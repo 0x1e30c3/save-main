@@ -1,0 +1,180 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: 'Geist Variable', sans-serif;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-ink: var(--primary-ink);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-growth: var(--growth);
+  --color-growth-ink: var(--growth-ink);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(0.979 0.007 88.6);
+  --foreground: oklch(0.216 0.006 56.043);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.216 0.006 56.043);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.216 0.006 56.043);
+  --primary: oklch(0.892 0.177 96.8);
+  --primary-foreground: oklch(0.228 0.036 93.6); /* dark text on Stellar yellow, never white */
+  --primary-ink: oklch(0.54 0.11 82); /* brand yellow is 1.4:1 as text on white; links and icons need this amber */
+  --secondary: oklch(0.671 0.109 225.3);
+  --secondary-foreground: oklch(0.263 0.051 236.7);
+  --muted: oklch(0.97 0.001 106.424);
+  --muted-foreground: oklch(0.553 0.013 58.071);
+  --accent: oklch(0.945 0.036 87.8);
+  --accent-foreground: oklch(0.519 0.097 73.5);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.88 0.006 48.7); /* one step past hairline so card and input edges read without squinting */
+  --input: oklch(0.88 0.006 48.7);
+  --ring: oklch(0.655 0.135 83.6); /* deep amber at 3:1 on the ivory bg; pure yellow vanishes */
+  --gold: oklch(0.751 0.13 79.8); /* saturated savings gold; --accent stays a pale wash */
+  --gold-ink: oklch(0.52 0.13 79.8); /* --gold is 2.25:1 on card, decorative only; this is the readable text shade */
+  --growth: oklch(0.751 0.13 145); /* same L/C as --gold, hue shifted to green for the earn-yield step */
+  --growth-ink: oklch(0.52 0.13 145); /* readable text shade, mirrors --gold-ink's contrast treatment */
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: oklch(0.184 0.005 67.5);
+  --foreground: oklch(0.934 0.010 87.5); /* warm off-white, not glare-white, still 15:1 on bg */
+  --card: oklch(0.216 0.006 56);
+  --card-foreground: oklch(0.934 0.010 87.5);
+  --popover: oklch(0.246 0.014 81.6);
+  --popover-foreground: oklch(0.934 0.010 87.5);
+  --primary: oklch(0.87 0.15 96.8); /* Stellar yellow, chroma eased so it does not vibrate on charcoal */
+  --primary-foreground: oklch(0.228 0.036 93.6);
+  --primary-ink: oklch(0.87 0.15 96.8); /* on charcoal the yellow itself is readable ink */
+  --secondary: oklch(0.737 0.104 223.7);
+  --secondary-foreground: oklch(0.266 0.049 235);
+  --muted: oklch(0.267 0.011 73.5);
+  --muted-foreground: oklch(0.746 0.023 76.5);
+  --accent: oklch(0.311 0.045 87.5);
+  --accent-foreground: oklch(0.807 0.122 84);
+  --destructive: oklch(0.66 0.2 25);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.775 0.146 90.6);
+  --gold: oklch(0.807 0.122 84);
+  --gold-ink: oklch(0.85 0.122 84); /* lighter than --gold so it still clears 4.5:1 on the bg-gold/15 badge tint, not just on card */
+  --growth: oklch(0.807 0.122 145);
+  --growth-ink: oklch(0.85 0.122 145); /* mirrors --gold-ink's lighter-on-dark treatment */
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes liquid-shimmer {
+  from {
+    background-position: 160% 0;
+  }
+  to {
+    background-position: -60% 0;
+  }
+}
+
+@utility animate-liquid-shimmer {
+  animation: liquid-shimmer 3.2s ease-in-out infinite;
+}
+
+@keyframes liquid-pulse-ring {
+  from {
+    transform: scale(0.6);
+    opacity: 0.45;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@utility animate-liquid-pulse-ring {
+  animation: liquid-pulse-ring 2.4s ease-out infinite;
+}
+
+@keyframes flow-line {
+  0% {
+    left: -10%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@utility animate-flow-line {
+  animation: flow-line 3.2s linear infinite;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* washes halved from the original brand pass so pages read as near-neutral with a hint of warmth */
+    background-image:
+      radial-gradient(80rem 44rem at 8% -10%, oklch(0.949 0.04 97 / 0.28), transparent 60%),
+      radial-gradient(64rem 38rem at 105% 0%, oklch(0.938 0.03 86 / 0.25), transparent 55%),
+      linear-gradient(180deg, oklch(0.988 0.008 95), oklch(0.994 0.004 92));
+    background-attachment: fixed;
+  }
+  .dark body {
+    background-image:
+      radial-gradient(64rem 38rem at 105% 0%, oklch(0.28 0.024 86 / 0.2), transparent 55%),
+      linear-gradient(180deg, oklch(0.198 0.006 75), oklch(0.168 0.005 75));
+    background-attachment: fixed;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
