@@ -18,8 +18,8 @@ By leveraging **iExec Nox**, Save runs confidentially inside a hardware enclave 
 
 ```mermaid
 flowchart TD
-(TEE Enclave)"]
-    subgraph Nox TEE Enclave (Confidential State)
+    P["Payer (customer or platform)"] -->|"pay(from, to, amount)"| C["ConfidentialSave (TEE Enclave)"]
+    subgraph "Nox TEE Enclave (Confidential State)"
         C -->|"amount x (1 - split)"| SP["Private Spendable Balance"]
         C -->|"amount x split"| SV["Private Savings Balance"]
     end
