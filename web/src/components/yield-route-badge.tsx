@@ -3,9 +3,9 @@ import type { YieldTarget } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 const SOURCE_LOGO: Record<YieldTarget, string> = {
-  defindex: '/logos/defindex-icon.webp',
-  blend: '/logos/blend.svg',
-  soroswap: '/logos/soroswap-icon.svg',
+  defindex: '/logos/nox-vault-icon.svg',
+  blend: '/logos/aave-icon.svg',
+  soroswap: '/logos/uniswap-icon.svg',
 }
 
 const SOURCE_NAME_KEY: Record<YieldTarget, MessageKey> = {
@@ -35,12 +35,11 @@ export function YieldRouteBadge({ target, className }: YieldRouteBadgeProps) {
     >
       <span
         className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-card ring-1 ring-border"
-        style={target === 'soroswap' ? { backgroundColor: '#8866dd' } : undefined}
       >
         <img
           src={SOURCE_LOGO[target]}
           alt=""
-          className={target === 'soroswap' ? 'h-[58%] w-[58%] object-contain' : 'h-full w-full object-cover'}
+          className="h-[60%] w-[60%] object-contain"
         />
       </span>
       <span className="truncate text-xs text-muted-foreground">

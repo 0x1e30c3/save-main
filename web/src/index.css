@@ -1,13 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-sans: 'Inter', sans-serif;
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -47,9 +47,9 @@
   --card-foreground: oklch(0.216 0.006 56.043);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.216 0.006 56.043);
-  --primary: oklch(0.892 0.177 96.8);
-  --primary-foreground: oklch(0.228 0.036 93.6); /* dark text on Stellar yellow, never white */
-  --primary-ink: oklch(0.54 0.11 82); /* brand yellow is 1.4:1 as text on white; links and icons need this amber */
+  --primary: oklch(0.58 0.20 260);
+  --primary-foreground: oklch(1 0 0); /* white text on cobalt blue */
+  --primary-ink: oklch(0.45 0.18 260); /* deeper indigo-blue for text links */
   --secondary: oklch(0.671 0.109 225.3);
   --secondary-foreground: oklch(0.263 0.051 236.7);
   --muted: oklch(0.97 0.001 106.424);
@@ -59,7 +59,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.88 0.006 48.7); /* one step past hairline so card and input edges read without squinting */
   --input: oklch(0.88 0.006 48.7);
-  --ring: oklch(0.655 0.135 83.6); /* deep amber at 3:1 on the ivory bg; pure yellow vanishes */
+  --ring: oklch(0.58 0.20 260); /* cobalt blue ring */
   --gold: oklch(0.751 0.13 79.8); /* saturated savings gold; --accent stays a pale wash */
   --gold-ink: oklch(0.52 0.13 79.8); /* --gold is 2.25:1 on card, decorative only; this is the readable text shade */
   --growth: oklch(0.751 0.13 145); /* same L/C as --gold, hue shifted to green for the earn-yield step */
@@ -74,9 +74,9 @@
   --card-foreground: oklch(0.934 0.010 87.5);
   --popover: oklch(0.246 0.014 81.6);
   --popover-foreground: oklch(0.934 0.010 87.5);
-  --primary: oklch(0.87 0.15 96.8); /* Stellar yellow, chroma eased so it does not vibrate on charcoal */
-  --primary-foreground: oklch(0.228 0.036 93.6);
-  --primary-ink: oklch(0.87 0.15 96.8); /* on charcoal the yellow itself is readable ink */
+  --primary: oklch(0.68 0.16 260); /* royal blue on dark mode */
+  --primary-foreground: oklch(0.184 0.005 67.5);
+  --primary-ink: oklch(0.68 0.16 260); /* royal blue ink */
   --secondary: oklch(0.737 0.104 223.7);
   --secondary-foreground: oklch(0.266 0.049 235);
   --muted: oklch(0.267 0.011 73.5);
@@ -86,7 +86,7 @@
   --destructive: oklch(0.66 0.2 25);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.775 0.146 90.6);
+  --ring: oklch(0.68 0.16 260);
   --gold: oklch(0.807 0.122 84);
   --gold-ink: oklch(0.85 0.122 84); /* lighter than --gold so it still clears 4.5:1 on the bg-gold/15 badge tint, not just on card */
   --growth: oklch(0.807 0.122 145);

@@ -23,9 +23,9 @@ type RulesCardProps = {
 }
 
 const YIELD_SOURCES: { target: YieldTarget; logo: string; logoBackdrop?: string }[] = [
-  { target: 'defindex', logo: '/logos/defindex-icon.webp' },
-  { target: 'blend', logo: '/logos/blend.svg' },
-  { target: 'soroswap', logo: '/logos/soroswap-icon.svg', logoBackdrop: '#8866dd' },
+  { target: 'defindex', logo: '/logos/nox-vault-icon.svg' },
+  { target: 'blend', logo: '/logos/aave-icon.svg' },
+  { target: 'soroswap', logo: '/logos/uniswap-icon.svg' },
 ]
 
 const YIELD_SOURCE_NAME_KEY: Record<YieldTarget, MessageKey> = {

@@ -83,8 +83,8 @@ export function YieldSourcesCard({
   const sources: SourceRow[] = [
     {
       key: 'defindex',
-      logo: '/logos/defindex-icon.webp',
-      website: 'https://defindex.io',
+      logo: '/logos/nox-vault-icon.svg',
+      website: 'https://docs.iex.ec/nox-protocol/getting-started/welcome',
       name: 'yield.sourceDefindexName',
       route: 'yield.sourceDefindexRoute',
       badge: 'active',
@@ -95,8 +95,8 @@ export function YieldSourcesCard({
     },
     {
       key: 'blend',
-      logo: '/logos/blend.svg',
-      website: 'https://blend.capital',
+      logo: '/logos/aave-icon.svg',
+      website: 'https://aave.com',
       name: 'yield.sourceBlendName',
       route: 'yield.sourceBlendRoute',
       badge: 'active',
@@ -107,9 +107,8 @@ export function YieldSourcesCard({
     },
     {
       key: 'soroswap',
-      logo: '/logos/soroswap-icon.svg',
-      logoBackdrop: '#8866dd',
-      website: 'https://soroswap.finance',
+      logo: '/logos/uniswap-icon.svg',
+      website: 'https://uniswap.org',
       name: 'yield.sourceSoroswapName',
       route: 'yield.sourceSoroswapRoute',
       badge: 'active',
