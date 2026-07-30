@@ -24,7 +24,7 @@ import { FloatingDeco } from '@/components/brand/floating-deco'
 import { LogoMark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
-import { EXPLORER_CONTRACT_URL } from '@/lib/config'
+import { EXPLORER_CONTRACT_URL, IS_EVM } from '@/lib/config'
 import { errorKey } from '@/lib/errors'
 import { useT, type MessageKey } from '@/lib/i18n'
 import { useFaucet } from '@/lib/use-faucet'
@@ -141,21 +141,23 @@ function SidebarContent({ rail = false, onNavigate }: SidebarContentProps) {
           <Link2Icon className="size-[18px] shrink-0" />
           <span className={label}>{t('nav.paymentLink')}</span>
         </NavLink>
-        <button
-          type="button"
-          className={cn(ITEM, ITEM_IDLE, 'disabled:pointer-events-none disabled:opacity-50')}
-          disabled={anyBusy}
-          onClick={() => void runFaucet()}
-        >
-          {faucetBusy ? (
-            <Loader2Icon className="size-[18px] shrink-0 animate-spin" />
-          ) : (
-            <CoinsIcon className="size-[18px] shrink-0" />
-          )}
-          <span className={label}>
-            {faucetBusy ? `${t('common.loading')}...` : t('nav.faucet')}
-          </span>
-        </button>
+        {!IS_EVM && (
+          <button
+            type="button"
+            className={cn(ITEM, ITEM_IDLE, 'disabled:pointer-events-none disabled:opacity-50')}
+            disabled={anyBusy}
+            onClick={() => void runFaucet()}
+          >
+            {faucetBusy ? (
+              <Loader2Icon className="size-[18px] shrink-0 animate-spin" />
+            ) : (
+              <CoinsIcon className="size-[18px] shrink-0" />
+            )}
+            <span className={label}>
+              {faucetBusy ? `${t('common.loading')}...` : t('nav.faucet')}
+            </span>
+          </button>
+        )}
         <SectionLabel rail={rail}>{t('nav.protocol')}</SectionLabel>
         <NavLink to="/app/settings" onClick={onNavigate} className={navClass}>
           <SettingsIcon className="size-[18px] shrink-0" />

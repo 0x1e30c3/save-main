@@ -25,9 +25,11 @@ export function ConnectButton() {
     try {
       await connect()
     } catch (e) {
+      console.error('Wallet connection error:', e)
       const key = errorKey(e)
       if (key === 'errors.walletCancelled') return // user closed the modal on purpose
-      toast.error(t(key))
+      const errMsg = e instanceof Error ? e.message : (typeof e === 'object' && e !== null && 'message' in e ? String((e as any).message) : String(e))
+      toast.error(`${t(key)} (${errMsg})`)
     }
   }
 

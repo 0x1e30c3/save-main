@@ -1,5 +1,5 @@
-import { rpc, scValToNative } from 'save'
-import { CONTRACT_ID, RPC_URL } from '@/lib/config'
+import { Contract, JsonRpcProvider, type EventLog } from 'ethers'
+import { CONTRACT_ID, EVM_RPC_URL } from '@/lib/config'
 
 export type ActivityItem = {
   id: string
@@ -14,68 +14,89 @@ export type ActivityItem = {
   until?: bigint
 }
 
-type Kind = ActivityItem['kind']
+const SAVE_EVM_ABI = [
+  'event PaymentRouted(address indexed from,address indexed to,uint8 yieldTarget)',
+  'event SpendWithdrawn(address indexed user)',
+  'event SavingsWithdrawn(address indexed user,uint8 yieldTarget)',
+  'event SplitSet(address indexed user,uint16 bps)',
+  'event LockSet(address indexed user,uint64 until)',
+] as const
 
-const KINDS: readonly Kind[] = ['pay', 'wd_spend', 'wd_save', 'split', 'lock']
-const LOOKBACK_LEDGERS = 100_000
-const PAGE_LIMIT = 200
-// the rpc scans roughly 10k ledgers per getEvents call, so a full lookback needs several pages
-const MAX_PAGES = 15
-
-function isKind(value: unknown): value is Kind {
-  return typeof value === 'string' && (KINDS as readonly string[]).includes(value)
-}
-
-// event cursors and ids start with (ledger << 32 | txOrder) as a decimal string
-function cursorLedger(cursor: string): number {
-  return Number(BigInt(cursor.split('-')[0]) >> 32n)
-}
-
-function toItem(event: rpc.Api.EventResponse, user: string): ActivityItem | null {
-  if (event.topic.length < 2) return null
-  const kind: unknown = scValToNative(event.topic[0])
-  if (!isKind(kind)) return null
-  if (scValToNative(event.topic[1]) !== user) return null
-
-  const base = { id: event.id, at: new Date(event.ledgerClosedAt), txHash: event.txHash }
-  const value: unknown = scValToNative(event.value)
-  switch (kind) {
-    case 'pay': {
-      const [from, amount, saved] = value as [string, bigint, bigint]
-      return { ...base, kind, from, amount, saved }
-    }
-    case 'wd_spend':
-      return { ...base, kind, amount: value as bigint }
-    case 'wd_save': {
-      const [shares, amount] = value as [bigint, bigint]
-      return { ...base, kind, shares, amount }
-    }
-    case 'split':
-      return { ...base, kind, bps: Number(value) }
-    case 'lock':
-      return { ...base, kind, until: BigInt(value as bigint | number) }
-  }
-}
-
-// rejects on rpc failure so callers can keep previously loaded items
-export async function fetchActivity(user: string): Promise<ActivityItem[]> {
+async function fetchEvmActivity(user: string): Promise<ActivityItem[]> {
   if (CONTRACT_ID === '') return []
-  const server = new rpc.Server(RPC_URL)
-  const latest = await server.getLatestLedger()
-  const startLedger = Math.max(latest.sequence - LOOKBACK_LEDGERS, 1)
-  const filters: rpc.Api.EventFilter[] = [
-    { type: 'contract', contractIds: [CONTRACT_ID] },
-  ]
+  const provider = new JsonRpcProvider(EVM_RPC_URL)
+  const latest = await provider.getBlockNumber()
+  const fromBlock = Math.max(latest - 80_000, 0)
+  const c = new Contract(CONTRACT_ID, SAVE_EVM_ABI, provider)
+  const userLc = user.toLowerCase()
 
-  const items: ActivityItem[] = []
-  let page = await server.getEvents({ startLedger, filters, limit: PAGE_LIMIT })
-  for (let i = 0; i < MAX_PAGES; i++) {
-    for (const event of page.events) {
-      const item = toItem(event, user)
-      if (item) items.push(item)
-    }
-    if (!page.cursor || cursorLedger(page.cursor) >= latest.sequence) break
-    page = await server.getEvents({ filters, cursor: page.cursor, limit: PAGE_LIMIT })
+  const [payLogs, spendLogs, savingsLogs, splitLogs, lockLogs] = await Promise.all([
+    c.queryFilter(c.filters.PaymentRouted(null, user), fromBlock, latest),
+    c.queryFilter(c.filters.SpendWithdrawn(user), fromBlock, latest),
+    c.queryFilter(c.filters.SavingsWithdrawn(user), fromBlock, latest),
+    c.queryFilter(c.filters.SplitSet(user), fromBlock, latest),
+    c.queryFilter(c.filters.LockSet(user), fromBlock, latest),
+  ])
+
+  const logs = [
+    ...payLogs,
+    ...spendLogs,
+    ...savingsLogs,
+    ...splitLogs,
+    ...lockLogs,
+  ] as EventLog[]
+
+  const blockTimes = new Map<number, Date>()
+  const at = async (blockNumber: number): Promise<Date> => {
+    const cached = blockTimes.get(blockNumber)
+    if (cached) return cached
+    const block = await provider.getBlock(blockNumber)
+    const value = new Date(Number(block?.timestamp ?? 0) * 1000)
+    blockTimes.set(blockNumber, value)
+    return value
   }
-  return items.sort((a, b) => (a.id < b.id ? 1 : a.id > b.id ? -1 : 0))
+
+  const items = await Promise.all(
+    logs.map(async (log): Promise<ActivityItem | null> => {
+      const base = {
+        id: `${log.transactionHash}-${log.index}`,
+        at: await at(log.blockNumber),
+        txHash: log.transactionHash,
+      }
+      if (log.fragment.name === 'PaymentRouted') {
+        const from = String(log.args.from)
+        const to = String(log.args.to)
+        if (to.toLowerCase() !== userLc) return null
+        return {
+          ...base,
+          kind: 'pay',
+          from,
+        }
+      }
+      if (log.fragment.name === 'SpendWithdrawn') {
+        return { ...base, kind: 'wd_spend' }
+      }
+      if (log.fragment.name === 'SavingsWithdrawn') {
+        return {
+          ...base,
+          kind: 'wd_save',
+        }
+      }
+      if (log.fragment.name === 'SplitSet') {
+        return { ...base, kind: 'split', bps: Number(log.args.bps) }
+      }
+      if (log.fragment.name === 'LockSet') {
+        return { ...base, kind: 'lock', until: BigInt(log.args.until) }
+      }
+      return null
+    }),
+  )
+
+  return items
+    .filter((item): item is ActivityItem => item !== null)
+    .sort((a, b) => (a.at.getTime() < b.at.getTime() ? 1 : -1))
+}
+
+export async function fetchActivity(user: string): Promise<ActivityItem[]> {
+  return fetchEvmActivity(user)
 }

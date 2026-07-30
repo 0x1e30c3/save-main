@@ -1,26 +1,13 @@
 import { useMemo } from 'react'
-import createStellarIdenticon from 'stellar-identicon-js'
 import { cn } from '@/lib/utils'
 
-const STELLAR_ADDRESS = /^G[A-Z2-7]{55}$/
-
-// module-level cache keeps the dataURL identical across re-renders and remounts
-const identiconCache = new Map<string, string | null>()
-
-function identiconDataUrl(address: string): string | null {
-  const hit = identiconCache.get(address)
-  if (hit !== undefined) return hit
-  let url: string | null = null
-  // document guard: the generator builds an offscreen canvas, browser only
-  if (typeof document !== 'undefined' && STELLAR_ADDRESS.test(address)) {
-    try {
-      url = createStellarIdenticon(address).toDataURL()
-    } catch {
-      url = null
-    }
+function getAddressColor(address: string): string {
+  let hash = 0
+  for (let i = 0; i < address.length; i++) {
+    hash = address.charCodeAt(i) + ((hash << 5) - hash)
   }
-  identiconCache.set(address, url)
-  return url
+  const hue = Math.abs(hash % 360)
+  return `hsl(${hue}, 75%, 65%)`
 }
 
 type AddressAvatarProps = {
@@ -30,25 +17,18 @@ type AddressAvatarProps = {
 }
 
 export function AddressAvatar({ address, size = 40, className }: AddressAvatarProps) {
-  const dataUrl = useMemo(() => identiconDataUrl(address), [address])
+  const bgColor = useMemo(() => getAddressColor(address), [address])
+  const initials = address.length > 4 ? address.slice(2, 4).toUpperCase() : '??'
+
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted ring-1 ring-border/60',
+        'inline-flex shrink-0 items-center justify-center overflow-hidden rounded-xl ring-1 ring-border/60 text-background font-mono text-xs font-bold select-none',
         className,
       )}
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, backgroundColor: bgColor }}
     >
-      {dataUrl ? (
-        <img
-          src={dataUrl}
-          alt=""
-          className="h-full w-full p-[15%]"
-          style={{ imageRendering: 'pixelated' }}
-        />
-      ) : (
-        <span aria-hidden="true" className="size-1/3 rounded-full bg-muted-foreground/25" />
-      )}
+      {initials}
     </span>
   )
 }

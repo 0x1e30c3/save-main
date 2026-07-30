@@ -136,7 +136,11 @@ export function NumberTicker({
         const dropped = prev.filter((c) => !nextIds.has(c.id))
         if (dropped.length > 0) {
           // keep dropped columns mounted just long enough to fade out instead of jumping
-          setExiting((prevExiting) => [...dropped, ...prevExiting])
+          setExiting((prevExiting) => {
+            const existingIds = new Set(prevExiting.map((c) => c.id))
+            const newUnique = dropped.filter((c) => !existingIds.has(c.id))
+            return [...newUnique, ...prevExiting]
+          })
           if (exitTimer.current) clearTimeout(exitTimer.current)
           exitTimer.current = setTimeout(() => setExiting([]), FADE_MS + 80)
         }

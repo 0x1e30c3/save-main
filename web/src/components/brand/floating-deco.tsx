@@ -117,7 +117,7 @@ function DollarCoin({ uid }: DecoProps) {
   )
 }
 
-function XlmCoin({ uid }: DecoProps) {
+function EthCoin({ uid }: DecoProps) {
   const rim = `${uid}-rim`
   const face = `${uid}-face`
   const sh = `${uid}-sh`
@@ -125,32 +125,29 @@ function XlmCoin({ uid }: DecoProps) {
     <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true">
       <defs>
         <radialGradient id={rim} cx="35%" cy="28%" r="80%">
-          <stop offset="0%" stopColor="#7a8089" />
-          <stop offset="55%" stopColor="#4a4f55" />
-          <stop offset="100%" stopColor="#23262a" />
+          <stop offset="0%" stopColor="#c2c9d6" />
+          <stop offset="55%" stopColor="#8a99ad" />
+          <stop offset="100%" stopColor="#4a5568" />
         </radialGradient>
         <linearGradient id={face} x1="0" y1="0" x2="0.6" y2="1">
-          <stop offset="0%" stopColor="#565c63" />
-          <stop offset="100%" stopColor="#2b2f34" />
+          <stop offset="0%" stopColor="#a0aec0" />
+          <stop offset="100%" stopColor="#718096" />
         </linearGradient>
         <filter id={sh} {...SHADOW}>
-          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#0c0e10" floodOpacity="0.35" />
+          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#2d3748" floodOpacity="0.35" />
         </filter>
       </defs>
       <g filter={`url(#${sh})`}>
         <circle cx="32" cy="32" r="27" fill={`url(#${rim})`} />
         <circle cx="32" cy="32" r="21" fill={`url(#${face})`} />
-        <circle cx="32" cy="32" r="21" fill="none" stroke="#171a1d" strokeWidth="1.2" opacity="0.5" />
-        {/* official lumen mark: its 237.8-wide box (center 195.1,153.1) scaled to 30px on the r-21 face */}
-        <g transform="translate(7.3869 12.6854) scale(0.126156)">
-          <path
-            fill="white"
-            d="M164.1,92.3c22.9-11.7,50.4-9.5,71.1,5.6l-1.7,0.9l-11.1,5.7c-17.3-9.7-38.4-9.4-55.5,0.6c-17.1,10-27.6,28.3-27.6,48.2c0,2.4,0.2,4.9,0.5,7.3l93.9-47.8l19.4-9.9l22.8-11.6v13.9l-23,11.7l-11.1,5.7l-99,50.4l-5.5,2.8l-5.6,2.9l-17.3,8.8v-13.9l5.9-3c4.5-2.3,7.1-7,6.7-12c-0.1-1.7-0.2-3.5-0.2-5.2C126.9,127.5,141.3,104,164.1,92.3z"
-          />
-          <path
-            fill="white"
-            d="M275.9,119v13.9l-5.9,3c-4.5,2.3-7.1,7-6.7,12c0.1,1.7,0.2,3.5,0.2,5.2c0,25.7-14.4,49.2-37.3,60.8s-50.4,9.5-71.1-5.6l12.1-6.2l0.7-0.4c17.3,9.7,38.5,9.5,55.6-0.5c17.1-10,27.7-28.4,27.7-48.2c0-2.5-0.2-4.9-0.5-7.3l-94,47.9l-19.4,9.9l-22.7,11.6v-13.9l22.9-11.7l11.1-5.7L275.9,119z"
-          />
+        <circle cx="32" cy="32" r="21" fill="none" stroke="#2d3748" strokeWidth="1.2" opacity="0.5" />
+        <g fill="white" transform="translate(22, 14)">
+          <polygon points="10 0 9.8 0.7 9.8 21.7 10 21.9 19.6 16.2" fill="#e2e8f0" />
+          <polygon points="10 0 0.4 16.2 10 21.9 10 11.7" fill="#cbd5e0" />
+          <polygon points="10 23.8 9.9 23.9 9.9 31.6 10 31.8 19.6 18" fill="#e2e8f0" />
+          <polygon points="10 31.8 10 23.8 0.4 18" fill="#cbd5e0" />
+          <polygon points="10 21.9 19.6 16.2 10 12.9" fill="#a0aec0" />
+          <polygon points="10 21.9 10 12.9 0.4 16.2" fill="#cbd5e0" />
         </g>
         <ellipse cx="22" cy="16" rx="9" ry="4.2" fill="#fff" opacity="0.45" transform="rotate(-28 22 16)" />
       </g>
@@ -375,7 +372,7 @@ const PLACEMENTS: Placement[] = [
   { obj: CoinStack, side: 'left', top: '76%', left: '12%', size: 76, rotate: -8, depth: 18, duration: 6.5, delay: 1.2 },
   { obj: UsdcCoin, side: 'left', top: '90%', left: '5%', size: 46, rotate: 10, depth: 24, duration: 6.2, delay: 0.7 },
   { obj: HeartBlob, side: 'right', top: '10%', right: '10%', size: 72, rotate: 10, depth: 20, duration: 7.5, delay: 0.6 },
-  { obj: XlmCoin, side: 'right', top: '24%', right: '18%', size: 50, rotate: -8, depth: 16, duration: 7.2, delay: 0.9 },
+  { obj: EthCoin, side: 'right', top: '24%', right: '18%', size: 50, rotate: -8, depth: 16, duration: 7.2, delay: 0.9 },
   { obj: SoftArrow, side: 'right', top: '36%', right: '4%', size: 88, rotate: 4, depth: 10, duration: 8.5, delay: 0.2 },
   { obj: DollarCoin, side: 'right', top: '60%', right: '14%', size: 52, rotate: 14, depth: 26, duration: 5, delay: 1 },
   { obj: Sparkle, side: 'right', top: '80%', right: '7%', size: 40, rotate: -10, depth: 24, duration: 6, delay: 0.3 },
@@ -393,7 +390,7 @@ const PLACEMENTS_ALT: Placement[] = [
   { obj: RpCoin, side: 'right', top: '14%', right: '8%', size: 88, rotate: -14, depth: 20, duration: 7, delay: 0.4 },
   { obj: SoftArrow, side: 'right', top: '38%', right: '17%', size: 72, rotate: -6, depth: 12, duration: 8, delay: 0 },
   { obj: HeartBlob, side: 'right', top: '58%', right: '5%', size: 64, rotate: 8, depth: 24, duration: 6.3, delay: 1 },
-  { obj: XlmCoin, side: 'right', top: '80%', right: '15%', size: 46, rotate: 10, depth: 28, duration: 6.6, delay: 0.6 },
+  { obj: EthCoin, side: 'right', top: '80%', right: '15%', size: 46, rotate: 10, depth: 28, duration: 6.6, delay: 0.6 },
   { obj: Sparkle, side: 'right', top: '93%', right: '22%', size: 36, rotate: -12, depth: 30, duration: 5.4, delay: 0.7 },
 ]
 

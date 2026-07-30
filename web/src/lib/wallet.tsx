@@ -7,13 +7,12 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { NETWORK_PASSPHRASE } from '@/lib/config'
-import { CyphrasModule } from '@/lib/cyphras-module'
-import { setWalletBridge } from '@/lib/wallet-bridge'
+import { BrowserProvider, type Eip1193Provider } from 'ethers'
+import { EVM_CHAIN_HEX } from '@/lib/config'
 
 const ADDRESS_KEY = 'save:address'
 
-type Kit = typeof import('@creit-tech/stellar-wallets-kit').StellarWalletsKit
+type Eip1193ProviderWindow = Window & { ethereum?: Eip1193Provider }
 
 type WalletContextValue = {
   address: string | null
@@ -25,22 +24,39 @@ type WalletContextValue = {
 
 const WalletContext = createContext<WalletContextValue | null>(null)
 
-let kitPromise: Promise<Kit> | null = null
-
-// lazy so the app renders even if no wallet extension exists or the kit fails to load
-function loadKit(): Promise<Kit> {
-  kitPromise ??= (async () => {
-    const [{ StellarWalletsKit, Networks }, { defaultModules }] = await Promise.all([
-      import('@creit-tech/stellar-wallets-kit'),
-      import('@creit-tech/stellar-wallets-kit/modules/utils'),
-    ])
-    StellarWalletsKit.init({
-      modules: [...defaultModules(), new CyphrasModule()],
-      network: Networks.TESTNET,
+async function ensureSepolia(provider: Eip1193Provider): Promise<void> {
+  try {
+    await provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: EVM_CHAIN_HEX }],
     })
-    return StellarWalletsKit
-  })()
-  return kitPromise
+  } catch (error: any) {
+    const isUnrecognized = 
+      error.code === 4902 || 
+      error.code === -32603 || 
+      (error.message && /unrecognized/i.test(error.message))
+      
+    if (isUnrecognized) {
+      await provider.request({
+        method: 'wallet_addEthereumChain',
+        params: [
+          {
+            chainId: EVM_CHAIN_HEX,
+            chainName: 'Sepolia Test Network',
+            rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
+            nativeCurrency: {
+              name: 'Sepolia ETH',
+              symbol: 'ETH',
+              decimals: 18,
+            },
+            blockExplorerUrls: ['https://sepolia.etherscan.io'],
+          },
+        ],
+      })
+    } else {
+      throw error
+    }
+  }
 }
 
 export function WalletProvider({ children }: { children: ReactNode }) {
@@ -53,17 +69,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     let cancelled = false
     void (async () => {
       try {
-        const kit = await loadKit()
+        const ethereum = (window as Eip1193ProviderWindow).ethereum
+        if (!ethereum) throw new Error('wallet_not_found')
+        const provider = new BrowserProvider(ethereum)
+        const accounts = (await provider.send('eth_accounts', [])) as string[]
+        if (!accounts.some((a) => a.toLowerCase() === stored.toLowerCase())) {
+          localStorage.removeItem(ADDRESS_KEY)
+          return
+        }
         if (cancelled) return
+        await ensureSepolia(ethereum)
         setAddress(stored)
-        setWalletBridge({
-          address: stored,
-          sign: (xdr) =>
-            kit.signTransaction(xdr, {
-              networkPassphrase: NETWORK_PASSPHRASE,
-              address: stored,
-            }),
-        })
       } catch {
         localStorage.removeItem(ADDRESS_KEY)
       }
@@ -76,18 +92,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const connect = useCallback(async () => {
     setConnecting(true)
     try {
-      const kit = await loadKit()
-      const result = await kit.authModal()
-      setAddress(result.address)
-      localStorage.setItem(ADDRESS_KEY, result.address)
-      setWalletBridge({
-        address: result.address,
-        sign: (xdr) =>
-          kit.signTransaction(xdr, {
-            networkPassphrase: NETWORK_PASSPHRASE,
-            address: result.address,
-          }),
-      })
+      const ethereum = (window as Eip1193ProviderWindow).ethereum
+      if (!ethereum) throw new Error('wallet_not_found')
+      const provider = new BrowserProvider(ethereum)
+      await ensureSepolia(ethereum)
+      const accounts = (await provider.send('eth_requestAccounts', [])) as string[]
+      const selected = accounts[0]
+      if (!selected) throw new Error('wallet_not_found')
+      setAddress(selected)
+      localStorage.setItem(ADDRESS_KEY, selected)
     } finally {
       setConnecting(false)
     }
@@ -95,27 +108,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const disconnect = useCallback(async () => {
     setAddress(null)
-    setWalletBridge(null)
     localStorage.removeItem(ADDRESS_KEY)
-    try {
-      const kit = await loadKit()
-      await kit.disconnect()
-    } catch {
-      // local state is already cleared; kit cleanup is best-effort
-    }
   }, [])
 
   const signTransaction = useCallback(
-    async (xdr: string) => {
-      if (!address) throw new Error('Wallet not connected')
-      const kit = await loadKit()
-      const { signedTxXdr } = await kit.signTransaction(xdr, {
-        networkPassphrase: NETWORK_PASSPHRASE,
-        address,
-      })
-      return signedTxXdr
+    async (_xdr: string) => {
+      throw new Error('sign_xdr_not_supported_on_evm')
     },
-    [address],
+    [],
   )
 
   const value = useMemo(

@@ -1,4 +1,4 @@
-import { HORIZON_URL, USDC_ISSUER } from '@/lib/config'
+import { HORIZON_URL, IS_EVM, USDC_ISSUER } from '@/lib/config'
 
 export type UsdcStatus = {
   hasTrustline: boolean
@@ -18,6 +18,7 @@ type HorizonBalance = {
  * exist on-chain yet has neither, which is treated the same as missing the trustline.
  */
 export async function getUsdcStatus(address: string): Promise<UsdcStatus> {
+  if (IS_EVM) return { hasTrustline: true, balance: 1 }
   try {
     const res = await fetch(`${HORIZON_URL}/accounts/${address}`)
     if (!res.ok) return { hasTrustline: false, balance: 0 }

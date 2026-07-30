@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="web/public/favicon.svg" width="88" alt="Save">
+  <img src="web/public/logo-save.png" width="88" alt="Save">
   <h1>Save</h1>
-  <p>Programmable savings on every payment, on Stellar.</p>
+  <p>Programmable savings on every payment, on EVM Sepolia using iExec Nox.</p>
 
-  <img src="https://img.shields.io/badge/chain-Stellar%20%2F%20Soroban-black.svg" alt="Stellar Soroban">
+  <img src="https://img.shields.io/badge/chain-EVM%20%2F%20iExec%20Nox-blue.svg" alt="EVM / iExec Nox">
   <img src="https://img.shields.io/badge/network-testnet-f59e0b.svg" alt="Testnet">
-  <img src="https://img.shields.io/badge/hackathon-APAC%20Stellar%202026-22c55e.svg" alt="APAC Stellar Hackathon 2026">
+  <img src="https://img.shields.io/badge/hackathon-WTF%20iExec%202026-22c55e.svg" alt="WTF iExec Hackathon 2026">
 </div>
 
 ---
@@ -61,8 +61,9 @@ receive it. The app's own faucet button sets this up automatically.
 
 - `contracts/` - Soroban contract (Rust, soroban-sdk 26, OpenZeppelin
   stellar-access and stellar-contract-utils)
+- `evm/` - Foundry (Forge) workspace for WTF iExec migration on ETH Sepolia
 - `web/` - frontend (Vite, React, TypeScript, Tailwind CSS v4, shadcn/ui,
-  Stellar Wallets Kit)
+  Stellar Wallets Kit)K
 - `packages/save` - TypeScript bindings generated from the deployed
   contract
 - `scripts/` - deploy and end-to-end verification scripts
@@ -77,6 +78,17 @@ pnpm install
 pnpm dev
 ```
 
+Frontend in EVM Sepolia migration mode (same features, EVM backend):
+
+```bash
+cd web
+cp .env.example .env
+# set:
+# VITE_CHAIN_MODE=evm
+# VITE_EVM_SAVE_ADDRESS=0xA9163491c71e3b073540cBF84E890fc51195E531
+pnpm dev
+```
+
 Contract tests:
 
 ```bash
@@ -88,6 +100,13 @@ End-to-end check on testnet (faucet -> pay -> split -> vault -> withdraw):
 
 ```bash
 ./scripts/e2e.sh CCCIVH3WBPYE6X4XR3Y7TLPRN44XU5Q4BUSD6RT7DWXWEOFLXDC3DFMV
+```
+
+WTF iExec migration track (Foundry scaffold):
+
+```bash
+cd evm
+forge build
 ```
 
 ## Trying the app

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { StrKey } from 'save'
 import { CheckIcon, CopyIcon, ExternalLinkIcon, LogOutIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { AddressAvatar } from '@/components/brand/address-avatar'
@@ -12,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useAppState } from '@/lib/app-state'
+import { isValidRecipientAddress } from '@/lib/address'
 import { save } from '@/lib/save'
 import { explorerTxUrl } from '@/lib/config'
 import { errorKey } from '@/lib/errors'
@@ -307,7 +307,7 @@ function InvalidLink() {
 export function PayPage() {
   const t = useT()
   const { address: recipient = '' } = useParams()
-  const valid = StrKey.isValidEd25519PublicKey(recipient)
+  const valid = isValidRecipientAddress(recipient)
 
   useScrollLock()
 

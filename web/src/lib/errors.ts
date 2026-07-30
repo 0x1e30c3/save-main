@@ -29,6 +29,7 @@ export function errorKey(e: unknown): MessageKey {
   if (contract) return CONTRACT_ERROR_KEYS[Number(contract[1])] ?? 'errors.generic'
   if (text.includes('faucet_unavailable')) return 'errors.faucetUnavailable'
   if (text.includes('faucet_maybe_funded')) return 'errors.faucetAlreadyFunded'
+  if (text.includes('wallet_not_found')) return 'common.connectFirst'
   if (/reject|declin|denied|closed/i.test(text)) return 'errors.walletCancelled'
   return 'errors.generic'
 }
