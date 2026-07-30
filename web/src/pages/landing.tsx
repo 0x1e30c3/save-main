@@ -655,7 +655,7 @@ export function Landing() {
                 href="https://docs.iex.ec/nox-protocol/getting-started/welcome"
                 target="_blank"
                 rel="noreferrer"
-                className="group flex flex-col items-center gap-4 rounded-2xl border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
+                className="group flex flex-col items-center gap-4 border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
               >
                 <span className="flex size-16 items-center justify-center rounded-full bg-[#e2e8f0]">
                   <img src="/logos/nox-vault-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
@@ -670,7 +670,7 @@ export function Landing() {
                 href="https://aave.com"
                 target="_blank"
                 rel="noreferrer"
-                className="group flex flex-col items-center gap-4 rounded-2xl border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
+                className="group flex flex-col items-center gap-4 border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
               >
                 <span className="flex size-16 items-center justify-center rounded-full bg-[#e2e8f0]">
                   <img src="/logos/aave-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
@@ -685,7 +685,7 @@ export function Landing() {
                 href="https://uniswap.org"
                 target="_blank"
                 rel="noreferrer"
-                className="group flex flex-col items-center gap-4 rounded-2xl border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
+                className="group flex flex-col items-center gap-4 border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
               >
                 <span className="flex size-16 items-center justify-center rounded-full bg-[#e2e8f0]">
                   <img src="/logos/uniswap-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
