@@ -66,7 +66,7 @@ export function SettingsPage() {
             <Select
               value={locale}
               onValueChange={(v) => {
-                if (v === 'en' || v === 'id' || v === 'vi' || v === 'fil') setLocale(v)
+                if (v === 'en' || v === 'id' || v === 'zh') setLocale(v)
               }}
             >
               <SelectTrigger id="settings-language" className="w-48">
@@ -75,8 +75,7 @@ export function SettingsPage() {
               <SelectContent>
                 <SelectItem value="en">{t('settings.langEn')}</SelectItem>
                 <SelectItem value="id">{t('settings.langId')}</SelectItem>
-                <SelectItem value="vi">{t('settings.langVi')}</SelectItem>
-                <SelectItem value="fil">{t('settings.langFil')}</SelectItem>
+                <SelectItem value="zh">{t('settings.langZh')}</SelectItem>
               </SelectContent>
             </Select>
           </SettingRow>
@@ -84,7 +83,7 @@ export function SettingsPage() {
             <Select
               value={primaryCurrency}
               onValueChange={(v) => {
-                if (v === 'idr' || v === 'usdc' || v === 'vnd' || v === 'php') setPrimaryCurrency(v)
+                if (v === 'idr' || v === 'usdc' || v === 'cny') setPrimaryCurrency(v)
               }}
             >
               <SelectTrigger id="settings-currency" className="w-48">
@@ -93,8 +92,7 @@ export function SettingsPage() {
               <SelectContent>
                 <SelectItem value="idr">{t('settings.currencyIdr')}</SelectItem>
                 <SelectItem value="usdc">{t('settings.currencyUsdc')}</SelectItem>
-                <SelectItem value="vnd">{t('settings.currencyVnd')}</SelectItem>
-                <SelectItem value="php">{t('settings.currencyPhp')}</SelectItem>
+                <SelectItem value="cny">{t('settings.currencyCny')}</SelectItem>
               </SelectContent>
             </Select>
           </SettingRow>

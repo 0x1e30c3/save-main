@@ -6,8 +6,8 @@ type DecoProps = { uid: string }
 
 const SHADOW = { x: '-40%', y: '-40%', width: '180%', height: '180%' }
 
-// the three APAC hackathon countries this app targets: Indonesia, Vietnam, Philippines
-const APAC_CURRENCY_SYMBOLS = ['Rp', '₫', '₱']
+// the APAC hackathon countries this app targets: Indonesia, China
+const APAC_CURRENCY_SYMBOLS = ['Rp', '¥']
 const CURRENCY_CYCLE_MS = 3200
 const CURRENCY_FLIP_MS = 420
 

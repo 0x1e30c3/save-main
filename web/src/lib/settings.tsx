@@ -7,8 +7,8 @@ import {
   type ReactNode,
 } from 'react'
 
-export type Locale = 'en' | 'id' | 'vi' | 'fil'
-export type PrimaryCurrency = 'idr' | 'usdc' | 'vnd' | 'php'
+export type Locale = 'en' | 'id' | 'zh'
+export type PrimaryCurrency = 'idr' | 'usdc' | 'cny'
 
 type SettingsContextValue = {
   locale: Locale
@@ -24,22 +24,21 @@ const SettingsContext = createContext<SettingsContextValue | null>(null)
 
 function initialLocale(): Locale {
   const stored = localStorage.getItem(LOCALE_KEY)
-  if (stored === 'en' || stored === 'id' || stored === 'vi' || stored === 'fil') return stored
+  if (stored === 'en' || stored === 'id' || stored === 'zh') return stored
   return 'en'
 }
 
 // the fiat shown alongside a USDC-primary display follows the chosen
-// language, so a Vietnamese speaker sees VND rather than defaulting to IDR
+// language, so a Chinese speaker sees CNY rather than defaulting to IDR
 export function secondaryCurrencyFor(primary: PrimaryCurrency, locale: Locale): PrimaryCurrency {
   if (primary !== 'usdc') return 'usdc'
-  if (locale === 'vi') return 'vnd'
-  if (locale === 'fil') return 'php'
+  if (locale === 'zh') return 'cny'
   return 'idr'
 }
 
 function initialCurrency(): PrimaryCurrency {
   const stored = localStorage.getItem(CURRENCY_KEY)
-  if (stored === 'idr' || stored === 'usdc' || stored === 'vnd' || stored === 'php') return stored
+  if (stored === 'idr' || stored === 'usdc' || stored === 'cny') return stored
   return 'usdc'
 }
 

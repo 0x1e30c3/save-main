@@ -1,6 +1,6 @@
-export type FxRates = { idr: number; vnd: number; php: number }
+export type FxRates = { idr: number; cny: number }
 
-export const FALLBACK_RATES: FxRates = { idr: 16300, vnd: 25400, php: 57 }
+export const FALLBACK_RATES: FxRates = { idr: 16300, cny: 7.25 }
 
 let cached: Promise<FxRates> | null = null
 
@@ -15,8 +15,7 @@ async function fetchRates(): Promise<FxRates> {
   const data = (await res.json()) as { rates?: Record<string, number> }
   return {
     idr: pick(data.rates, 'IDR', FALLBACK_RATES.idr),
-    vnd: pick(data.rates, 'VND', FALLBACK_RATES.vnd),
-    php: pick(data.rates, 'PHP', FALLBACK_RATES.php),
+    cny: pick(data.rates, 'CNY', FALLBACK_RATES.cny),
   }
 }
 

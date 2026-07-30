@@ -138,7 +138,7 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
               )
               const ticker = (
                 <NumberTicker
-                  value={usdcToNumber(total) * rates[primaryCurrency]}
+                  value={usdcToNumber(total) * rates[primaryCurrency as 'idr' | 'cny']}
                   decimalPlaces={0}
                   locale={intl}
                   delay={0.3}
