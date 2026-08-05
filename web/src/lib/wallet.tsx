@@ -8,9 +8,9 @@ import {
   type ReactNode,
 } from 'react'
 import { BrowserProvider, type Eip1193Provider } from 'ethers'
-import { EVM_CHAIN_HEX } from '@/lib/config'
+import { FLARE_CHAIN_HEX, FLARE_RPC_URL, FLARE_EXPLORER_URL } from '@/lib/config'
 
-const ADDRESS_KEY = 'save:address'
+const ADDRESS_KEY = 'yoursave:address'
 
 type Eip1193ProviderWindow = Window & { ethereum?: Eip1193Provider }
 
@@ -19,37 +19,36 @@ type WalletContextValue = {
   connecting: boolean
   connect: () => Promise<void>
   disconnect: () => Promise<void>
-  signTransaction: (xdr: string) => Promise<string>
 }
 
 const WalletContext = createContext<WalletContextValue | null>(null)
 
-async function ensureSepolia(provider: Eip1193Provider): Promise<void> {
+async function ensureFlare(provider: Eip1193Provider): Promise<void> {
   try {
     await provider.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: EVM_CHAIN_HEX }],
+      params: [{ chainId: FLARE_CHAIN_HEX }],
     })
   } catch (error: any) {
-    const isUnrecognized = 
-      error.code === 4902 || 
-      error.code === -32603 || 
+    const isUnrecognized =
+      error.code === 4902 ||
+      error.code === -32603 ||
       (error.message && /unrecognized/i.test(error.message))
-      
+
     if (isUnrecognized) {
       await provider.request({
         method: 'wallet_addEthereumChain',
         params: [
           {
-            chainId: EVM_CHAIN_HEX,
-            chainName: 'Sepolia Test Network',
-            rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
+            chainId: FLARE_CHAIN_HEX,
+            chainName: 'Flare Coston2 Testnet',
+            rpcUrls: [FLARE_RPC_URL],
             nativeCurrency: {
-              name: 'Sepolia ETH',
-              symbol: 'ETH',
+              name: 'Flare',
+              symbol: 'C2FLR',
               decimals: 18,
             },
-            blockExplorerUrls: ['https://sepolia.etherscan.io'],
+            blockExplorerUrls: [FLARE_EXPLORER_URL],
           },
         ],
       })
@@ -78,7 +77,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           return
         }
         if (cancelled) return
-        await ensureSepolia(ethereum)
+        await ensureFlare(ethereum)
         setAddress(stored)
       } catch {
         localStorage.removeItem(ADDRESS_KEY)
@@ -95,7 +94,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const ethereum = (window as Eip1193ProviderWindow).ethereum
       if (!ethereum) throw new Error('wallet_not_found')
       const provider = new BrowserProvider(ethereum)
-      await ensureSepolia(ethereum)
+      await ensureFlare(ethereum)
       const accounts = (await provider.send('eth_requestAccounts', [])) as string[]
       const selected = accounts[0]
       if (!selected) throw new Error('wallet_not_found')
@@ -111,16 +110,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(ADDRESS_KEY)
   }, [])
 
-  const signTransaction = useCallback(
-    async (_xdr: string) => {
-      throw new Error('sign_xdr_not_supported_on_evm')
-    },
-    [],
-  )
-
   const value = useMemo(
-    () => ({ address, connecting, connect, disconnect, signTransaction }),
-    [address, connecting, connect, disconnect, signTransaction],
+    () => ({ address, connecting, connect, disconnect }),
+    [address, connecting, connect, disconnect],
   )
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
