@@ -8,4 +8,4 @@ optimizer_runs = 300
 evm_version = "paris"
 
 [rpc_endpoints]
-sepolia = "${SEPOLIA_RPC_URL}"
+coston2 = "${FLARE_RPC_URL}"
