@@ -1,6 +1,6 @@
-export type YieldTarget = 'defindex' | 'blend' | 'soroswap'
+export type YieldTarget = 'sparkdex' | 'firelight' | 'upshift'
 
-export type SaveAccount = {
+export type YourSaveAccount = {
   splitBps: number
   spend: bigint
   shares: bigint
@@ -11,8 +11,8 @@ export type SaveAccount = {
 export type TxResult = { hash: string }
 export type WithdrawSavingsResult = { amount: bigint; hash: string }
 
-export interface SaveService {
-  getAccount(user: string): Promise<SaveAccount>
+export interface YourSaveService {
+  getAccount(user: string): Promise<YourSaveAccount>
   pay(from: string, to: string, amount: bigint): Promise<TxResult>
   withdrawSpend(user: string, amount: bigint): Promise<TxResult>
   withdrawSavings(user: string, shares: bigint): Promise<WithdrawSavingsResult>
