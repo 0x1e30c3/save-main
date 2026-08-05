@@ -9,12 +9,13 @@ import { useSettings } from '@/lib/settings'
 import { cn } from '@/lib/utils'
 
 type YieldSourcesCardProps = {
-  blendApy: number | null
-  tvl: bigint | null
-  blendTvl: bigint | null
-  soroswapApy: number | null
-  soroswapTvl: bigint | null
-  mainnetApy: { defindex: number | null; blend: number | null; soroswap: number | null }
+  sparkdexApy: number | null
+  sparkdexTvl: bigint | null
+  firelightApy: number | null
+  firelightTvl: bigint | null
+  upshiftApy: number | null
+  upshiftTvl: bigint | null
+  mainnetApy: { sparkdex: number | null; firelight: number | null; upshift: number | null }
   loading: boolean
   rates: FxRates
   selectedTarget?: YieldTarget
@@ -66,11 +67,12 @@ function ProtocolLogo({ source }: { source: SourceRow }) {
 }
 
 export function YieldSourcesCard({
-  blendApy,
-  tvl,
-  blendTvl,
-  soroswapApy,
-  soroswapTvl,
+  sparkdexApy,
+  sparkdexTvl,
+  firelightApy,
+  firelightTvl,
+  upshiftApy,
+  upshiftTvl,
   mainnetApy,
   loading,
   rates,
@@ -82,40 +84,40 @@ export function YieldSourcesCard({
 
   const sources: SourceRow[] = [
     {
-      key: 'defindex',
-      logo: '/logos/nox-vault-icon.svg',
-      website: 'https://docs.iex.ec/nox-protocol/getting-started/welcome',
-      name: 'yield.sourceDefindexName',
-      route: 'yield.sourceDefindexRoute',
+      key: 'sparkdex',
+      logo: '/logos/sparkdex-icon.svg',
+      website: 'https://sparkdex.finance',
+      name: 'yield.sourceSparkdexName',
+      route: 'yield.sourceSparkdexRoute',
       badge: 'active',
-      target: 'defindex',
-      apy: blendApy,
-      tvl,
-      mainnetApy: mainnetApy.defindex,
+      target: 'sparkdex',
+      apy: sparkdexApy,
+      tvl: sparkdexTvl,
+      mainnetApy: mainnetApy.sparkdex,
     },
     {
-      key: 'blend',
-      logo: '/logos/aave-icon.svg',
-      website: 'https://aave.com',
-      name: 'yield.sourceBlendName',
-      route: 'yield.sourceBlendRoute',
+      key: 'firelight',
+      logo: '/logos/firelight-icon.svg',
+      website: 'https://firelight.finance',
+      name: 'yield.sourceFirelightName',
+      route: 'yield.sourceFirelightRoute',
       badge: 'active',
-      target: 'blend',
-      apy: blendApy,
-      tvl: blendTvl,
-      mainnetApy: mainnetApy.blend,
+      target: 'firelight',
+      apy: firelightApy,
+      tvl: firelightTvl,
+      mainnetApy: mainnetApy.firelight,
     },
     {
-      key: 'soroswap',
-      logo: '/logos/uniswap-icon.svg',
-      website: 'https://uniswap.org',
-      name: 'yield.sourceSoroswapName',
-      route: 'yield.sourceSoroswapRoute',
+      key: 'upshift',
+      logo: '/logos/upshift-icon.svg',
+      website: 'https://upshift.finance',
+      name: 'yield.sourceUpshiftName',
+      route: 'yield.sourceUpshiftRoute',
       badge: 'active',
-      target: 'soroswap',
-      apy: soroswapApy,
-      tvl: soroswapTvl,
-      mainnetApy: mainnetApy.soroswap,
+      target: 'upshift',
+      apy: upshiftApy,
+      tvl: upshiftTvl,
+      mainnetApy: mainnetApy.upshift,
     },
   ]
 
