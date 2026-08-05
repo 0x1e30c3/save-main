@@ -12,15 +12,13 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input'
 import { useAppState } from '@/lib/app-state'
 import { isValidRecipientAddress } from '@/lib/address'
-import { save } from '@/lib/save'
+import { yoursave } from '@/lib/yoursave'
 import { explorerTxUrl } from '@/lib/config'
 import { errorKey } from '@/lib/errors'
-import { parseUsdc, shortHex } from '@/lib/format'
+import { parseFxrp, shortHex } from '@/lib/format'
 import { formatMoney, useT } from '@/lib/i18n'
 import { useSettings } from '@/lib/settings'
-import { useFaucet } from '@/lib/use-faucet'
 import { useScrollLock } from '@/lib/use-scroll-lock'
-import { getUsdcStatus, type UsdcStatus } from '@/lib/usdc-status'
 import { useWallet } from '@/lib/wallet'
 
 const QUICK_AMOUNTS = ['25', '50', '100']
@@ -61,23 +59,19 @@ function PayCard({ recipient }: { recipient: string }) {
   const [value, setValue] = useState(() => {
     const preset = (searchParams.get('amount') ?? '').trim()
     try {
-      return parseUsdc(preset) > 0n ? preset : ''
+      return parseFxrp(preset) > 0n ? preset : ''
     } catch {
       return ''
     }
   })
   const [splitPct, setSplitPct] = useState<number | null>(null)
   const [paid, setPaid] = useState<{ amount: bigint; hash: string } | null>(null)
-  const [usdcStatus, setUsdcStatus] = useState<UsdcStatus | null>(null)
-  const [checkingUsdc, setCheckingUsdc] = useState(false)
-  const { faucetBusy, runFaucet } = useFaucet()
   const anyBusy = busy !== null
   const displayName = name !== '' ? name : shortAddress(recipient)
-  const needsFunds = usdcStatus !== null && (!usdcStatus.hasTrustline || usdcStatus.balance === 0)
 
   useEffect(() => {
     let cancelled = false
-    save.getAccount(recipient).then(
+    yoursave.getAccount(recipient).then(
       (acc) => {
         if (!cancelled) setSplitPct(Math.round(acc.splitBps / 100))
       },
@@ -87,23 +81,6 @@ function PayCard({ recipient }: { recipient: string }) {
       cancelled = true
     }
   }, [recipient])
-
-  useEffect(() => {
-    if (!address) {
-      setUsdcStatus(null)
-      return
-    }
-    let cancelled = false
-    setCheckingUsdc(true)
-    getUsdcStatus(address).then((status) => {
-      if (cancelled) return
-      setUsdcStatus(status)
-      setCheckingUsdc(false)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [address])
 
   const handleConnect = async () => {
     try {
@@ -115,15 +92,10 @@ function PayCard({ recipient }: { recipient: string }) {
     }
   }
 
-  const handleFund = async () => {
-    await runFaucet()
-    if (address) setUsdcStatus(await getUsdcStatus(address))
-  }
-
   const handlePay = async () => {
     let parsed: bigint
     try {
-      parsed = parseUsdc(value)
+      parsed = parseFxrp(value)
       if (parsed <= 0n) throw new Error('invalid amount')
     } catch {
       toast.error(t('errors.invalidAmount'))
@@ -131,7 +103,7 @@ function PayCard({ recipient }: { recipient: string }) {
     }
     if (!address) return
     const result = await runAction('paylink', 'success.linkPaid', () =>
-      save.pay(address, recipient, parsed),
+      yoursave.pay(address, recipient, parsed),
     )
     if (result) setPaid({ amount: parsed, hash: result.hash })
   }
@@ -145,8 +117,8 @@ function PayCard({ recipient }: { recipient: string }) {
           </span>
           <p className="text-xl font-semibold tracking-tight">{t('pay.successTitle')}</p>
           <p className="flex items-center gap-2 text-2xl font-semibold tracking-tight tabular-nums">
-            <TokenIcon token="usdc" size={36} />
-            {formatMoney(paid.amount, 'usdc', rates, locale)}
+            <TokenIcon token="fxrp" size={36} />
+            {formatMoney(paid.amount, 'fxrp', rates, locale)}
           </p>
           <p className="text-sm text-muted-foreground">
             {t('pay.successBody', { name: displayName })}
@@ -190,7 +162,7 @@ function PayCard({ recipient }: { recipient: string }) {
       <CardContent className="space-y-3">
         <div className="relative">
           <TokenIcon
-            token="usdc"
+            token="fxrp"
             size={36}
             className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
           />
@@ -247,25 +219,11 @@ function PayCard({ recipient }: { recipient: string }) {
                 <LogOutIcon className="size-3.5" />
               </button>
             </div>
-            {needsFunds && (
-              <div className="flex items-center justify-between gap-2 rounded-xl bg-accent px-3 py-2 text-accent-foreground">
-                <p className="text-xs">{t('pay.needsFundsHint')}</p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="shrink-0 bg-card"
-                  disabled={faucetBusy}
-                  onClick={() => void handleFund()}
-                >
-                  {faucetBusy ? `${t('common.loading')}...` : t('faucet.button')}
-                </Button>
-              </div>
-            )}
             <Button
               size="lg"
               className="w-full"
               onClick={() => void handlePay()}
-              disabled={anyBusy || value.trim() === '' || needsFunds || checkingUsdc}
+              disabled={anyBusy || value.trim() === ''}
             >
               {busy === 'paylink' ? `${t('common.loading')}...` : t('pay.button')}
             </Button>
