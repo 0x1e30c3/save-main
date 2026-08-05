@@ -1,10 +1,10 @@
 import type { ActivityItem } from '@/lib/activity'
 
-export const DEFINDEX_SHARE_SCALE = 10_000_000n
-export const BLEND_RATE_SCALAR = 10_000_000_000_000n
+// Flare Coston2 yield protocol constants
+export const FXRP_SCALE = 10n ** 18n // FXRP has 18 decimals
 
 export async function getSharePrice(): Promise<bigint | null> {
-  return 10_000_000n // mock 1.0 USDC per share
+  return 10n ** 18n // mock 1.0 FXRP per share
 }
 
 export type VaultStats = {
@@ -13,75 +13,70 @@ export type VaultStats = {
   invested: bigint | null
 }
 
-export async function getVaultStats(): Promise<VaultStats> {
+export async function getFirelightVaultStats(): Promise<VaultStats> {
   return {
-    totalSupply: 5_000_000_000n,
-    idle: 1_000_000_000n,
-    invested: 4_000_000_000n,
+    totalSupply: 5_000_000_000_000_000_000_000n, // 5000 FXRP
+    idle: 1_000_000_000_000_000_000_000n, // 1000 FXRP
+    invested: 4_000_000_000_000_000_000_000n, // 4000 FXRP
   }
 }
 
-export type BlendPoolInfo = {
+export type SparkDexPoolInfo = {
   apy: number | null
-  bRate: bigint | null
+  tvl: bigint | null
+  feeRate: bigint | null
+}
+
+export async function getSparkDexPoolInfo(): Promise<SparkDexPoolInfo> {
+  return {
+    apy: 0.125, // mock 12.5% APY
+    tvl: 12_500_000_000_000_000_000_000n, // 12500 FXRP
+    feeRate: 3000n, // 0.3%
+  }
+}
+
+export async function getSparkDexMainnetReferenceApy(): Promise<number | null> {
+  return 0.142 // mock 14.2% APY
+}
+
+export async function getFirelightMainnetReferenceApy(): Promise<number | null> {
+  return 0.085 // mock 8.5% APY
+}
+
+export type UpshiftStats = {
+  apy: number | null
   tvl: bigint | null
 }
 
-export async function getBlendPoolInfo(): Promise<BlendPoolInfo> {
+export async function getUpshiftStats(): Promise<UpshiftStats> {
   return {
-    apy: 0.052, // mock 5.2% APY
-    bRate: 10_200_000_000_000n,
-    tvl: 12_500_000_000n,
+    apy: 0.095, // mock 9.5% APY
+    tvl: 8_400_000_000_000_000_000_000n, // 8400 FXRP
   }
 }
 
-export async function getBlendMainnetReferenceApy(): Promise<number | null> {
-  return 0.061 // mock 6.1% APY
-}
-
-export async function getDefindexMainnetReferenceApy(): Promise<number | null> {
-  return 0.055 // mock 5.5% APY
-}
-
-export type SoroswapStats = {
-  apy: number | null
-  tvl: bigint | null
-  reserveUsdc: bigint | null
-  totalSupply: bigint | null
-}
-
-export async function getSoroswapStats(): Promise<SoroswapStats> {
-  return {
-    apy: null,
-    tvl: 8_400_000_000n,
-    reserveUsdc: 8_400_000_000n,
-    totalSupply: 10_000_000n,
-  }
-}
-
-export async function getSoroswapMainnetReferenceApy(): Promise<number | null> {
-  return 0.084 // mock 8.4% APY
+export async function getUpshiftMainnetReferenceApy(): Promise<number | null> {
+  return 0.102 // mock 10.2% APY
 }
 
 export function valueOfShares(
   shares: bigint,
-  target: 'defindex' | 'blend' | 'soroswap',
+  target: 'sparkdex' | 'firelight' | 'upshift',
   sharePrice: bigint | null,
-  blendBRate: bigint | null,
-  soroswapPool?: { reserveUsdc: bigint | null; totalSupply: bigint | null },
+  sparkdexTvl: bigint | null,
+  upshiftStats?: { tvl: bigint | null },
 ): bigint | null {
-  if (target === 'blend') {
-    if (blendBRate === null) return null
-    return (shares * blendBRate) / BLEND_RATE_SCALAR
+  if (target === 'sparkdex') {
+    if (sharePrice === null) return null
+    return (shares * sharePrice) / FXRP_SCALE
   }
-  if (target === 'soroswap') {
-    const reserveUsdc = soroswapPool?.reserveUsdc ?? null
-    const totalSupply = soroswapPool?.totalSupply ?? null
-    if (reserveUsdc === null || totalSupply === null || totalSupply === 0n) return null
-    return (shares * 2n * reserveUsdc) / totalSupply
+  if (target === 'upshift') {
+    const tvl = upshiftStats?.tvl ?? null
+    if (tvl === null || sharePrice === null) return null
+    return (shares * sharePrice) / FXRP_SCALE
   }
   if (sharePrice === null) return null
-  return (shares * sharePrice) / DEFINDEX_SHARE_SCALE
+  return (shares * sharePrice) / FXRP_SCALE
 }
 
 export type SavingsPosition = {
