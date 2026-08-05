@@ -20,7 +20,6 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { AddressAvatar } from '@/components/brand/address-avatar'
-import { FloatingDeco } from '@/components/brand/floating-deco'
 import { LogoMark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
@@ -398,8 +397,13 @@ export function AppShell() {
 
   return (
     <div className="relative h-svh">
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
-        <FloatingDeco side="both" className="opacity-40" />
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[-1]">
+        <img
+          src="/assets/section1-bg.jpg"
+          alt=""
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-background/50" />
       </div>
       <div className="hidden md:block">
         <button
