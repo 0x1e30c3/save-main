@@ -21,7 +21,7 @@ export function App() {
   return (
     <ThemeProvider
       attribute="class"
-      storageKey="save:theme"
+      storageKey="yoursave:theme"
       defaultTheme="light"
       disableTransitionOnChange
     >
