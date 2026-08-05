@@ -12,9 +12,9 @@ const PRODUCT_LINKS: { to: string; label: MessageKey }[] = [
 ]
 
 const PROTOCOL_LINKS: { href: string; logo: string; logoBackdrop?: string; name: MessageKey }[] = [
-  { href: 'https://docs.iex.ec/nox-protocol/getting-started/welcome', logo: '/logos/nox-vault-icon.svg', name: 'yield.sourceDefindexName' },
-  { href: 'https://aave.com', logo: '/logos/aave-icon.svg', name: 'yield.sourceBlendName' },
-  { href: 'https://uniswap.org', logo: '/logos/uniswap-icon.svg', name: 'yield.sourceSoroswapName' },
+  { href: 'https://sparkdex.finance', logo: '/logos/sparkdex-icon.svg', name: 'yield.sourceSparkdexName' },
+  { href: 'https://firelight.finance', logo: '/logos/firelight-icon.svg', name: 'yield.sourceFirelightName' },
+  { href: 'https://upshift.finance', logo: '/logos/upshift-icon.svg', name: 'yield.sourceUpshiftName' },
 ]
 
 function scrollToTop(): void {
