@@ -3,15 +3,15 @@ import type { YieldTarget } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 const SOURCE_LOGO: Record<YieldTarget, string> = {
-  defindex: '/logos/nox-vault-icon.svg',
-  blend: '/logos/aave-icon.svg',
-  soroswap: '/logos/uniswap-icon.svg',
+  sparkdex: '/logos/sparkdex-icon.svg',
+  firelight: '/logos/firelight-icon.svg',
+  upshift: '/logos/upshift-icon.svg',
 }
 
 const SOURCE_NAME_KEY: Record<YieldTarget, MessageKey> = {
-  defindex: 'rules.yieldSourceDefindexName',
-  blend: 'rules.yieldSourceBlendName',
-  soroswap: 'rules.yieldSourceSoroswapName',
+  sparkdex: 'rules.yieldSourceSparkdexName',
+  firelight: 'rules.yieldSourceFirelightName',
+  upshift: 'rules.yieldSourceUpshiftName',
 }
 
 type YieldRouteBadgeProps = {
