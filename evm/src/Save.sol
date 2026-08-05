@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-// Minimal ERC20 interface used by Save routing helpers
+// Minimal ERC20 interface used by YourSave routing helpers
 interface IERC20Minimal {
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
     function approve(address spender, uint256 amount) external returns (bool);
 }
 
 
-contract Save {
+contract YourSave {
     enum YieldTarget {
-        Defindex,
-        Blend,
-        Soroswap
+        SparkDEX,
+        Firelight,
+        Upshift
     }
 
     struct Account {
@@ -142,7 +142,7 @@ contract Save {
         if (!_initialized[user]) {
             _initialized[user] = true;
             acc.splitBps = DEFAULT_SPLIT_BPS;
-            acc.yieldTarget = YieldTarget.Defindex;
+            acc.yieldTarget = YieldTarget.Firelight;
         }
     }
 
@@ -153,7 +153,7 @@ contract Save {
     }
 
 
-    /// @notice Withdraw savings and route them through an on-chain adapter (e.g., Uniswap adapter)
+    /// @notice Withdraw savings and route them through an on-chain adapter (e.g., SparkDEX adapter)
     /// @dev User must approve the tokenIn to this contract prior to calling. This keeps caller==user semantics.
     function withdrawSavingsToAdapter(
         uint256 shares,
