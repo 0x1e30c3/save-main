@@ -7,25 +7,25 @@ import { Card, CardContent } from '@/components/ui/card'
 import { NumberTicker } from '@/components/ui/number-ticker'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { ActivityItem } from '@/lib/activity'
-import { usdcToNumber } from '@/lib/format'
+import { fxrpToNumber } from '@/lib/format'
 import { currencyAffix, formatDate, formatMoney, intlLocale, useT } from '@/lib/i18n'
 import type { FxRates } from '@/lib/rates'
 import { secondaryCurrencyFor, useSettings } from '@/lib/settings'
-import type { SaveAccount } from '@/lib/types'
+import type { YourSaveAccount } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import {
   computeSavingsPosition,
-  getBlendPoolInfo,
   getSharePrice,
-  getSoroswapStats,
+  getSparkDexPoolInfo,
+  getUpshiftStats,
   valueOfShares,
 } from '@/lib/yield'
 
 const MIN_SEGMENT_PCT = 4 // keep tiny pockets visible on the bar
-const ONE_USDC = 10_000_000n
+const ONE_FXRP = 10n ** 18n
 
 type BalanceHeroProps = {
-  account: SaveAccount | null
+  account: YourSaveAccount | null
   activity: ActivityItem[]
   loading: boolean
   rates: FxRates
@@ -46,22 +46,19 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
   const secondaryCurrency = secondaryCurrencyFor(primaryCurrency, locale)
   const intl = intlLocale(locale)
   const [sharePrice, setSharePrice] = useState<bigint | null>(null)
-  const [blendBRate, setBlendBRate] = useState<bigint | null>(null)
-  const [soroswapPool, setSoroswapPool] = useState<{
-    reserveUsdc: bigint | null
-    totalSupply: bigint | null
-  }>({ reserveUsdc: null, totalSupply: null })
+  const [sparkdexTvl, setSparkdexTvl] = useState<bigint | null>(null)
+  const [upshiftStats, setUpshiftStats] = useState<{ tvl: bigint | null }>({ tvl: null })
   const yieldTarget = account?.yieldTarget ?? 'defindex'
 
   useEffect(() => {
     let active = true
-    if (yieldTarget === 'blend') {
-      void getBlendPoolInfo().then((info) => {
-        if (active) setBlendBRate(info.bRate)
+    if (yieldTarget === 'sparkdex') {
+      void getSparkDexPoolInfo().then((info) => {
+        if (active) setSparkdexTvl(info.tvl)
       })
-    } else if (yieldTarget === 'soroswap') {
-      void getSoroswapStats().then((stats) => {
-        if (active) setSoroswapPool({ reserveUsdc: stats.reserveUsdc, totalSupply: stats.totalSupply })
+    } else if (yieldTarget === 'upshift') {
+      void getUpshiftStats().then((stats) => {
+        if (active) setUpshiftStats({ tvl: stats.tvl })
       })
     } else {
       void getSharePrice().then((price) => {
@@ -98,15 +95,15 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
   const empty = total <= 0n
   const locked = Number(account.lockUntil) * 1000 > Date.now()
   const [spendPct, savePct] = segmentWidths(
-    usdcToNumber(account.spend),
-    usdcToNumber(account.shares),
+    fxrpToNumber(account.spend),
+    fxrpToNumber(account.shares),
   )
   const currentValue = valueOfShares(
     account.shares,
     account.yieldTarget,
     sharePrice,
-    blendBRate,
-    soroswapPool,
+    sparkdexTvl,
+    upshiftStats,
   )
   const position = currentValue !== null ? computeSavingsPosition(activity, currentValue) : null
   const earning = position !== null && position.earnings !== null && position.earnings > 0n
@@ -116,18 +113,18 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
       <CardContent>
         <p className="text-sm text-muted-foreground">{t('balances.total')}</p>
         <div className="mt-1 flex items-end gap-1.5">
-          {primaryCurrency === 'usdc' ? (
+          {primaryCurrency === 'fxrp' ? (
             <>
               <NumberTicker
-                value={usdcToNumber(total)}
+                value={fxrpToNumber(total)}
                 decimalPlaces={2}
                 locale={intl}
                 delay={0.3}
                 className="text-4xl font-semibold tracking-tight text-foreground tabular-nums"
               />
               <span className="mb-1 inline-flex items-center gap-2 text-lg text-muted-foreground">
-                <TokenIcon token="usdc" size={34} />
-                USDC
+                <TokenIcon token="fxrp" size={34} />
+                FXRP
               </span>
             </>
           ) : (
@@ -138,7 +135,7 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
               )
               const ticker = (
                 <NumberTicker
-                  value={usdcToNumber(total) * rates[primaryCurrency as 'idr' | 'cny']}
+                  value={fxrpToNumber(total) * rates[primaryCurrency as 'idr' | 'cny']}
                   decimalPlaces={0}
                   locale={intl}
                   delay={0.3}
@@ -160,12 +157,12 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
           )}
         </div>
         <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">
-          {secondaryCurrency === 'usdc' && <TokenIcon token="usdc" size={18} />}~{' '}
+          {secondaryCurrency === 'fxrp' && <TokenIcon token="fxrp" size={18} />}~{' '}
           {secondary(total)}
         </p>
-        {primaryCurrency !== 'usdc' && (
+        {primaryCurrency !== 'fxrp' && (
           <p className="mt-1 text-xs text-muted-foreground">
-            {t('balances.rateCaption', { amount: formatMoney(ONE_USDC, primaryCurrency, rates, locale) })}
+            {t('balances.rateCaption', { amount: formatMoney(ONE_FXRP, primaryCurrency, rates, locale) })}
           </p>
         )}
         <div className="mt-6">
@@ -176,7 +173,7 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
                 {t('balances.spendable')}
               </p>
               <p className="mt-1 flex items-center gap-1.5 text-lg font-semibold tracking-tight tabular-nums">
-                <TokenIcon token="usdc" size={24} />
+                <TokenIcon token="fxrp" size={24} />
                 {primary(account.spend)}
               </p>
               <p className="text-xs text-muted-foreground tabular-nums">
@@ -189,7 +186,7 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
                 <span className="size-2 rounded-full bg-gold" />
               </p>
               <p className="mt-1 flex items-center justify-end gap-1.5 text-lg font-semibold tracking-tight tabular-nums">
-                <TokenIcon token="usdc" size={24} />
+                <TokenIcon token="fxrp" size={24} />
                 {primary(account.shares)}
               </p>
               <p className="text-xs text-muted-foreground tabular-nums">
