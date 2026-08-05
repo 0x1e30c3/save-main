@@ -3,10 +3,10 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAppState } from '@/lib/app-state'
 import { useT } from '@/lib/i18n'
-import type { SaveAccount } from '@/lib/types'
+import type { YourSaveAccount } from '@/lib/types'
 
 type AccountPanelProps = {
-  children: (account: SaveAccount) => ReactNode
+  children: (account: YourSaveAccount) => ReactNode
 }
 
 export function AccountPanel({ children }: AccountPanelProps) {
