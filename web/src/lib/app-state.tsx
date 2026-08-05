@@ -10,19 +10,19 @@ import {
 } from 'react'
 import { toast } from 'sonner'
 import { fetchActivity, type ActivityItem } from '@/lib/activity'
-import { save } from '@/lib/save'
+import { yoursave } from '@/lib/yoursave'
 import { explorerTxUrl } from '@/lib/config'
 import { errorKey } from '@/lib/errors'
 import { shortHex } from '@/lib/format'
 import { useT, type MessageKey } from '@/lib/i18n'
 import { FALLBACK_RATES, getFxRates, type FxRates } from '@/lib/rates'
-import type { SaveAccount } from '@/lib/types'
+import type { YourSaveAccount } from '@/lib/types'
 import { useWallet } from '@/lib/wallet'
 
 type AccountStatus = 'disconnected' | 'loading' | 'ready' | 'error'
 
 type AppStateValue = {
-  account: SaveAccount | null
+  account: YourSaveAccount | null
   accountStatus: AccountStatus
   rates: FxRates
   activity: ActivityItem[]
@@ -41,7 +41,7 @@ const AppStateContext = createContext<AppStateValue | null>(null)
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const { address } = useWallet()
   const t = useT()
-  const [account, setAccount] = useState<SaveAccount | null>(null)
+  const [account, setAccount] = useState<YourSaveAccount | null>(null)
   const [accountStatus, setAccountStatus] = useState<AccountStatus>('disconnected')
   const [rates, setRates] = useState<FxRates>(FALLBACK_RATES)
   const [activity, setActivity] = useState<ActivityItem[]>([])
@@ -61,7 +61,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setActivityLoading(true)
     }
     const [accountResult, activityResult] = await Promise.allSettled([
-      save.getAccount(addr),
+      yoursave.getAccount(addr),
       fetchActivity(addr),
     ])
     if (addressRef.current !== addr) return
