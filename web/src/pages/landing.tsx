@@ -352,7 +352,7 @@ export function Landing() {
                 id="ed-hero-title"
               >
                 <span>Confidential</span>
-                <span>USDC</span>
+                <span>FXRP</span>
                 <span>Savings</span>
               </h1>
               <p className="mt-6 max-w-[28ch] text-sm font-semibold uppercase leading-[1.55] tracking-[0.08em] text-[#f8fafc]/70">
@@ -491,7 +491,7 @@ export function Landing() {
             <article className="flex min-h-[140px] items-start bg-[#f8fafc] px-6 py-6 shadow-xl lg:absolute lg:min-h-0 lg:w-[320px] lg:right-[8vw] lg:top-[35%]">
               <p className="text-lg font-bold leading-[1.15] tracking-[-0.02em] max-w-[14ch]">
                 <span className="block text-xs font-semibold text-[#9c7420] uppercase tracking-[0.1em] mb-2">III. Seamless Integration</span>
-                Clients pay through standard Sepolia USDC links with no complex sign-up.
+                Clients pay through standard Flare FXRP links with no complex sign-up.
               </p>
             </article>
 
@@ -652,47 +652,47 @@ export function Landing() {
             <p className="mt-3 text-muted-foreground">{t('landing.protocolsCaption')}</p>
             <div className="mt-12 grid gap-6 sm:grid-cols-3">
               <a
-                href="https://docs.iex.ec/nox-protocol/getting-started/welcome"
+                href="https://sparkdex.finance"
                 target="_blank"
                 rel="noreferrer"
                 className="group flex flex-col items-center gap-4 border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
               >
                 <span className="flex size-16 items-center justify-center rounded-full bg-[#e2e8f0]">
-                  <img src="/logos/nox-vault-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
+                  <img src="/logos/sparkdex-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
                 </span>
                 <div>
-                  <p className="font-bold text-lg">Nox Vault</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Confidential yield pool</p>
+                  <p className="font-bold text-lg">SparkDEX</p>
+                  <p className="mt-1 text-sm text-muted-foreground">DEX & liquidity pools</p>
                 </div>
               </a>
 
               <a
-                href="https://aave.com"
+                href="https://firelight.finance"
                 target="_blank"
                 rel="noreferrer"
                 className="group flex flex-col items-center gap-4 border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
               >
                 <span className="flex size-16 items-center justify-center rounded-full bg-[#e2e8f0]">
-                  <img src="/logos/aave-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
+                  <img src="/logos/firelight-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
                 </span>
                 <div>
-                  <p className="font-bold text-lg">Aave V3</p>
-                  <p className="mt-1 text-sm text-muted-foreground">USDC lending pool</p>
+                  <p className="font-bold text-lg">Firelight</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Yield vaults</p>
                 </div>
               </a>
 
               <a
-                href="https://uniswap.org"
+                href="https://upshift.finance"
                 target="_blank"
                 rel="noreferrer"
                 className="group flex flex-col items-center gap-4 border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
               >
                 <span className="flex size-16 items-center justify-center rounded-full bg-[#e2e8f0]">
-                  <img src="/logos/uniswap-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
+                  <img src="/logos/upshift-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
                 </span>
                 <div>
-                  <p className="font-bold text-lg">Uniswap V2</p>
-                  <p className="mt-1 text-sm text-muted-foreground">USDC liquidity pool</p>
+                  <p className="font-bold text-lg">Upshift</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Strategy vaults</p>
                 </div>
               </a>
             </div>
