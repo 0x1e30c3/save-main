@@ -137,11 +137,12 @@ export function Dashboard() {
             </div>
           </section>
           <YieldSourcesCard
-            blendApy={yieldData.blendApy}
-            tvl={yieldTvl}
-            blendTvl={yieldData.blendTvl}
-            soroswapApy={yieldData.soroswapStats.apy}
-            soroswapTvl={yieldData.soroswapStats.tvl}
+            sparkdexApy={yieldData.sparkdexPoolInfo.apy}
+            sparkdexTvl={yieldData.sparkdexPoolInfo.tvl}
+            firelightApy={null}
+            firelightTvl={yieldTvl}
+            upshiftApy={yieldData.upshiftStats.apy}
+            upshiftTvl={yieldData.upshiftStats.tvl}
             mainnetApy={yieldData.mainnetApy}
             loading={yieldLoading}
             rates={rates}
