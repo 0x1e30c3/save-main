@@ -83,7 +83,7 @@ export function SettingsPage() {
             <Select
               value={primaryCurrency}
               onValueChange={(v) => {
-                if (v === 'idr' || v === 'usdc' || v === 'cny') setPrimaryCurrency(v)
+                if (v === 'idr' || v === 'fxrp' || v === 'cny') setPrimaryCurrency(v)
               }}
             >
               <SelectTrigger id="settings-currency" className="w-48">
@@ -91,7 +91,7 @@ export function SettingsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="idr">{t('settings.currencyIdr')}</SelectItem>
-                <SelectItem value="usdc">{t('settings.currencyUsdc')}</SelectItem>
+                <SelectItem value="fxrp">{t('settings.currencyFxrp')}</SelectItem>
                 <SelectItem value="cny">{t('settings.currencyCny')}</SelectItem>
               </SelectContent>
             </Select>
