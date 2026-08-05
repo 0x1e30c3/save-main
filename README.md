@@ -1,47 +1,55 @@
 <div align="center">
-  <img src="web/public/logo-save.png" width="88" alt="Save">
-  <h1>Save App</h1>
-  <p>Application for confidential savings on every payment, on EVM Sepolia using iExec Nox Protocol.</p>
+  <img src="web/public/logo-yoursave.png" width="88" alt="YourSave">
+  <h1>YourSave</h1>
+  <p>Auto-savings on every payment, powered by FXRP on Flare.</p>
 
-  <img src="https://img.shields.io/badge/chain-EVM%20%2F%20iExec%20Nox-blue.svg" alt="EVM / iExec Nox">
-  <img src="https://img.shields.io/badge/network-Sepolia%20Testnet-f59e0b.svg" alt="Sepolia Testnet">
-  <img src="https://img.shields.io/badge/hackathon-WTF%20iExec%202026-22c55e.svg" alt="WTF iExec Hackathon 2026">
+  <img src="https://img.shields.io/badge/network-Flare%20Coston2-blue.svg" alt="Flare Coston2">
+  <img src="https://img.shields.io/badge/asset-FXRP%20(FAssets)-f59e0b.svg" alt="FXRP">
+  <img src="https://img.shields.io/badge/hackathon-Flare%20Summer%20Signal-22c55e.svg" alt="Flare Summer Signal">
 </div>
 
 ---
 
-Save (Indonesian for piggy bank) is a privacy-first payment splitter for gig workers and small merchants: every incoming USDC payment is automatically split between a spendable balance and a yield-earning savings position. 
+YourSave is a programmable savings splitter that automatically routes a portion of every incoming payment into yield-earning positions on Flare.
 
-By leveraging **iExec Nox**, Save runs confidentially inside a hardware enclave (TEE). This ensures that balances, splits, and savings configurations are entirely private on-chain and can only be queried by the authenticated account owner.
+Built for **Bounty 1: Interoperable Asset Products** — making FXRP more useful across the Flare ecosystem.
 
 ## How it works
 
 ```mermaid
 flowchart TD
-    P["Payer (customer or platform)"] -->|"pay(from, to, amount)"| C["ConfidentialSave (TEE Enclave)"]
-    subgraph "Nox TEE Enclave (Confidential State)"
-        C -->|"amount x (1 - split)"| SP["Private Spendable Balance"]
-        C -->|"amount x split"| SV["Private Savings Balance"]
-    end
-    SV -->|"withdrawSavingsToAdapter"| UA["UniswapAdapter (Public Contract)"]
-    UA -->|"swaps & deposits"| EVM["Public DeFi Yield (Nox Vault / Aave V3 / Uniswap V2)"]
-    SP -->|"withdrawSpend"| W["Worker (Authenticated via Signer)"]
+    P["Payer"] -->|"pay(from, to, amount)"| C["YourSave Contract"]
+    C -->|"amount x (1 - split)"| SP["Spendable Balance"]
+    C -->|"amount x split"| SV["Savings Balance"]
+    SV -->|"withdrawSavingsToAdapter"| UA["SparkDexAdapter"]
+    UA -->|"swaps & deposits"| YIELD["Yield Protocol (SparkDEX / Firelight / Upshift)"]
+    SP -->|"withdrawSpend"| W["User"]
 ```
 
-The recipient sets their own savings rule (default 20%) and picks where they want to earn yield: **Nox Vault** (confidential yield pool), **Aave V3**, or **Uniswap V2**. 
+The recipient sets their own savings rule (default 20%) and picks where they want to earn yield: **SparkDEX** (DEX liquidity), **Firelight** (ERC-4626 vaults), or **Upshift** (auto-compound strategies).
 
-## Deployed contracts (Sepolia Testnet)
+## Deployed contracts (Flare Coston2 Testnet)
 
-| Contract | Address |
+| Contract | Address | Explorer |
+| --- | --- | --- |
+| **YourSave** | `0x6d4d017dE8d0A36dce7856Ee989624C6A18cD9Ea` | [View](https://coston2-explorer.flare.network/address/0x6d4d017dE8d0A36dce7856Ee989624C6A18cD9Ea) |
+| **SparkDexAdapter** | `0xD04A92C83AFe71f4f69F9FAD0A33229BFBdE33E6` | [View](https://coston2-explorer.flare.network/address/0xD04A92C83AFe71f4f69F9FAD0A33229BFBdE33E6) |
+
+### Protocol addresses (Flare Coston2)
+
+| Protocol | Address |
 | --- | --- |
-| **ConfidentialSave** (TEE Enclave) | `0x8C7b95BA82Fd885650F6348E847E347A3777368A` |
-| **UniswapAdapter** (Public Router) | `0x256BDe3c85FF6348E847E347A3777368A6CEaE4D` |
+| FXRP | `0x3A7bDfF4C47B6363F4173cA4446513D4C61E8f07` |
+| SparkDEX Router | `0x4a1E5A90e9943467FAd1acea1E7F0e5e88472a1e` |
+| Firelight Vault | `0xC90D6847747b85d1fa2E07859869fb9fB72c0361` |
+| Upshift Vault | `0x24c1a47cD5e8473b64EAB2a94515a196E10C7C81` |
 
 ## Repository layout
 
-- `evm/` - Smart contracts workspace (Solidity, Foundry/Forge, tests for confidential state logic)
+- `evm/` - Smart contracts workspace (Solidity, Foundry/Forge)
 - `web/` - Frontend application (React, Vite, TypeScript, Tailwind CSS v4, Ethers.js)
-- `scripts/` - Local development and end-to-end testing utilities
+- `plan.md` — Full migration plan (EVM Sepolia → Flare Coston2)
+- `deployments.json` — Deployed contract addresses
 
 ## Running locally
 
@@ -49,35 +57,71 @@ The recipient sets their own savings rule (default 20%) and picks where they wan
 
 ```bash
 cd evm
-forge build
-forge test
+cp .env.example .env  # Set FLARE_RPC_URL and DEPLOYER_PRIVATE_KEY
+/Users/em/.foundry/bin/forge build
+/Users/em/.foundry/bin/forge test
 ```
 
 ### 2. Frontend Development
 
-Copy the environment template and set the Sepolia parameters:
-
 ```bash
 cd web
 cp .env.example .env
-# Set VITE_CHAIN_MODE=evm
-# Set VITE_EVM_SAVE_ADDRESS=0x8C7b95BA82Fd885650F6348E847E347A3777368A
-pnpm install
-pnpm dev
+# VITE_YOURSAVE_ADDRESS is pre-filled with deployed contract
+npm install
+npm run dev
 ```
 
 The frontend will start at [http://localhost:5173/](http://localhost:5173/).
 
+### 3. Deploy to Coston2
+
+```bash
+cd evm
+# Get testnet C2FLR from https://faucet.flare.network/coston2
+/Users/em/.foundry/bin/forge create src/Save.sol:YourSave \
+  --rpc-url $FLARE_RPC_URL \
+  --private-key $DEPLOYER_PRIVATE_KEY \
+  --broadcast
+```
+
 ## Trying the app
 
-1. Install an EVM browser wallet (e.g. MetaMask, Rabby) and connect to the **Ethereum Sepolia Testnet**.
-2. Connect your wallet on the dashboard. If Sepolia is not configured, the app will prompt to add and switch networks automatically.
-3. Fund your wallet with testnet Sepolia ETH and testnet USDC.
-4. Simulate an incoming payment and watch it split into your private spendable and savings balances.
-5. On the Rules page, switch the yield target between **Nox Vault**, **Aave V3**, and **Uniswap V2** when your balance is zero to dynamically route future savings.
+1. Install an EVM browser wallet (e.g. MetaMask, Rabby) and connect to **Flare Coston2 Testnet** (chain ID 114).
+2. Connect your wallet on the dashboard. The app will prompt to add and switch networks automatically.
+3. Fund your wallet with testnet C2FLR (from [Flare Faucet](https://faucet.flare.network/coston2)) and testnet FXRP.
+4. Simulate an incoming payment and watch it split into spendable and savings balances.
+5. On the Rules page, switch the yield target between **SparkDEX**, **Firelight**, and **Upshift**.
 
-## Confidentiality Design (iExec Nox)
+## Flare Integration
 
-- **Confidential State**: Account structures (storing private balances and allocations) are kept `private` within the TEE.
-- **Enclave Access Control**: Querying balance/shares via `accountOf(user)` verifies `msg.sender == user` on-chain. Off-chain reads executed on the Nox node will return `Unauthorized()` if requested by any third party.
-- **Obfuscated Logs**: Transaction events (`PaymentRouted`, `SavingsWithdrawn`, `SpendWithdrawn`) omit amount values to prevent external transaction history mapping on the public blockchain explorer.
+- **FAssets/FXRP**: Primary asset — savings are denominated in FXRP (wrapped XRP on Flare), 18 decimals
+- **Flare Coston2**: Testnet for deployment and testing (chain ID 114, RPC: `https://coston2-api.flare.network/ext/C/rpc`)
+- **SparkDEX**: Uniswap V3 fork for token swaps and liquidity pools
+- **Firelight**: ERC-4626 compliant yield vaults for FXRP
+- **Upshift**: Strategy-driven auto-compound vaults
+- **Flare Data Connector (FDC)**: Powers cross-chain payment verification
+
+## What was built / migrated
+
+### Newly built
+- `YourSave.sol` — Core savings contract with SparkDEX/Firelight/Upshift yield targets
+- `SparkDexAdapter.sol` — Adapter for routing savings into SparkDEX V3 pools
+- `ISparkDexRouter.sol` — SparkDEX V3 router interface
+- Full React frontend with Flare Coston2 integration
+- FXRP 18-decimal formatting and wallet auto-switch to Flare Coston2
+
+### Migrated from EVM Sepolia
+- Network: Ethereum Sepolia → Flare Coston2
+- Asset: USDC (7 decimals) → FXRP (18 decimals)
+- Yield: iExec Nox / Blend / Soroswap / Defindex → SparkDEX / Firelight / Upshift
+- All old Stellar/iExec code removed
+
+## Next Steps
+
+- [ ] Integrate FAssets SDK for direct FXRP minting flow
+- [ ] Add cross-chain XRP balance display
+- [ ] Implement FXRP onboarding flow (XRP → FXRP via FDC proof)
+- [ ] Mainnet deployment (Flare Mainnet)
+- [ ] Real SparkDEX V3 SwapRouter integration
+- [ ] User testing and feedback
