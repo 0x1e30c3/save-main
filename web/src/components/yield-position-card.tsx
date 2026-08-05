@@ -4,20 +4,20 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { YieldRouteBadge } from '@/components/yield-route-badge'
-import { usdcToInput } from '@/lib/format'
+import { fxrpToInput } from '@/lib/format'
 import { formatMoney, useT } from '@/lib/i18n'
 import type { FxRates } from '@/lib/rates'
 import { secondaryCurrencyFor, useSettings } from '@/lib/settings'
-import { BLEND_RATE_SCALAR, computeSavingsPosition, savingsHistory, valueOfShares } from '@/lib/yield'
+import { computeSavingsPosition, savingsHistory, valueOfShares } from '@/lib/yield'
 import type { ActivityItem } from '@/lib/activity'
-import type { SaveAccount } from '@/lib/types'
+import type { YourSaveAccount } from '@/lib/types'
 
 type YieldPositionCardProps = {
-  account: SaveAccount | null
+  account: YourSaveAccount | null
   activity: ActivityItem[]
   sharePrice: bigint | null
-  blendBRate: bigint | null
-  soroswapPool: { reserveUsdc: bigint | null; totalSupply: bigint | null }
+  sparkdexPoolInfo: { apy: number | null; tvl: bigint | null; feeRate: bigint | null }
+  upshiftStats: { apy: number | null; tvl: bigint | null }
   loading: boolean
   rates: FxRates
 }
@@ -51,7 +51,7 @@ function Stat({
           (tone === 'gold' ? 'text-gold-ink' : tone === 'muted' ? 'text-muted-foreground' : '')
         }
       >
-        <TokenIcon token="usdc" size={24} />
+        <TokenIcon token="fxrp" size={24} />
         {amount}
       </p>
       <p className="text-xs text-muted-foreground tabular-nums">{secondary}</p>
@@ -63,8 +63,8 @@ export function YieldPositionCard({
   account,
   activity,
   sharePrice,
-  blendBRate,
-  soroswapPool,
+  sparkdexPoolInfo,
+  upshiftStats,
   loading,
   rates,
 }: YieldPositionCardProps) {
@@ -91,25 +91,12 @@ export function YieldPositionCard({
     )
   }
 
-  // USDC value per LP token, using the pool's own reserve ratio (see valueOfShares) - not a
-  // fixed-point index like blend's b_rate, but still a "USDC per unit of share" number, so it
-  // shares the sharePrice display format below rather than needing a fourth one.
-  const soroswapLpPrice =
-    soroswapPool.totalSupply !== null && soroswapPool.totalSupply > 0n && soroswapPool.reserveUsdc !== null
-      ? (2n * soroswapPool.reserveUsdc) / soroswapPool.totalSupply
-      : null
-  const rate =
-    account.yieldTarget === 'blend'
-      ? blendBRate
-      : account.yieldTarget === 'soroswap'
-        ? soroswapLpPrice
-        : sharePrice
   const currentValue = valueOfShares(
     account.shares,
     account.yieldTarget,
     sharePrice,
-    blendBRate,
-    soroswapPool,
+    sparkdexPoolInfo.tvl,
+    { tvl: upshiftStats.tvl },
   )
   const position = computeSavingsPosition(activity, currentValue)
   const earningsTone = position.earnings !== null && position.earnings > 0n ? 'gold' : 'muted'
@@ -164,16 +151,12 @@ export function YieldPositionCard({
         )}
         <div className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t pt-3 text-xs text-muted-foreground">
           <span>
-            {t('yield.shares')}: <span className="tabular-nums">{usdcToInput(account.shares)}</span>
+            {t('yield.shares')}: <span className="tabular-nums">{fxrpToInput(account.shares)}</span>
           </span>
           <span>
-            {t(account.yieldTarget === 'blend' ? 'yield.blendRate' : 'yield.sharePrice')}:{' '}
+            {t('yield.sharePrice')}:{' '}
             <span className="tabular-nums">
-              {rate === null
-                ? '-'
-                : account.yieldTarget === 'blend'
-                  ? (Number(rate) / Number(BLEND_RATE_SCALAR)).toFixed(4)
-                  : usdcToInput(rate)}
+              {sharePrice === null ? '-' : fxrpToInput(sharePrice)}
             </span>
           </span>
         </div>
