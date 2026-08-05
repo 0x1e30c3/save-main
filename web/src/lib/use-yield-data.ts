@@ -1,50 +1,45 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  getBlendMainnetReferenceApy,
-  getBlendPoolInfo,
-  getDefindexMainnetReferenceApy,
   getSharePrice,
-  getSoroswapMainnetReferenceApy,
-  getSoroswapStats,
-  getVaultStats,
-  type SoroswapStats,
+  getFirelightVaultStats,
+  getSparkDexPoolInfo,
+  getUpshiftStats,
+  getSparkDexMainnetReferenceApy,
+  getFirelightMainnetReferenceApy,
+  getUpshiftMainnetReferenceApy,
+  type SparkDexPoolInfo,
   type VaultStats,
+  type UpshiftStats,
 } from '@/lib/yield'
 
-// Mainnet numbers exist purely as a clearly-labeled reference point (real yield where there's
-// real borrowing/trading demand) - never the user's own position, which always lives on testnet.
 type MainnetReferenceApy = {
-  defindex: number | null
-  blend: number | null
-  soroswap: number | null
+  upshift: number | null
+  firelight: number | null
+  sparkdex: number | null
 }
 
 type YieldData = {
   sharePrice: bigint | null
   vaultStats: VaultStats
-  blendApy: number | null
-  blendBRate: bigint | null
-  blendTvl: bigint | null
-  soroswapStats: SoroswapStats
+  sparkdexPoolInfo: SparkDexPoolInfo
+  upshiftStats: UpshiftStats
   mainnetApy: MainnetReferenceApy
 }
 
 const EMPTY_STATS: VaultStats = { totalSupply: null, idle: null, invested: null }
-const EMPTY_SOROSWAP_STATS: SoroswapStats = { apy: null, tvl: null, reserveUsdc: null, totalSupply: null }
-const EMPTY_MAINNET_APY: MainnetReferenceApy = { defindex: null, blend: null, soroswap: null }
+const EMPTY_SPARKDEX: SparkDexPoolInfo = { apy: null, tvl: null, feeRate: null }
+const EMPTY_UPSHIFT: UpshiftStats = { apy: null, tvl: null }
+const EMPTY_MAINNET_APY: MainnetReferenceApy = { upshift: null, firelight: null, sparkdex: null }
 
 export function useYieldData() {
   const [data, setData] = useState<YieldData>({
     sharePrice: null,
     vaultStats: EMPTY_STATS,
-    blendApy: null,
-    blendBRate: null,
-    blendTvl: null,
-    soroswapStats: EMPTY_SOROSWAP_STATS,
+    sparkdexPoolInfo: EMPTY_SPARKDEX,
+    upshiftStats: EMPTY_UPSHIFT,
     mainnetApy: EMPTY_MAINNET_APY,
   })
   const [loading, setLoading] = useState(true)
-  // guards against an in-flight refresh overwriting a newer one's result
   const runId = useRef(0)
 
   const load = useCallback(async () => {
@@ -53,29 +48,27 @@ export function useYieldData() {
     const [
       sharePrice,
       vaultStats,
-      blendPoolInfo,
-      soroswapStats,
-      defindexMainnetApy,
-      blendMainnetApy,
-      soroswapMainnetApy,
+      sparkdexPoolInfo,
+      upshiftStats,
+      sparkdexMainnetApy,
+      firelightMainnetApy,
+      upshiftMainnetApy,
     ] = await Promise.all([
       getSharePrice(),
-      getVaultStats(),
-      getBlendPoolInfo(),
-      getSoroswapStats(),
-      getDefindexMainnetReferenceApy(),
-      getBlendMainnetReferenceApy(),
-      getSoroswapMainnetReferenceApy(),
+      getFirelightVaultStats(),
+      getSparkDexPoolInfo(),
+      getUpshiftStats(),
+      getSparkDexMainnetReferenceApy(),
+      getFirelightMainnetReferenceApy(),
+      getUpshiftMainnetReferenceApy(),
     ])
     if (runId.current !== id) return
     setData({
       sharePrice,
       vaultStats,
-      blendApy: blendPoolInfo.apy,
-      blendBRate: blendPoolInfo.bRate,
-      blendTvl: blendPoolInfo.tvl,
-      soroswapStats,
-      mainnetApy: { defindex: defindexMainnetApy, blend: blendMainnetApy, soroswap: soroswapMainnetApy },
+      sparkdexPoolInfo,
+      upshiftStats,
+      mainnetApy: { sparkdex: sparkdexMainnetApy, firelight: firelightMainnetApy, upshift: upshiftMainnetApy },
     })
     setLoading(false)
   }, [])
