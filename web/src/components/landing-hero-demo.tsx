@@ -28,9 +28,9 @@ export function LandingHeroDemo() {
         {t('landing.demoLabel')}
       </p>
       <p className="mt-1.5 flex items-center gap-2 text-3xl font-semibold tracking-tight tabular-nums">
-        <TokenIcon token="usdc" size={28} />
+        <TokenIcon token="fxrp" size={28} />
         <NumberTicker value={amount} decimalPlaces={0} />
-        <span className="text-base font-normal text-muted-foreground">USDC</span>
+        <span className="text-base font-normal text-muted-foreground">FXRP</span>
       </p>
       <div className="mt-4 flex h-2.5 w-full gap-0.5 overflow-hidden rounded-full bg-muted">
         <div
