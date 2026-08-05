@@ -11,27 +11,27 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { useAppState } from '@/lib/app-state'
-import { save } from '@/lib/save'
+import { yoursave } from '@/lib/yoursave'
 import { formatDate, useT, type MessageKey } from '@/lib/i18n'
 import { useSettings } from '@/lib/settings'
-import type { SaveAccount, YieldTarget } from '@/lib/types'
+import type { YourSaveAccount, YieldTarget } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useWallet } from '@/lib/wallet'
 
 type RulesCardProps = {
-  account: SaveAccount
+  account: YourSaveAccount
 }
 
 const YIELD_SOURCES: { target: YieldTarget; logo: string; logoBackdrop?: string }[] = [
-  { target: 'defindex', logo: '/logos/nox-vault-icon.svg' },
-  { target: 'blend', logo: '/logos/aave-icon.svg' },
-  { target: 'soroswap', logo: '/logos/uniswap-icon.svg' },
+  { target: 'sparkdex', logo: '/logos/sparkdex-icon.svg' },
+  { target: 'firelight', logo: '/logos/firelight-icon.svg' },
+  { target: 'upshift', logo: '/logos/upshift-icon.svg' },
 ]
 
 const YIELD_SOURCE_NAME_KEY: Record<YieldTarget, MessageKey> = {
-  defindex: 'rules.yieldSourceDefindexName',
-  blend: 'rules.yieldSourceBlendName',
-  soroswap: 'rules.yieldSourceSoroswapName',
+  sparkdex: 'rules.yieldSourceSparkdexName',
+  firelight: 'rules.yieldSourceFirelightName',
+  upshift: 'rules.yieldSourceUpshiftName',
 }
 
 type YieldSourceOptionProps = {
@@ -122,7 +122,7 @@ export function RulesCard({ account }: RulesCardProps) {
   const handleSaveSplit = async () => {
     if (!address) return
     const ok = await runAction('split', 'success.splitSaved', () =>
-      save.setSplit(address, percent * 100),
+      yoursave.setSplit(address, percent * 100),
     )
     if (ok) setDraft(null)
   }
@@ -130,7 +130,7 @@ export function RulesCard({ account }: RulesCardProps) {
   const handleLock = async () => {
     if (!address) return
     const until = BigInt(Math.floor(new Date(`${date}T00:00:00`).getTime() / 1000))
-    const ok = await runAction('lock', 'success.lockSet', () => save.setLock(address, until))
+    const ok = await runAction('lock', 'success.lockSet', () => yoursave.setLock(address, until))
     if (ok) setDate('')
   }
 
@@ -139,7 +139,7 @@ export function RulesCard({ account }: RulesCardProps) {
   const handleSwitchTarget = async (target: YieldTarget) => {
     if (!address || anyBusy || target === account.yieldTarget) return
     await runAction('yieldTarget', 'success.yieldTargetSaved', () =>
-      save.setYieldTarget(address, target),
+      yoursave.setYieldTarget(address, target),
     )
   }
 
