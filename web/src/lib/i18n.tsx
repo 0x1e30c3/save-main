@@ -42,6 +42,43 @@ const en = {
   'landing.backToTop': 'Back to top',
   'landing.footer': 'Built on Flare Coston2 testnet. Demo funds only, no real money.',
 
+  /* ── Editorial landing sections ── */
+  'landing.aboutLabel': '01 — About',
+  'landing.aboutTitle': 'Not every financial move needs to be public.',
+  'landing.aboutBody':
+    'YourSave gives you programmable privacy for everyday payments. Receive FXRP, auto-split into savings, and route yield through DeFi — all without exposing your balances on a public explorer.',
+  'landing.aboutStat1Label': '01 — Privacy by default',
+  'landing.aboutStat1Body': 'Payment amounts and splits stay off public explorers.',
+  'landing.aboutStat2Label': '02 — Yield on autopilot',
+  'landing.aboutStat2Body': 'Savings earn from SparkDEX, Firelight, or Upshift automatically.',
+
+  'landing.featureLabel': '02 — Features',
+  'landing.featureTitle': 'A savings engine built for real life.',
+  'landing.feature1Title': 'Auto-Split',
+  'landing.feature1Body': 'Every incoming payment is divided by your rules. Spend some, save the rest — instantly.',
+  'landing.feature2Title': 'Yield Routing',
+  'landing.feature2Body': 'Saved FXRP flows into DeFi protocols. SparkDEX for liquidity, Firelight for vaults, Upshift for strategies.',
+  'landing.feature3Title': 'Payment Links',
+  'landing.feature3Body': 'Share a link, get paid in FXRP. No bank accounts, no sign-up flows, no friction.',
+
+  'landing.quoteText': 'Saving should be automatic, transparent, and yours.',
+
+  'landing.howLabel': '03 — How it works',
+  'landing.howWorkTitle': 'Three steps from payment to yield.',
+
+  'landing.archLabel': '04 — Architecture',
+  'landing.archTitle': 'Built on Flare FAssets.',
+  'landing.archBody': 'FXRP is a fully-backed, on-chain representation of XRP on Flare. YourSave routes it through audited DeFi protocols.',
+  'landing.archStep1': '01 — Receive',
+  'landing.archStep1Body': 'User gets paid in FXRP via payment link or direct transfer.',
+  'landing.archStep2': '02 — Split',
+  'landing.archStep2Body': 'Smart contract divides payment according to your rules.',
+  'landing.archStep3': '03 — Earn',
+  'landing.archStep3Body': 'Savings portion routes to yield protocol automatically.',
+
+  'landing.footerCtaTitle': 'Start saving automatically.',
+  'landing.footerCtaBody': 'Connect your wallet and split your first payment.',
+
   'topbar.connect': 'Connect wallet',
   'topbar.disconnect': 'Disconnect',
   'topbar.connected': 'Connected',
@@ -260,11 +297,18 @@ const en = {
   'errors.switchTargetWithBalance': 'Withdraw your savings before switching yield source.',
   'errors.paused': 'The contract is paused right now. Try again later.',
   'errors.walletCancelled': 'Request cancelled in your wallet.',
+  'errors.walletTimeout': 'Wallet did not respond. Please try again.',
   'errors.generic': 'Something went wrong. Please try again.',
   'errors.faucetUnavailable': 'The faucet is unavailable right now. Try again in a bit.',
   'errors.faucetAlreadyFunded': 'This wallet already has test funds.',
   'errors.loadFailed': 'Could not load your account. Check your connection and try again.',
   'errors.invalidPayAddress': 'The address in this payment link is not a valid Flare address.',
+
+  'wallet.title': 'Connect wallet',
+  'wallet.caption': 'Select a wallet from your browser to continue.',
+  'wallet.none': 'No wallets detected.',
+  'wallet.useInjected': 'Use injected wallet',
+  'wallet.injected': 'Injected wallet',
 
   'common.loading': 'Loading',
   'common.retry': 'Try again',
@@ -320,6 +364,43 @@ const id = {
   'landing.footerContract': 'Lihat kontrak',
   'landing.backToTop': 'Kembali ke atas',
   'landing.footer': 'Dibangun di Flare Coston2 testnet. Dana demo saja, bukan uang sungguhan.',
+
+  /* ── Editorial landing sections ── */
+  'landing.aboutLabel': '01 — Tentang',
+  'landing.aboutTitle': 'Tidak semua langkah finansial perlu diketahui publik.',
+  'landing.aboutBody':
+    'YourSave memberimu privasi terprogram untuk pembayaran sehari-hari. Terima FXRP, bagi otomatis ke tabungan, dan alirkan yield ke DeFi — tanpa mengekspos saldo di explorer publik.',
+  'landing.aboutStat1Label': '01 — Privasi by default',
+  'landing.aboutStat1Body': 'Jumlah pembayaran dan split tetap off public explorer.',
+  'landing.aboutStat2Label': '02 — Yield otomatis',
+  'landing.aboutStat2Body': 'Tabungan menghasilkan dari SparkDEX, Firelight, atau Upshift secara otomatis.',
+
+  'landing.featureLabel': '02 — Fitur',
+  'landing.featureTitle': 'Mesin tabungan yang dibuat untuk kehidupan nyata.',
+  'landing.feature1Title': 'Auto-Split',
+  'landing.feature1Body': 'Setiap pembayaran masuk dibagi sesuai aturumu. Belanja sebagian, tabung sebagian — seketika.',
+  'landing.feature2Title': 'Yield Routing',
+  'landing.feature2Body': 'FXRP yang ditabung mengalir ke protokol DeFi. SparkDEX untuk likuiditas, Firelight untuk vault, Upshift untuk strategi.',
+  'landing.feature3Title': 'Payment Links',
+  'landing.feature3Body': 'Bagikan tautan, dibayar dalam FXRP. Tanpa rekening bank, tanpa proses pendaftaran, tanpa gesekan.',
+
+  'landing.quoteText': 'Menabung seharusnya otomatis, transparan, dan milikmu.',
+
+  'landing.howLabel': '03 — Cara kerja',
+  'landing.howWorkTitle': 'Tiga langkah dari pembayaran ke yield.',
+
+  'landing.archLabel': '04 — Arsitektur',
+  'landing.archTitle': 'Dibangun di Flare FAssets.',
+  'landing.archBody': 'FXRP adalah representasi on-chain XRP di Flare yang dijamin penuh. YourSave mengarahkannya melalui protokol DeFi yang telah diaudit.',
+  'landing.archStep1': '01 — Terima',
+  'landing.archStep1Body': 'Pengguna dibayar dalam FXRP melalui tautan pembayaran atau transfer langsung.',
+  'landing.archStep2': '02 — Bagi',
+  'landing.archStep2Body': 'Kontrak cerdas membagi pembayaran sesuai aturumu.',
+  'landing.archStep3': '03 — Hasilkan',
+  'landing.archStep3Body': 'Bagian tabungan secara otomatis dialirkan ke protokol yield.',
+
+  'landing.footerCtaTitle': 'Mulai menabung secara otomatis.',
+  'landing.footerCtaBody': 'Hubungkan dompetmu dan bagi pembayaran pertamamu.',
 
   'topbar.connect': 'Hubungkan dompet',
   'topbar.disconnect': 'Putuskan',
@@ -540,11 +621,18 @@ const id = {
   'errors.switchTargetWithBalance': 'Tarik tabunganmu dulu sebelum ganti sumber imbal hasil.',
   'errors.paused': 'Kontrak sedang dijeda. Coba lagi nanti.',
   'errors.walletCancelled': 'Permintaan dibatalkan di dompetmu.',
+  'errors.walletTimeout': 'Dompet tidak merespons. Coba lagi, ya.',
   'errors.generic': 'Ada yang tidak beres. Coba lagi, ya.',
   'errors.faucetUnavailable': 'Faucet sedang tidak tersedia. Coba beberapa saat lagi.',
   'errors.faucetAlreadyFunded': 'Dompet ini sudah punya dana uji.',
   'errors.loadFailed': 'Tidak bisa memuat akunmu. Periksa koneksimu dan coba lagi.',
   'errors.invalidPayAddress': 'Alamat di tautan pembayaran ini bukan alamat Flare yang valid.',
+
+  'wallet.title': 'Hubungkan dompet',
+  'wallet.caption': 'Pilih dompet dari browsermu untuk melanjutkan.',
+  'wallet.none': 'Tidak ada dompet terdeteksi.',
+  'wallet.useInjected': 'Gunakan dompet yang terpasang',
+  'wallet.injected': 'Dompet terpasang',
 
   'common.loading': 'Memuat',
   'common.retry': 'Coba lagi',
@@ -595,6 +683,43 @@ const zh = {
   'landing.footerContract': '查看智能合约',
   'landing.backToTop': '返回顶部',
   'landing.footer': 'Built on Flare Coston2 testnet. Demo funds only, no real money.',
+
+  /* ── Editorial landing sections ── */
+  'landing.aboutLabel': '01 — 关于',
+  'landing.aboutTitle': '并非每一笔财务操作都需要公开。',
+  'landing.aboutBody':
+    'YourSave 为日常支付提供可编程隐私。接收 FXRP，自动分流至储蓄，并将收益路由至 DeFi — 无需在公共浏览器上暴露您的余额。',
+  'landing.aboutStat1Label': '01 — 默认隐私',
+  'landing.aboutStat1Body': '支付金额和分流规则保持在公共浏览器之外。',
+  'landing.aboutStat2Label': '02 — 自动收益',
+  'landing.aboutStat2Body': '储蓄从 SparkDEX、Firelight 或 Upshift 自动赚取收益。',
+
+  'landing.featureLabel': '02 — 功能',
+  'landing.featureTitle': '为真实生活打造的储蓄引擎。',
+  'landing.feature1Title': '自动分流',
+  'landing.feature1Body': '每笔 incoming 支付都按您的规则分配。消费一部分，储蓄一部分 — 立即执行。',
+  'landing.feature2Title': '收益路由',
+  'landing.feature2Body': '储蓄的 FXRP 流入 DeFi 协议。SparkDEX 提供流动性，Firelight 提供金库，Upshift 提供策略。',
+  'landing.feature3Title': '支付链接',
+  'landing.feature3Body': '分享链接，以 FXRP 收款。无需银行账户，无需注册流程，零摩擦。',
+
+  'landing.quoteText': '储蓄应该是自动的、透明的、属于您的。',
+
+  'landing.howLabel': '03 — 工作原理',
+  'landing.howWorkTitle': '从支付到收益，三步完成。',
+
+  'landing.archLabel': '04 — 架构',
+  'landing.archTitle': '基于 Flare FAssets 构建。',
+  'landing.archBody': 'FXRP 是 Flare 上完全担保的 XRP 链上表示。YourSave 将其路由至经过审计的 DeFi 协议。',
+  'landing.archStep1': '01 — 接收',
+  'landing.archStep1Body': '用户通过支付链接或直接转账以 FXRP 收款。',
+  'landing.archStep2': '02 — 分流',
+  'landing.archStep2Body': '智能合约根据您的规则分配支付。',
+  'landing.archStep3': '03 — 赚取',
+  'landing.archStep3Body': '储蓄部分自动路由至收益协议。',
+
+  'landing.footerCtaTitle': '开始自动储蓄。',
+  'landing.footerCtaBody': '连接您的钱包，分流您的第一笔支付。',
 
   'topbar.connect': '连接钱包',
   'topbar.disconnect': '断开连接',
@@ -768,6 +893,14 @@ const zh = {
 
   'errors.generic': '发生错误，请重试。',
   'errors.walletCancelled': '操作被取消。',
+  'errors.walletTimeout': '钱包没有响应，请重试。',
+
+  'wallet.title': '连接钱包',
+  'wallet.caption': '选择浏览器中的钱包以继续。',
+  'wallet.none': '未检测到钱包。',
+  'wallet.useInjected': '使用已注入的钱包',
+  'wallet.injected': '已注入的钱包',
+
   'errors.faucetUnavailable': '测试水龙头暂时不可用，请稍后再试。',
   'errors.faucetAlreadyFunded': '您已拥有足够测试币，请勿重复申请。',
   'errors.invalidAmount': '无效金额。',

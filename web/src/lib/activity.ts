@@ -1,4 +1,4 @@
-import { Contract, JsonRpcProvider, type EventLog } from 'ethers'
+import { Contract, JsonRpcProvider, type EventLog, type Log } from 'ethers'
 import { CONTRACT_ID, EVM_RPC_URL } from '@/lib/config'
 
 export type ActivityItem = {
@@ -22,81 +22,105 @@ const SAVE_EVM_ABI = [
   'event LockSet(address indexed user,uint64 until)',
 ] as const
 
+const BLOCK_LOOKBACK = 5_000
+const blockTimestampCache = new Map<number, number>()
+
+async function getBlockTimestamp(provider: JsonRpcProvider, blockNumber: number): Promise<number> {
+  const cached = blockTimestampCache.get(blockNumber)
+  if (cached !== undefined) return cached
+  const block = await provider.getBlock(blockNumber)
+  const ts = Number(block?.timestamp ?? 0)
+  blockTimestampCache.set(blockNumber, ts)
+  return ts
+}
+
+function decodeLogs(logs: EventLog[], user: string, iface: Contract['interface']): ActivityItem[] {
+  const userLc = user.toLowerCase()
+  const out: ActivityItem[] = []
+  for (const log of logs) {
+    const base = {
+      id: `${log.transactionHash}-${log.index}`,
+      at: new Date((blockTimestampCache.get(log.blockNumber) ?? 0) * 1000),
+      txHash: log.transactionHash,
+    }
+    const name = log.fragment?.name
+    if (name === 'PaymentRouted') {
+      const from = String(log.args.from)
+      const to = String(log.args.to)
+      if (to.toLowerCase() !== userLc) continue
+      out.push({ ...base, kind: 'pay', from })
+    } else if (name === 'SpendWithdrawn') {
+      out.push({ ...base, kind: 'wd_spend' })
+    } else if (name === 'SavingsWithdrawn') {
+      out.push({ ...base, kind: 'wd_save' })
+    } else if (name === 'SplitSet') {
+      out.push({ ...base, kind: 'split', bps: Number(log.args.bps) })
+    } else if (name === 'LockSet') {
+      out.push({ ...base, kind: 'lock', until: BigInt(log.args.until) })
+    }
+  }
+  return out
+}
+
 async function fetchEvmActivity(user: string): Promise<ActivityItem[]> {
   if (CONTRACT_ID === '') return []
-  const provider = new JsonRpcProvider(EVM_RPC_URL)
-  const latest = await provider.getBlockNumber()
-  const fromBlock = Math.max(latest - 80_000, 0)
+  const provider = new JsonRpcProvider(EVM_RPC_URL, undefined, { staticNetwork: true })
   const c = new Contract(CONTRACT_ID, SAVE_EVM_ABI, provider)
   const userLc = user.toLowerCase()
 
-  const [payLogs, spendLogs, savingsLogs, splitLogs, lockLogs] = await Promise.all([
-    c.queryFilter(c.filters.PaymentRouted(null, user), fromBlock, latest),
-    c.queryFilter(c.filters.SpendWithdrawn(user), fromBlock, latest),
-    c.queryFilter(c.filters.SavingsWithdrawn(user), fromBlock, latest),
-    c.queryFilter(c.filters.SplitSet(user), fromBlock, latest),
-    c.queryFilter(c.filters.LockSet(user), fromBlock, latest),
-  ])
+  const latest = await provider.getBlockNumber()
+  const fromBlock = Math.max(latest - BLOCK_LOOKBACK, 0)
 
-  const logs = [
-    ...payLogs,
-    ...spendLogs,
-    ...savingsLogs,
-    ...splitLogs,
-    ...lockLogs,
-  ] as EventLog[]
+  // Build all five filter topics up-front and fire as ONE batched getLogs call
+  // (the RPC supports up to N topics in a single request, which is much faster
+  // than five parallel calls because we skip the per-call handshake overhead).
+  const topics: string[][][] = [
+    [c.filters.PaymentRouted(null, user).fragment.topicHash],
+    [c.filters.SpendWithdrawn(user).fragment.topicHash],
+    [c.filters.SavingsWithdrawn(user).fragment.topicHash],
+    [c.filters.SplitSet(user).fragment.topicHash],
+    [c.filters.LockSet(user).fragment.topicHash],
+  ]
 
-  const blockTimes = new Map<number, Date>()
-  const at = async (blockNumber: number): Promise<Date> => {
-    const cached = blockTimes.get(blockNumber)
-    if (cached) return cached
-    const block = await provider.getBlock(blockNumber)
-    const value = new Date(Number(block?.timestamp ?? 0) * 1000)
-    blockTimes.set(blockNumber, value)
-    return value
-  }
-
-  const items = await Promise.all(
-    logs.map(async (log): Promise<ActivityItem | null> => {
-      const base = {
-        id: `${log.transactionHash}-${log.index}`,
-        at: await at(log.blockNumber),
-        txHash: log.transactionHash,
-      }
-      if (log.fragment.name === 'PaymentRouted') {
-        const from = String(log.args.from)
-        const to = String(log.args.to)
-        if (to.toLowerCase() !== userLc) return null
-        return {
-          ...base,
-          kind: 'pay',
-          from,
-        }
-      }
-      if (log.fragment.name === 'SpendWithdrawn') {
-        return { ...base, kind: 'wd_spend' }
-      }
-      if (log.fragment.name === 'SavingsWithdrawn') {
-        return {
-          ...base,
-          kind: 'wd_save',
-        }
-      }
-      if (log.fragment.name === 'SplitSet') {
-        return { ...base, kind: 'split', bps: Number(log.args.bps) }
-      }
-      if (log.fragment.name === 'LockSet') {
-        return { ...base, kind: 'lock', until: BigInt(log.args.until) }
-      }
-      return null
-    }),
+  const rawLogs = await Promise.all(
+    topics.map((t) =>
+      provider.getLogs({ address: CONTRACT_ID, topics: t, fromBlock, toBlock: latest }),
+    ),
   )
 
-  return items
+  // Pre-warm block timestamps for every unique block we just touched in parallel
+  const uniqueBlocks = Array.from(new Set(rawLogs.flat().map((l) => l.blockNumber)))
+  await Promise.all(uniqueBlocks.map((b) => getBlockTimestamp(provider, b)))
+
+  // Decode using cached timestamps (no extra RPC calls needed)
+  const iface = c.interface
+  const allLogs = rawLogs.flat() as EventLog[]
+  const decoded = decodeLogs(allLogs, user, iface)
+
+  return decoded
     .filter((item): item is ActivityItem => item !== null)
     .sort((a, b) => (a.at.getTime() < b.at.getTime() ? 1 : -1))
 }
 
+const inflight = new Map<string, Promise<ActivityItem[]>>()
+const cache = new Map<string, { ts: number; items: ActivityItem[] }>()
+const CACHE_MS = 30_000
+
 export async function fetchActivity(user: string): Promise<ActivityItem[]> {
-  return fetchEvmActivity(user)
+  const key = user.toLowerCase()
+  const now = Date.now()
+  const cached = cache.get(key)
+  if (cached && now - cached.ts < CACHE_MS) return cached.items
+  const pending = inflight.get(key)
+  if (pending) return pending
+  const p = fetchEvmActivity(key)
+    .then((items) => {
+      cache.set(key, { ts: Date.now(), items })
+      return items
+    })
+    .finally(() => {
+      inflight.delete(key)
+    })
+  inflight.set(key, p)
+  return p
 }

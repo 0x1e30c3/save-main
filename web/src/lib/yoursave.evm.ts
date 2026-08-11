@@ -103,12 +103,9 @@ async function sendTx(txPromise: Promise<{ hash: string; wait: () => Promise<unk
 
 export const yoursaveEvm: YourSaveService = {
   async getAccount(user: string): Promise<YourSaveAccount> {
-    let contract: Contract;
-    try {
-      contract = await signerContract();
-    } catch {
-      contract = reader();
-    }
+    // READ path: never touch the wallet or pop a network switch dialog — just hit the RPC.
+    // The signer path is only needed for writes (pay, withdraw, setSplit, etc).
+    const contract = reader()
     const acc = await contract.accountOf(user)
     return {
       splitBps: Number(acc.splitBps),

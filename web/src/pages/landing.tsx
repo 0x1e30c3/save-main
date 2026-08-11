@@ -1,394 +1,109 @@
-import { useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useGSAP } from '@gsap/react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
-import { LogoMark } from '@/components/brand/logo'
 import { useT } from '@/lib/i18n'
 import { ScrollReveal } from '@/components/brand/scroll-reveal'
+import { LogoMark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 
-gsap.registerPlugin(useGSAP, ScrollTrigger)
-
-const CIRCLES = [
-  { id: 'left-mid', cx: 0, cy: 543.9, r: 550, g: '1,3', rot: 0 },
-  { id: 'right-mid', cx: 1440, cy: 543.9, r: 550, g: '1,3', rot: 180 },
-  { id: 'left-top', cx: 2.5, cy: -365, r: 805, g: '2', rot: -45 },
-  { id: 'right-top', cx: 1437.5, cy: -365, r: 805, g: '2', rot: -45 },
-  { id: 'left-bottom', cx: 2.5, cy: 1245, r: 805, g: '2,4', rot: 45 },
-  { id: 'right-bottom', cx: 1437.5, cy: 1245, r: 805, g: '2,4', rot: 45 },
-  { id: 'center-top', cx: 720, cy: 15, r: 425, g: '3,4', rot: -45 },
-  { id: 'center-bottom', cx: 720, cy: 865, r: 425, g: '1,3,4', rot: 45 },
-]
+function SectionLabel({ number, children }: { number: string; children: string }) {
+  return (
+    <p className="font-mono text-[10px] font-bold tracking-[0.23em] uppercase text-secondary">
+      [{number}] {children}
+    </p>
+  )
+}
 
 export function Landing() {
   const t = useT()
-  const rootRef = useRef<HTMLDivElement | null>(null)
-  const heroRef = useRef<HTMLElement | null>(null)
-  const solutionRef = useRef<HTMLElement | null>(null)
+  const [selectedFeature, setSelectedFeature] = useState(0)
 
-  const [activeNav, setActiveNav] = useState('top')
-
-  useGSAP(
-    () => {
-      const root = rootRef.current
-      if (!root) return
-
-      const circles = gsap.utils.toArray<SVGCircleElement>('[data-ed-canvas] circle', root)
-      const sections = gsap.utils.toArray<HTMLElement>('[data-ed-section]', root)
-      const topnav = root.querySelector<HTMLElement>('[data-ed-topnav]')
-
-      const mm = gsap.matchMedia(root)
-      mm.add(
-        {
-          isDesktop: '(min-width: 1025px)',
-          reduceMotion: '(prefers-reduced-motion: reduce)',
-        },
-        (context) => {
-          const { isDesktop, reduceMotion } = context.conditions as {
-            isDesktop: boolean
-            reduceMotion: boolean
-          }
-
-          // ---- Lenis smooth scroll ----
-          let lenis: Lenis | undefined
-          let raf: ((t: number) => void) | undefined
-          if (!reduceMotion) {
-            lenis = new Lenis()
-            lenis.on('scroll', ScrollTrigger.update)
-            raf = (t: number) => lenis?.raf(t * 1000)
-            gsap.ticker.add(raf)
-            gsap.ticker.lagSmoothing(0)
-          }
-
-          // ---- Top nav scrolled state ----
-          if (topnav) {
-            ScrollTrigger.create({
-              start: 40,
-              onEnter: () => {
-                topnav.dataset.scrolled = 'true'
-              },
-              onLeaveBack: () => {
-                topnav.dataset.scrolled = 'false'
-              },
-            })
-          }
-
-          // ---- Per-section circle activation + nav highlight ----
-          let activeGroup = 0
-          const activate = (group: number) => {
-            if (group === activeGroup) return
-            activeGroup = group
-            let onIndex = 0
-            circles.forEach((circle) => {
-              const on = (circle.dataset.group ?? '').split(',').includes(String(group))
-              gsap.to(circle, {
-                strokeDashoffset: on ? 0 : 1,
-                duration: reduceMotion ? 0 : 1.6,
-                delay: reduceMotion || !on ? 0 : 0.09 * onIndex++,
-                ease: 'power2.inOut',
-                overwrite: 'auto',
-              })
-            })
-          }
-
-          sections.forEach((section, i) => {
-            ScrollTrigger.create({
-              trigger: section,
-              start: 'top 55%',
-              end: 'bottom 55%',
-              onToggle: (self) => {
-                if (self.isActive) {
-                  activate(i + 1)
-                  setActiveNav(section.id)
-                }
-              },
-            })
-
-            if (reduceMotion) return
-
-            const headline = section.querySelector('[data-ed-headline]')
-            const narrative = section.querySelector('[data-ed-narrative]')
-            if (headline || narrative) {
-              gsap.from([headline, narrative], {
-                autoAlpha: 0,
-                y: 56,
-                duration: 1.1,
-                stagger: 0.16,
-                ease: 'power3.out',
-                scrollTrigger: { trigger: section, start: 'top 72%' },
-              })
-            }
-          })
-
-          // ---- Hero Hand Parallax + Hover Parallax ----
-          const hero = heroRef.current
-          if (hero) {
-            const heroInner = hero.querySelector('[data-ed-hero-inner]')
-            const heroFrame = hero.querySelector('[data-ed-hero-frame]')
-            const heroBg = hero.querySelector('[data-ed-bg]')
-
-            if (heroInner) {
-              gsap.from(heroInner.children, {
-                y: 22,
-                autoAlpha: 0,
-                duration: 0.9,
-                stagger: 0.12,
-                ease: 'power2.out',
-                delay: 0.2,
-              })
-            }
-
-            if (heroFrame) {
-              const frameRect = heroFrame.querySelector('rect')
-              if (frameRect) {
-                gsap.from(frameRect, {
-                  strokeDashoffset: 1,
-                  duration: 1.4,
-                  ease: 'power2.out',
-                })
-              }
-
-              const parallax = gsap.timeline({
-                scrollTrigger: {
-                  trigger: hero,
-                  start: 'top top',
-                  end: 'bottom top',
-                  scrub: 0.6,
-                },
-              })
-              parallax.to(heroFrame, { y: -40, autoAlpha: 0.35, ease: 'none' }, 0)
-            }
-
-            if (isDesktop && heroBg) {
-              gsap.set(heroBg, { scale: 1.1, transformOrigin: 'center center' })
-              const xTo = gsap.quickTo(heroBg, 'x', { duration: 0.8, ease: 'power3.out' })
-              const yTo = gsap.quickTo(heroBg, 'y', { duration: 0.8, ease: 'power3.out' })
-              const clamp = gsap.utils.clamp(-1, 1)
-
-              const onMove = (e: PointerEvent) => {
-                const rect = hero.getBoundingClientRect()
-                const nx = clamp(gsap.utils.mapRange(0, rect.width, -1, 1, e.clientX - rect.left))
-                const ny = clamp(gsap.utils.mapRange(0, rect.height, -1, 1, e.clientY - rect.top))
-                xTo(nx * 14)
-                yTo(ny * 10)
-              }
-              const onLeave = () => {
-                xTo(0)
-                yTo(0)
-              }
-
-              hero.addEventListener('pointermove', onMove)
-              hero.addEventListener('pointerleave', onLeave)
-              return () => {
-                hero.removeEventListener('pointermove', onMove)
-                hero.removeEventListener('pointerleave', onLeave)
-              }
-            }
-          }
-
-          // ---- Solution Background Parallax ----
-          const solution = solutionRef.current
-          if (solution && !reduceMotion) {
-            const background = solution.querySelector('[data-solution-background]')
-            if (background) {
-              gsap.fromTo(
-                background,
-                { yPercent: -8 },
-                {
-                  yPercent: 8,
-                  ease: 'none',
-                  scrollTrigger: {
-                    trigger: solution,
-                    start: 'top bottom',
-                    end: 'bottom top',
-                    scrub: 0.6,
-                  },
-                },
-              )
-            }
-          }
-
-          return () => {
-            if (raf) gsap.ticker.remove(raf)
-            lenis?.destroy()
-          }
-        },
-        { scope: rootRef },
-      )
-    },
-    { scope: rootRef },
-  )
+  useEffect(() => {
+    const lenis = new Lenis()
+    function raf(time: number) {
+      lenis.raf(time * 1000)
+      requestAnimationFrame(raf)
+    }
+    requestAnimationFrame(raf)
+    return () => lenis.destroy()
+  }, [])
 
   return (
-    <div
-      ref={rootRef}
-      className="relative min-h-svh bg-[#090d16] text-[#f8fafc] font-sans selection:bg-[#ff409f]/30 selection:text-white"
-    >
-      {/* Background Section Decorative Rings */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" data-ed-canvas aria-hidden="true">
-        <svg
-          className="block h-full w-full"
-          viewBox="0 0 1440 880"
-          preserveAspectRatio="xMidYMid slice"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {CIRCLES.map((c) => (
-            <circle
-              key={c.id}
-              cx={c.cx}
-              cy={c.cy}
-              r={c.r}
-              pathLength={1}
-              strokeDasharray={1}
-              strokeDashoffset={1}
-              vectorEffect="non-scaling-stroke"
-              data-group={c.g}
-              transform={`rotate(${c.rot} ${c.cx} ${c.cy})`}
-              className="fill-none stroke-[#f8fafc]/20 stroke-[0.5px]"
-            />
-          ))}
-        </svg>
-      </div>
-
-      {/* Header / Top Navigation */}
-      <header
-        className="fixed inset-x-0 top-0 z-[70] flex items-center justify-between gap-2 px-6 py-3 text-[#f8fafc] transition-all duration-300 border-b border-transparent data-[scrolled=true]:border-[#f8fafc]/10 data-[scrolled=true]:bg-[#090d16]/85 data-[scrolled=true]:backdrop-blur-md sm:py-4 md:px-12"
-        data-ed-topnav
-      >
+    <div className="relative min-h-svh bg-[#eee8d8] text-[#193d2d] font-sans selection:bg-[#b7d6bd] selection:text-[#173d2d]">
+      {/* Header / Top Navigation — kept simple per user request */}
+      <header className="fixed inset-x-0 top-0 z-[70] flex items-center justify-between px-6 py-4 md:px-12 border-b border-transparent data-[scrolled=true]:border-[#c9bfa5]/40 data-[scrolled=true]:bg-[#eee8d8]/85 data-[scrolled=true]:backdrop-blur-md transition-all">
         <Link className="flex items-center gap-2.5 outline-none" to="/">
-          <LogoMark size={28} className="text-[#f8fafc]" />
-          <span className="text-xl font-bold tracking-tight">Save</span>
+          <LogoMark size={28} className="text-[#193d2d]" />
+          <span className="text-xl font-bold tracking-tight text-[#193d2d]">Save</span>
         </Link>
         <div className="flex items-center gap-4 sm:gap-6">
-          <nav className="hidden items-center gap-6 text-sm font-semibold tracking-[0.02em] text-[#f8fafc]/70 sm:flex">
-            <a
-              href="#problem"
-              className={`hover:text-[#f8fafc] transition-colors ${activeNav === 'problem' ? 'text-[#f8fafc]' : ''}`}
-            >
-              {t('landing.navCompare')}
-            </a>
-            <a
-              href="#solution"
-              className={`hover:text-[#f8fafc] transition-colors ${activeNav === 'solution' ? 'text-[#f8fafc]' : ''}`}
-            >
-              {t('landing.navHow')}
-            </a>
-            <a
-              href="#protocols"
-              className={`hover:text-[#f8fafc] transition-colors ${activeNav === 'protocols' ? 'text-[#f8fafc]' : ''}`}
-            >
-              {t('landing.navProtocols')}
-            </a>
+          <nav className="hidden items-center gap-6 text-sm font-semibold tracking-[0.02em] text-[#526457] sm:flex">
+            <a href="#about" className="hover:text-[#193d2d] transition-colors">{t('landing.navCompare')}</a>
+            <a href="#features" className="hover:text-[#193d2d] transition-colors">{t('landing.navHow')}</a>
+            <a href="#protocols" className="hover:text-[#193d2d] transition-colors">{t('landing.navProtocols')}</a>
           </nav>
-          <Button asChild size="sm" className="bg-[#f5f3ea] text-[#090d16] hover:bg-white border-none font-semibold rounded-lg px-5">
+          <Button asChild size="sm" className="bg-[#1c4934] text-[#f2ecda] hover:bg-[#2a5c44] border-none font-semibold rounded-lg px-5">
             <Link to="/app">{t('landing.cta')}</Link>
           </Button>
         </div>
       </header>
 
-      {/* MAIN CONTENT SECTION */}
       <main id="main-content" className="relative z-10 overflow-x-clip">
-        {/* HERO SECTION */}
-        <section
-          ref={heroRef}
-          className="relative isolate z-20 grid min-h-svh place-items-center overflow-hidden px-5 pb-8 pt-24 sm:px-8 sm:pb-10 sm:pt-28"
-          id="top"
-        >
-          <img
-            data-ed-bg
-            className="absolute inset-0 z-[-3] h-full w-full object-cover will-change-transform opacity-40 mix-blend-luminosity"
-            src="/assets/section1-bg.jpg"
-            alt=""
-          />
-          <div
-            className="pointer-events-none absolute inset-0 z-[-2] bg-[radial-gradient(48%_56%_at_50%_47%,rgba(9,13,22,0.6),rgba(9,13,22,0.1)_76%),linear-gradient(to_bottom,rgba(29,34,21,0.6),transparent_22%,transparent_60%,rgba(9,13,22,0.7))]"
-            aria-hidden="true"
-          />
 
-          {/* Parallel Hands decoration */}
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 1: HERO (kept as-is per user request)
+        ═══════════════════════════════════════════════════════════ */}
+        <section className="relative isolate z-20 grid min-h-svh place-items-center overflow-hidden px-5 pb-8 pt-24 sm:px-8 sm:pb-10 sm:pt-28" id="top">
+          <img className="absolute inset-0 z-[-3] h-full w-full object-cover opacity-40 mix-blend-luminosity" src="/assets/section1-bg.jpg" alt="" />
+          <div className="pointer-events-none absolute inset-0 z-[-2] bg-[radial-gradient(48%_56%_at_50%_47%,rgba(9,13,22,0.6),rgba(9,13,22,0.1)_76%),linear-gradient(to_bottom,rgba(29,34,21,0.6),transparent_22%,transparent_60%,rgba(9,13,22,0.7))]" aria-hidden="true" />
+
           <div className="pointer-events-none absolute inset-0 z-[-1]" aria-hidden="true">
             <div className="absolute left-0 top-1/2 origin-left -translate-y-[46%] max-lg:-translate-y-[58%] max-lg:scale-90 max-[620px]:opacity-40">
-              <img
-                className="block h-auto w-[min(46vw,600px)] will-change-transform [filter:drop-shadow(0_26px_40px_rgba(0,0,0,0.55))] max-lg:w-[62vw] max-[620px]:w-[76vw]"
-                src="/assets/left-hand.png"
-                alt=""
-              />
+              <img className="block h-auto w-[min(46vw,600px)] [filter:drop-shadow(0_26px_40px_rgba(0,0,0,0.55))] max-lg:w-[62vw] max-[620px]:w-[76vw]" src="/assets/left-hand.png" alt="" />
             </div>
             <div className="absolute right-0 top-1/2 origin-right -translate-y-[40%] max-lg:-translate-y-[16%] max-lg:scale-90 max-[620px]:opacity-40">
-              <img
-                className="block h-auto w-[min(46vw,600px)] will-change-transform [filter:drop-shadow(0_26px_40px_rgba(0,0,0,0.55))] max-lg:w-[62vw] max-[620px]:w-[76vw]"
-                src="/assets/right-hand.png"
-                alt=""
-              />
+              <img className="block h-auto w-[min(46vw,600px)] [filter:drop-shadow(0_26px_40px_rgba(0,0,0,0.55))] max-lg:w-[62vw] max-[620px]:w-[76vw]" src="/assets/right-hand.png" alt="" />
             </div>
           </div>
 
-          {/* Hero Content Frame Box */}
-          <div
-            data-ed-hero-frame
-            className="relative flex min-h-[clamp(500px,72svh,640px)] w-full max-w-[480px] bg-[radial-gradient(115%_90%_at_50%_45%,rgba(29,34,21,0.7),rgba(9,13,22,0.2)_100%)] px-6 py-7 text-[#f8fafc] [text-shadow:0_1px_18px_rgba(0,0,0,0.6)] sm:px-9 sm:py-9 lg:px-10 lg:py-11"
-          >
-            <svg
-              className="pointer-events-none absolute inset-0 h-full w-full"
-              viewBox="0 0 340 452"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <rect
-                x="0.5"
-                y="0.5"
-                width="339"
-                height="451"
-                pathLength={1}
-                strokeDasharray={1}
-                className="fill-none stroke-[#f8fafc]/40"
-              />
+          <div className="relative flex min-h-[clamp(500px,72svh,640px)] w-full max-w-[480px] bg-[radial-gradient(115%_90%_at_50%_45%,rgba(29,34,21,0.7),rgba(9,13,22,0.2)_100%)] px-6 py-7 text-[#f8fafc] [text-shadow:0_1px_18px_rgba(0,0,0,0.6)] sm:px-9 sm:py-9 lg:px-10 lg:py-11">
+            <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 340 452" preserveAspectRatio="none" aria-hidden="true">
+              <rect x="0.5" y="0.5" width="339" height="451" pathLength={1} strokeDasharray={1} className="fill-none stroke-[#f8fafc]/40" />
             </svg>
-            <div data-ed-hero-inner className="relative flex w-full flex-col">
-              <h1
-                className="m-0 mt-2 flex flex-col text-[clamp(2.1rem,8vw,3.6rem)] font-bold leading-[0.98] tracking-[-0.03em] text-[#f8fafc] sm:mt-4 sm:text-[clamp(2.1rem,4.4vw,3.6rem)]"
-                id="ed-hero-title"
-              >
+            <div className="relative flex w-full flex-col">
+              <h1 className="m-0 mt-2 flex flex-col text-[clamp(2.1rem,8vw,3.6rem)] font-bold leading-[0.98] tracking-[-0.03em] text-[#f8fafc] sm:mt-4 sm:text-[clamp(2.1rem,4.4vw,3.6rem)]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                 <span>Confidential</span>
                 <span>FXRP</span>
                 <span>Savings</span>
               </h1>
-              <p className="mt-6 max-w-[28ch] text-sm font-semibold uppercase leading-[1.55] tracking-[0.08em] text-[#f8fafc]/70">
+              <p className="mt-6 max-w-[28ch] text-sm font-semibold uppercase leading-[1.55] tracking-[0.08em] text-[#f8fafc]/70" style={{ fontFamily: "'Space Mono', monospace" }}>
                 {t('landing.heroTitle')}
               </p>
               <div className="mt-6 grid grid-cols-2 gap-2.5 sm:mt-7">
-                <Link
-                  className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#f5f3ea] px-3 text-center text-sm font-bold tracking-[0.02em] text-[#090d16] transition-opacity hover:opacity-85 sm:px-5"
-                  to="/app"
-                >
+                <Link className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#f5f3ea] px-3 text-center text-sm font-bold tracking-[0.02em] text-[#090d16] transition-opacity hover:opacity-85 sm:px-5" to="/app">
                   {t('landing.cta')}
                 </Link>
-                <a
-                  className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#f8fafc]/50 bg-transparent px-3 text-center text-sm font-bold leading-tight tracking-[0.02em] text-[#f8fafc] transition-opacity hover:opacity-85 sm:px-5"
-                  href="#solution"
-                >
-                  {t('landing.navHow')}
+                <a className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#f8fafc]/50 bg-transparent px-3 text-center text-sm font-bold leading-tight tracking-[0.02em] text-[#f8fafc] transition-opacity hover:opacity-85 sm:px-5" href="#about">
+                  {t('landing.navCompare')}
                 </a>
               </div>
               <ul className="mt-auto grid list-none gap-0.5 pt-5 sm:pt-6">
                 <li>
-                  <a href="#problem" className="flex items-baseline justify-between border-b border-transparent py-2 text-[15px] font-bold text-[#f8fafc]/60 hover:text-white sm:py-2.5">
+                  <a href="#about" className="flex items-baseline justify-between border-b border-transparent py-2 text-[15px] font-bold text-[#f8fafc]/60 hover:text-white sm:py-2.5">
                     <span>{t('landing.navCompare')}</span>
-                    <span className="text-xs font-semibold text-[#f8fafc]/40">I</span>
+                    <span className="text-xs font-semibold text-[#f8fafc]/40" style={{ fontFamily: "'Space Mono', monospace" }}>I</span>
                   </a>
                 </li>
                 <li>
-                  <a href="#solution" className="flex items-baseline justify-between border-b border-transparent py-2 text-[15px] font-bold text-[#f8fafc]/60 hover:text-white sm:py-2.5">
+                  <a href="#features" className="flex items-baseline justify-between border-b border-transparent py-2 text-[15px] font-bold text-[#f8fafc]/60 hover:text-white sm:py-2.5">
                     <span>{t('landing.navHow')}</span>
-                    <span className="text-xs font-semibold text-[#f8fafc]/40">II</span>
+                    <span className="text-xs font-semibold text-[#f8fafc]/40" style={{ fontFamily: "'Space Mono', monospace" }}>II</span>
                   </a>
                 </li>
                 <li>
                   <a href="#protocols" className="flex items-baseline justify-between border-b border-transparent py-2 text-[15px] font-bold text-[#f8fafc]/60 hover:text-white sm:py-2.5">
                     <span>{t('landing.navProtocols')}</span>
-                    <span className="text-xs font-semibold text-[#f8fafc]/40">III</span>
+                    <span className="text-xs font-semibold text-[#f8fafc]/40" style={{ fontFamily: "'Space Mono', monospace" }}>III</span>
                   </a>
                 </li>
               </ul>
@@ -396,337 +111,347 @@ export function Landing() {
           </div>
         </section>
 
-        {/* PROBLEM STATEMENT SECTION */}
-        <section
-          className="relative z-20 flex min-h-svh items-center bg-[#f8fafc] px-[clamp(20px,5vw,72px)] py-24 text-[#0f172a] sm:py-28"
-          id="problem"
-          data-ed-section
-        >
-          <div className="mx-auto grid w-full max-w-6xl items-center gap-14 lg:grid-cols-[0.88fr_1fr] lg:gap-20">
-            {/* Ledger Decorative Sketch */}
-            <div className="relative min-h-[220px] lg:min-h-[420px]" aria-hidden="true">
-              <svg
-                className="absolute left-1/2 top-1/2 h-[min(62vw,500px)] w-[min(78vw,640px)] -translate-x-1/2 -translate-y-1/2 overflow-visible text-[#2563eb] lg:left-[44%]"
-                viewBox="0 0 640 500"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g className="opacity-80" vectorEffect="non-scaling-stroke">
-                  <path d="M92 275C164 208 247 173 341 169C429 166 493 195 556 254" className="stroke-[#9c7420]/75" strokeWidth="2" strokeDasharray="7 10" />
-                  <path d="M118 345C195 279 278 247 367 249C446 251 508 282 558 337" className="stroke-[#2563eb]/35" strokeWidth="1.5" strokeDasharray="5 12" />
-                  <rect x="224" y="148" width="190" height="190" rx="22" className="stroke-[#2563eb]" strokeWidth="2.2" transform="rotate(-17 319 243)" />
-                  <rect x="259" y="183" width="120" height="120" rx="18" className="stroke-[#2563eb]/60" strokeWidth="1.8" transform="rotate(-17 319 243)" />
-                  <g className="stroke-[#9c7420]" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="320" cy="236" r="43" strokeWidth="2" />
-                    <path d="M279 250L365 205" strokeWidth="9" className="stroke-[#f0eeea]" />
-                    <path d="M273 253L370 202" strokeWidth="2.8" />
-                    <path d="M270 271L367 220" strokeWidth="2.8" />
-                  </g>
-                  <circle cx="159" cy="275" r="42" className="stroke-[#2563eb]" strokeWidth="2" />
-                  <circle cx="159" cy="275" r="16" className="stroke-[#9c7420]" strokeWidth="2" />
-                  <circle cx="498" cy="256" r="47" className="stroke-[#2563eb]" strokeWidth="2" />
-                  <circle cx="498" cy="256" r="18" className="stroke-[#9c7420]" strokeWidth="2" />
-                  <path d="M159 275L270 224M374 229L498 256M356 284L533 359M260 278L100 354" className="stroke-[#2563eb]/40" strokeWidth="1.6" />
-                </g>
-              </svg>
-            </div>
-
-            {/* Problem Statement Content */}
-            <div className="max-w-[620px] lg:justify-self-end">
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 2: ABOUT — Editorial 2-column
+        ═══════════════════════════════════════════════════════════ */}
+        <section className="relative z-20 paper-grain bg-[#eee8d8] px-[clamp(20px,5vw,72px)] min-h-svh flex items-center" id="about">
+          <div className="mx-auto grid w-full max-w-6xl items-start gap-14 lg:grid-cols-[0.82fr_1.18fr] lg:gap-20">
+            {/* Left column: headline */}
+            <div>
               <ScrollReveal
                 containerClassName="max-w-lg"
-                textClassName="text-[clamp(1.8rem,4vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.03em] text-[#0f172a]"
+                textClassName="text-[clamp(2.4rem,5vw,4.2rem)] font-bold leading-[0.84] tracking-[-0.045em] text-[#193d2d]"
                 baseRotation={0}
                 blurStrength={3}
               >
-                Public wallets were never designed for private business.
+                {t('landing.aboutTitle')}
+              </ScrollReveal>
+            </div>
+
+            {/* Right column: body + stats */}
+            <div className="lg:mt-8">
+              <ScrollReveal textClassName="text-[clamp(1.05rem,1.55vw,1.2rem)] font-medium leading-[1.6] text-[#526457]" baseRotation={0} blurStrength={2}>
+                {t('landing.aboutBody')}
               </ScrollReveal>
 
-              <div className="mt-10 space-y-7 text-[clamp(1.05rem,1.55vw,1.25rem)] font-semibold leading-[1.42] text-[#0f172a]/85">
-                <ScrollReveal textClassName="max-w-[32ch]" baseRotation={1.5} blurStrength={2}>
-                  Every time someone pays your wallet, they can potentially see your entire income, payment history, and splits on a public explorer.
-                </ScrollReveal>
-                <ScrollReveal textClassName="max-w-[34ch] text-[#1d4ed8]" baseRotation={1.2} blurStrength={2}>
-                  Save runs confidentially on iExec Nox enclaves (TEE), securing your splits, assets, and rule history in a private vault.
-                </ScrollReveal>
+              <div className="mt-12 grid grid-cols-1 gap-0 sm:grid-cols-2">
+                <div className="border-t border-[#c9bfa5] py-6 sm:border-r sm:pr-6">
+                  <p className="font-mono text-[10px] font-bold tracking-[0.23em] uppercase text-secondary">{t('landing.aboutStat1Label')}</p>
+                  <p className="mt-3 text-sm font-medium leading-[1.6] text-[#526457]">{t('landing.aboutStat1Body')}</p>
+                </div>
+                <div className="border-t border-[#c9bfa5] py-6 sm:pl-6">
+                  <p className="font-mono text-[10px] font-bold tracking-[0.23em] uppercase text-secondary">{t('landing.aboutStat2Label')}</p>
+                  <p className="mt-3 text-sm font-medium leading-[1.6] text-[#526457]">{t('landing.aboutStat2Body')}</p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* SOLUTION GRID CARDS SECTION */}
-        <section
-          ref={solutionRef}
-          className="relative z-20 min-h-[85vh] overflow-hidden bg-[#090d16] text-[#0f172a] lg:h-[85vh]"
-          id="solution"
-          data-ed-section
-        >
-          <div className="absolute -inset-y-[10%] inset-x-0 will-change-transform opacity-30 mix-blend-luminosity" data-solution-background aria-hidden="true">
-            <img className="h-full w-full object-cover" src="/assets/section3-bg.webp" alt="" />
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 3: FEATURES — Interactive 3-card selection
+        ═══════════════════════════════════════════════════════════ */}
+        <section className="relative z-20 paper-grain bg-[#c0d7bf] px-[clamp(20px,5vw,72px)] min-h-svh flex items-center" id="features">
+          <div className="mx-auto w-full max-w-6xl">
+            <SectionLabel number="02">{t('landing.featureLabel')}</SectionLabel>
+            <h2
+              className="mt-4 text-[clamp(2rem,4vw,3.4rem)] font-bold leading-[0.9] tracking-[-0.04em] text-[#193d2d]"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              {t('landing.featureTitle')}
+            </h2>
+
+            {/* Feature Cards */}
+            <div className="mt-14 grid gap-4 sm:grid-cols-3">
+              {[
+                { title: t('landing.feature1Title'), body: t('landing.feature1Body'), icon: '↔' },
+                { title: t('landing.feature2Title'), body: t('landing.feature2Body'), icon: '↗' },
+                { title: t('landing.feature3Title'), body: t('landing.feature3Body'), icon: '🔗' },
+              ].map((feat, i) => (
+                <button
+                  key={feat.title}
+                  type="button"
+                  onClick={() => setSelectedFeature(i)}
+                  className={`group relative flex flex-col items-start border-2 p-7 text-left transition-all duration-260 hover:-translate-y-[5px] ${
+                    selectedFeature === i
+                      ? 'border-[#1c4934] bg-[#f4ede0] shadow-lg'
+                      : 'border-[#739d7b]/40 bg-[#d2e1ce]/60 hover:border-[#739d7b] hover:bg-[#d2e1ce]'
+                  }`}
+                  aria-pressed={selectedFeature === i}
+                >
+                  <span className={`mb-4 flex size-12 items-center justify-center text-2xl transition-transform duration-260 group-hover:rotate-12 ${
+                    selectedFeature === i ? 'bg-[#1c4934] text-[#f2ecda]' : 'bg-[#b7d6bd] text-[#1c4934]'
+                  }`}>
+                    {feat.icon}
+                  </span>
+                  <h3
+                    className="text-xl font-bold leading-[1.1] tracking-[-0.02em] text-[#193d2d]"
+                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                  >
+                    {feat.title}
+                  </h3>
+                  <p className="mt-3 text-sm font-medium leading-[1.6] text-[#526457]">{feat.body}</p>
+                  <span className="mt-auto pt-4 text-xs font-bold text-[#1c4934] opacity-0 transition-opacity duration-260 group-hover:opacity-100">
+                    Pilih ini →
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Feature Detail */}
+            <div className="mt-12 grid items-start gap-10 lg:grid-cols-[0.7fr_1.3fr]">
+              <div>
+                <p className="font-mono text-[10px] font-bold tracking-[0.23em] uppercase text-secondary">
+                  [{String(selectedFeature + 1).padStart(2, '0')}]
+                </p>
+                <h3
+                  className="mt-2 text-[clamp(1.6rem,3vw,2.4rem)] font-bold leading-[0.95] tracking-[-0.03em] text-[#193d2d]"
+                  style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                >
+                  {[t('landing.feature1Title'), t('landing.feature2Title'), t('landing.feature3Title')][selectedFeature]}
+                </h3>
+                <p className="mt-4 text-[clamp(1rem,1.4vw,1.15rem)] font-medium leading-[1.6] text-[#526457]">
+                  {[t('landing.feature1Body'), t('landing.feature2Body'), t('landing.feature3Body')][selectedFeature]}
+                </p>
+              </div>
+
+              {/* Quote Card */}
+              <div className="relative bg-[#1c4b36] p-8 sm:p-10">
+                <div className="absolute -top-3 -left-3 size-16 rounded-full border-2 border-[#d5aa61]/40" aria-hidden="true" />
+                <p
+                  className="relative text-[clamp(1.2rem,2.2vw,1.8rem)] font-medium italic leading-[1.3] text-[#d5aa61]"
+                  style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                >
+                  "{t('landing.quoteText')}"
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="absolute inset-0 bg-[#f8fafc]/10 mix-blend-screen" aria-hidden="true" />
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 4: HOW IT WORKS — Dark green 3-step
+        ═══════════════════════════════════════════════════════════ */}
+        <section className="relative z-20 paper-grain bg-[#173f2d] px-[clamp(20px,5vw,72px)] min-h-svh flex items-center" id="how">
+          <div className="mx-auto w-full max-w-6xl">
+            <SectionLabel number="03">{t('landing.howLabel')}</SectionLabel>
+            <h2
+              className="mt-4 text-[clamp(2rem,4vw,3.4rem)] font-bold leading-[0.9] tracking-[-0.04em] text-[#f2ecda]"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              {t('landing.howWorkTitle')}
+            </h2>
+
+            <div className="relative mt-14 grid gap-10 sm:grid-cols-3 sm:gap-6">
+              {/* Vertical dividers on desktop */}
+              <div className="absolute top-0 bottom-0 left-[33%] hidden w-px bg-[#789b7e]/30 sm:block" aria-hidden="true" />
+              <div className="absolute top-0 bottom-0 right-[33%] hidden w-px bg-[#789b7e]/30 sm:block" aria-hidden="true" />
+
+              {[
+                { num: '01', title: t('landing.step1Title'), body: t('landing.step1Body') },
+                { num: '02', title: t('landing.step2Title'), body: t('landing.step2Body') },
+                { num: '03', title: t('landing.step3Title'), body: t('landing.step3Body') },
+              ].map((step) => (
+                <div key={step.num} className="relative flex flex-col">
+                  <p className="font-mono text-[10px] font-bold tracking-[0.23em] uppercase text-[#b7d6bd]">
+                    {step.num}
+                  </p>
+                  <h3
+                    className="mt-3 text-[clamp(1.6rem,3vw,2.4rem)] font-bold leading-[1] tracking-[-0.03em] text-[#f2ecda]"
+                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                  >
+                    {step.title}
+                  </h3>
+                  <p className="mt-4 text-sm font-medium leading-[1.6] text-[#b7d6bd]">
+                    {step.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 5: ARCHITECTURE — Gold accent with diagram
+        ═══════════════════════════════════════════════════════════ */}
+        <section className="relative z-20 paper-grain overflow-hidden bg-[#eee8d8] px-[clamp(20px,5vw,72px)] min-h-svh flex items-center" id="protocols">
+          {/* Line-art grid overlay */}
           <div
-            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(29,34,21,0.1),rgba(29,34,21,0.3)),radial-gradient(70%_60%_at_20%_12%,rgba(245,243,232,0.35),transparent_58%)]"
+            className="pointer-events-none absolute inset-0 opacity-[0.11]"
             aria-hidden="true"
+            style={{
+              backgroundImage: 'linear-gradient(90deg, rgba(28,73,52,1) 1px, transparent 1px), linear-gradient(180deg, rgba(28,73,52,1) 1px, transparent 1px)',
+              backgroundSize: '48px 48px',
+            }}
           />
 
-          <div className="relative grid min-h-[85vh] grid-cols-1 gap-4 p-5 sm:p-6 md:grid-cols-2 md:gap-4 md:p-8 lg:block lg:h-[85vh] lg:p-0">
-            <h2 className="sr-only">How Save Protects You</h2>
-
-            {/* Overlapping Olio-inspired cards containing Save features */}
-            <article className="flex min-h-[140px] items-start bg-[#f8fafc] px-6 py-6 shadow-xl lg:absolute lg:min-h-0 lg:w-[350px] lg:left-[8vw] lg:top-[10%]">
-              <p className="text-xl font-bold leading-[1.1] tracking-[-0.02em] max-w-[14ch]">
-                <span className="block text-xs font-semibold text-[#9c7420] uppercase tracking-[0.1em] mb-2">I. Nox Protocol</span>
-                Confidential savings split secured inside TEE hardware enclaves.
-              </p>
-            </article>
-
-            <article className="flex min-h-[140px] items-start bg-[#f8fafc] px-6 py-6 shadow-xl lg:absolute lg:min-h-0 lg:w-[300px] lg:left-[45vw] lg:top-[20%]">
-              <p className="text-lg font-bold leading-[1.15] tracking-[-0.02em] max-w-[15ch]">
-                <span className="block text-xs font-semibold text-[#9c7420] uppercase tracking-[0.1em] mb-2">II. Default Saving</span>
-                Splits are processed on-chain, routing rules securely without public ledger exposure.
-              </p>
-            </article>
-
-            <article className="flex min-h-[140px] items-start bg-[#f8fafc] px-6 py-6 shadow-xl lg:absolute lg:min-h-0 lg:w-[320px] lg:right-[8vw] lg:top-[35%]">
-              <p className="text-lg font-bold leading-[1.15] tracking-[-0.02em] max-w-[14ch]">
-                <span className="block text-xs font-semibold text-[#9c7420] uppercase tracking-[0.1em] mb-2">III. Seamless Integration</span>
-                Clients pay through standard Flare FXRP links with no complex sign-up.
-              </p>
-            </article>
-
-            <article className="flex min-h-[140px] items-start bg-[#f8fafc] px-6 py-6 shadow-xl lg:absolute lg:min-h-0 lg:w-[480px] lg:left-[22vw] lg:bottom-[15%]">
-              <p className="text-base font-bold leading-[1.2] tracking-[-0.02em] max-w-[32ch]">
-                <span className="block text-xs font-semibold text-[#9c7420] uppercase tracking-[0.1em] mb-2">IV. Obfuscated Logs</span>
-                Incoming events omit amounts. No third parties can parse or reverse-engineer your financial balances.
-              </p>
-            </article>
-
-            <article className="flex min-h-[140px] items-start bg-[#f8fafc] px-6 py-6 shadow-xl lg:absolute lg:min-h-0 lg:w-[290px] lg:left-[66vw] lg:bottom-[8%]">
-              <p className="text-base font-bold leading-[1.2] tracking-[-0.02em] max-w-[16ch]">
-                <span className="block text-xs font-semibold text-[#9c7420] uppercase tracking-[0.1em] mb-2">V. Multi-Yield Routing</span>
-                Earn automatically from Nox Vault, Aave, or Uniswap V2 pools.
-              </p>
-            </article>
-          </div>
-        </section>
-
-        {/* THREE STEPS TIMELINE SECTION */}
-        <section
-          className="relative z-20 bg-[#f8fafc] px-[clamp(20px,5vw,72px)] py-16 text-[#0f172a] sm:py-24"
-          id="steps"
-        >
-          <div className="mx-auto w-full max-w-7xl lg:px-12 lg:py-16">
-            <div className="mx-auto max-w-[680px] text-center">
-              <h2 className="text-[clamp(2.3rem,5vw,3.6rem)] font-bold leading-[0.98] tracking-[-0.04em]">
-                Three simple steps.
+          <div className="relative mx-auto grid w-full max-w-6xl items-start gap-14 lg:grid-cols-[1fr_1fr] lg:gap-20">
+            {/* Left: Text */}
+            <div>
+              <SectionLabel number="04">{t('landing.archLabel')}</SectionLabel>
+              <h2
+                className="mt-4 text-[clamp(2rem,4vw,3.4rem)] font-bold leading-[0.9] tracking-[-0.04em] text-[#193d2d]"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              >
+                {t('landing.archTitle')}
               </h2>
+              <p className="mt-6 text-[clamp(1rem,1.4vw,1.15rem)] font-medium leading-[1.6] text-[#4c5d4a]">
+                {t('landing.archBody')}
+              </p>
+
+              {/* Protocol logos */}
+              <div className="mt-10 flex flex-wrap gap-4">
+                {[
+                  { name: 'SparkDEX', logo: '/logos/sparkdex-icon.svg', href: 'https://sparkdex.finance' },
+                  { name: 'Firelight', logo: '/logos/firelight-icon.svg', href: 'https://firelight.finance' },
+                  { name: 'Upshift', logo: '/logos/upshift-icon.svg', href: 'https://upshift.finance' },
+                ].map((p) => (
+                  <a
+                    key={p.name}
+                    href={p.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex items-center gap-2 rounded-full border border-[#4c5d4a]/30 bg-[#f4ede0]/60 px-4 py-2 text-sm font-semibold text-[#193d2d] transition-all hover:bg-[#f4ede0] hover:shadow-md"
+                  >
+                    <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e4c17b]/40">
+                      <img src={p.logo} alt="" className="h-full w-full object-contain p-0.5" />
+                    </span>
+                    {p.name}
+                  </a>
+                ))}
+              </div>
             </div>
 
-            <div className="relative mt-12 grid border-[#e2e8f0]/60 md:grid-cols-3 md:border-t">
-              <div
-                className="pointer-events-none absolute left-0 right-0 top-0 hidden h-3 bg-[repeating-linear-gradient(to_right,rgba(32,38,26,0.08)_0,rgba(32,38,26,0.08)_1px,transparent_1px,transparent_8px)] md:block"
-                aria-hidden="true"
-              />
-
-              {/* Step 1 */}
-              <article className="group/card relative flex min-h-[400px] flex-col border-[#e2e8f0]/60 py-7 transition-colors duration-300 hover:bg-[#f8fafc]/35 max-md:border-t md:px-6 md:[&:not(:first-child)]:border-l lg:px-8">
-                <span className="mb-10 inline-flex h-9 w-fit items-center justify-center rounded-md border border-[#e2e8f0]/70 bg-[#f8fafc] px-4 text-sm font-bold text-[#0f172a]/80 group-hover/card:border-[#4c5d34]/30 group-hover/card:text-[#1d4ed8]">
-                  Step 01
-                </span>
-                <h3 className="max-w-[14ch] text-xl font-bold leading-[1.1] tracking-[-0.02em]">
-                  {t('landing.step1Title')}
-                </h3>
-                <p className="mt-4 max-w-[28ch] text-[0.95rem] font-medium leading-[1.5] text-[#64748b]">
-                  {t('landing.step1Body')}
-                </p>
-                {/* Step Sketch 1 */}
-                <div className="relative mt-auto h-[172px] overflow-hidden rounded-md bg-[#e2e8f0]/75 group-hover/card:bg-[#f8fafc]/80 transition-colors">
-                  <svg className="absolute left-1/2 top-1/2 h-[178px] w-[235px] -translate-x-1/2 -translate-y-1/2 overflow-visible text-[#2563eb] transition-transform duration-500 ease-out group-hover/card:scale-105" viewBox="0 0 250 190" fill="none">
-                    <g className="opacity-95" vectorEffect="non-scaling-stroke">
-                      <path d="M38 130C74 93 112 78 151 86C181 92 202 111 218 139" className="stroke-[#9c7420]/65" strokeDasharray="6 9" strokeWidth="1.7" />
-                      <rect x="70" y="34" width="108" height="126" rx="14" className="stroke-[#2563eb]" strokeWidth="2" transform="rotate(-6 124 97)" />
-                      <path d="M94 69L151 63M92 91L160 84M91 113L139 108" className="stroke-[#2563eb]/60" strokeWidth="1.7" transform="rotate(-6 124 97)" />
-                      <g className="stroke-[#9c7420]" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4">
-                        <path d="M82 134L68 148C59 157 44 157 35 148C26 139 26 124 35 115L48 102" />
-                        <path d="M68 120L105 83" />
-                      </g>
-                    </g>
-                  </svg>
-                </div>
-              </article>
-
-              {/* Step 2 */}
-              <article className="group/card relative flex min-h-[400px] flex-col border-[#e2e8f0]/60 py-7 transition-colors duration-300 hover:bg-[#f8fafc]/35 max-md:border-t md:px-6 md:[&:not(:first-child)]:border-l lg:px-8">
-                <span className="mb-10 inline-flex h-9 w-fit items-center justify-center rounded-md border border-[#e2e8f0]/70 bg-[#f8fafc] px-4 text-sm font-bold text-[#0f172a]/80 group-hover/card:border-[#4c5d34]/30 group-hover/card:text-[#1d4ed8]">
-                  Step 02
-                </span>
-                <h3 className="max-w-[14ch] text-xl font-bold leading-[1.1] tracking-[-0.02em]">
-                  {t('landing.step2Title')}
-                </h3>
-                <p className="mt-4 max-w-[28ch] text-[0.95rem] font-medium leading-[1.5] text-[#64748b]">
-                  {t('landing.step2Body')}
-                </p>
-                {/* Step Sketch 2 */}
-                <div className="relative mt-auto h-[172px] overflow-hidden rounded-md bg-[#e2e8f0]/75 group-hover/card:bg-[#f8fafc]/80 transition-colors">
-                  <svg className="absolute left-1/2 top-1/2 h-[178px] w-[235px] -translate-x-1/2 -translate-y-1/2 overflow-visible text-[#2563eb] transition-transform duration-500 ease-out group-hover/card:scale-105" viewBox="0 0 250 190" fill="none">
-                    <g className="opacity-95" vectorEffect="non-scaling-stroke">
-                      <path d="M34 104C68 75 103 62 139 66C172 70 198 88 220 119" className="stroke-[#2563eb]/35" strokeDasharray="5 10" strokeWidth="1.6" />
-                      <path d="M39 139H211" className="stroke-[#2563eb]/45" strokeLinecap="round" strokeWidth="1.7" />
-                      <g className="stroke-[#2563eb]" strokeWidth="2">
-                        <rect x="47" y="112" width="36" height="27" rx="7" />
-                        <rect x="167" y="112" width="36" height="27" rx="7" />
-                      </g>
-                      <path d="M83 125H107M143 125H167" className="stroke-[#9c7420]/75" strokeDasharray="4 7" strokeLinecap="round" strokeWidth="2" />
-                    </g>
-                  </svg>
-                </div>
-              </article>
-
-              {/* Step 3 */}
-              <article className="group/card relative flex min-h-[400px] flex-col border-[#e2e8f0]/60 py-7 transition-colors duration-300 hover:bg-[#f8fafc]/35 max-md:border-t md:px-6 md:[&:not(:first-child)]:border-l lg:px-8">
-                <span className="mb-10 inline-flex h-9 w-fit items-center justify-center rounded-md border border-[#e2e8f0]/70 bg-[#f8fafc] px-4 text-sm font-bold text-[#0f172a]/80 group-hover/card:border-[#4c5d34]/30 group-hover/card:text-[#1d4ed8]">
-                  Step 03
-                </span>
-                <h3 className="max-w-[14ch] text-xl font-bold leading-[1.1] tracking-[-0.02em]">
-                  {t('landing.step3Title')}
-                </h3>
-                <p className="mt-4 max-w-[28ch] text-[0.95rem] font-medium leading-[1.5] text-[#64748b]">
-                  {t('landing.step3Body')}
-                </p>
-                {/* Step Sketch 3 */}
-                <div className="relative mt-auto h-[172px] overflow-hidden rounded-md bg-[#e2e8f0]/75 group-hover/card:bg-[#f8fafc]/80 transition-colors">
-                  <svg className="absolute left-1/2 top-1/2 h-[178px] w-[235px] -translate-x-1/2 -translate-y-1/2 overflow-visible text-[#2563eb] transition-transform duration-500 ease-out group-hover/card:scale-105" viewBox="0 0 250 190" fill="none">
-                    <g className="opacity-95" vectorEffect="non-scaling-stroke">
-                      <rect x="65" y="37" width="120" height="126" rx="15" className="stroke-[#2563eb]" strokeWidth="2" transform="rotate(5 125 100)" />
-                      <path d="M89 72L151 78M87 95L163 102M86 119L136 124" className="stroke-[#2563eb]/50" strokeWidth="1.7" transform="rotate(5 125 100)" />
-                      <path d="M157 121V105C157 87 169 76 185 76C201 76 213 87 213 105V121" className="stroke-[#9c7420]" strokeWidth="2.4" />
-                    </g>
-                  </svg>
-                </div>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        {/* WHO IT'S FOR DEMOGRAPHICS CARDS */}
-        <section className="relative z-20 bg-[#f8fafc] px-[clamp(20px,5vw,72px)] py-16 text-[#0f172a] sm:py-24" id="users">
-          <div className="mx-auto w-full max-w-7xl">
-            <h2 className="text-balance text-[clamp(2.45rem,5.2vw,3.6rem)] font-bold leading-[0.96] tracking-[-0.04em] mb-12">
-              Designed for private internet earnings.
-            </h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:gap-6">
-              <article className="group relative min-h-[360px] overflow-hidden rounded-xl bg-[#0f172a] text-[#f8fafc] md:min-h-[390px] lg:min-h-[430px]">
-                <img src="/assets/freelancer.png" alt="" className="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-luminosity" />
-                <div className="absolute inset-0 bg-[#0f172a]/30 mix-blend-multiply" aria-hidden="true" />
-                <div className="relative flex h-full flex-col justify-between p-7 lg:p-8">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#f8fafc]/75">Private Invoices</p>
-                  <div>
-                    <h3 className="text-3xl font-bold leading-[1] tracking-[-0.02em]">Freelancers</h3>
-                    <p className="mt-3 max-w-[28ch] text-[#f8fafc]/80">Save splits and routes international client payments into yield anonymously.</p>
+            {/* Right: Process diagram */}
+            <div className="relative bg-[#e4c17b]/50 p-8 sm:p-10 border border-[#4c5d4a]/20">
+              <div className="flex flex-col gap-6">
+                {[
+                  { step: '01', label: t('landing.archStep1'), body: t('landing.archStep1Body') },
+                  { step: '02', label: t('landing.archStep2'), body: t('landing.archStep2Body') },
+                  { step: '03', label: t('landing.archStep3'), body: t('landing.archStep3Body') },
+                ].map((s, i) => (
+                  <div key={s.step}>
+                    <div className="flex items-start gap-4">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#1c4934]/30 font-mono text-xs font-bold text-[#1c4934]">
+                        {s.step}
+                      </span>
+                      <div>
+                        <p className="font-bold text-[#193d2d]">{s.label}</p>
+                        <p className="mt-1 text-sm text-[#4c5d4a]">{s.body}</p>
+                      </div>
+                    </div>
+                    {i < 2 && (
+                      <div className="ml-5 mt-3 mb-1 w-px h-6 border-l-2 border-dashed border-[#1c4934]/20" aria-hidden="true" />
+                    )}
                   </div>
-                </div>
-              </article>
-
-              <article className="group relative min-h-[360px] overflow-hidden rounded-xl bg-[#0f172a] text-[#f8fafc] md:min-h-[390px] lg:min-h-[430px]">
-                <img src="/assets/agency.png" alt="" className="absolute inset-0 h-full w-full object-cover opacity-60 mix-blend-luminosity" />
-                <div className="absolute inset-0 bg-[#0f172a]/30 mix-blend-multiply" aria-hidden="true" />
-                <div className="relative flex h-full flex-col justify-between p-7 lg:p-8">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#f8fafc]/75">Business Revenue</p>
-                  <div>
-                    <h3 className="text-3xl font-bold leading-[1] tracking-[-0.02em]">Agencies</h3>
-                    <p className="mt-3 max-w-[28ch] text-[#f8fafc]/80">Manage merchant billing splits privately without leaking business cashflows.</p>
-                  </div>
-                </div>
-              </article>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* PROTOCOLS YIELD MAP */}
-        <section className="relative z-20 bg-[#f8fafc] px-[clamp(20px,5vw,72px)] py-16 text-[#0f172a] sm:py-24" id="protocols">
-          <div className="mx-auto w-full max-w-5xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-              {t('landing.protocolsTitle')}
-            </h2>
-            <p className="mt-3 text-muted-foreground">{t('landing.protocolsCaption')}</p>
-            <div className="mt-12 grid gap-6 sm:grid-cols-3">
-              <a
-                href="https://sparkdex.finance"
-                target="_blank"
-                rel="noreferrer"
-                className="group flex flex-col items-center gap-4 border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
-              >
-                <span className="flex size-16 items-center justify-center rounded-full bg-[#e2e8f0]">
-                  <img src="/logos/sparkdex-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
-                </span>
-                <div>
-                  <p className="font-bold text-lg">SparkDEX</p>
-                  <p className="mt-1 text-sm text-muted-foreground">DEX & liquidity pools</p>
-                </div>
-              </a>
-
-              <a
-                href="https://firelight.finance"
-                target="_blank"
-                rel="noreferrer"
-                className="group flex flex-col items-center gap-4 border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
-              >
-                <span className="flex size-16 items-center justify-center rounded-full bg-[#e2e8f0]">
-                  <img src="/logos/firelight-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
-                </span>
-                <div>
-                  <p className="font-bold text-lg">Firelight</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Yield vaults</p>
-                </div>
-              </a>
-
-              <a
-                href="https://upshift.finance"
-                target="_blank"
-                rel="noreferrer"
-                className="group flex flex-col items-center gap-4 border border-[#e2e8f0] bg-card p-6 text-center outline-none transition-all hover:-translate-y-1 hover:shadow-lg"
-              >
-                <span className="flex size-16 items-center justify-center rounded-full bg-[#e2e8f0]">
-                  <img src="/logos/upshift-icon.svg" className="h-[60%] w-[60%] object-contain" alt="" />
-                </span>
-                <div>
-                  <p className="font-bold text-lg">Upshift</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Strategy vaults</p>
-                </div>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* BOTTOM FINAL CTA SECTION */}
-        <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-[#090d16] px-6 py-24 text-[#f8fafc]">
+        {/* ═══════════════════════════════════════════════════════════
+            SECTION 6: FINAL CTA — Dark with serif headline
+        ═══════════════════════════════════════════════════════════ */}
+        <section className="relative z-20 min-h-svh flex items-center overflow-hidden px-[clamp(20px,5vw,72px)]">
+          <img className="absolute inset-0 z-[-3] h-full w-full object-cover opacity-40 mix-blend-luminosity" src="/assets/section1-bg.jpg" alt="" />
+          <div className="pointer-events-none absolute inset-0 z-[-2] bg-[radial-gradient(48%_56%_at_50%_47%,rgba(9,13,22,0.6),rgba(9,13,22,0.1)_76%),linear-gradient(to_bottom,rgba(29,34,21,0.6),transparent_22%,transparent_60%,rgba(9,13,22,0.7))]" aria-hidden="true" />
           <div className="relative mx-auto w-full max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-balance sm:text-5xl">
-              {t('landing.finalCtaTitle')}
+            <h2
+              className="text-[clamp(2.4rem,5.5vw,4.8rem)] font-bold leading-[0.88] tracking-[-0.05em] text-[#f2ecda]"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              {t('landing.footerCtaTitle')}
             </h2>
-            <p className="mt-4 text-[#f8fafc]/70 text-lg max-w-xl mx-auto">{t('landing.finalCtaBody')}</p>
-            <Button asChild size="lg" className="mt-8 bg-[#f5f3ea] text-[#090d16] hover:bg-white border-none font-bold rounded-lg px-8">
+            <p className="mt-6 text-lg text-[#b7d6bd] max-w-lg mx-auto">
+              {t('landing.footerCtaBody')}
+            </p>
+            <Button asChild size="lg" className="mt-10 bg-[#d5aa61] text-[#193d2d] hover:bg-[#e4c17b] border-none font-bold rounded-lg px-10">
               <Link to="/app">{t('landing.cta')}</Link>
             </Button>
           </div>
         </section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="relative z-10 border-t border-[#e2e8f0]/20 bg-[#090d16] text-[#f8fafc]/70 py-12 px-6">
-        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <LogoMark size={24} className="text-[#f8fafc]" />
-            <span className="text-lg font-bold text-[#f8fafc]">Save</span>
+      {/* ═══════════════════════════════════════════════════════════
+          FOOTER — Editorial style
+      ═══════════════════════════════════════════════════════════ */}
+      <footer className="relative z-10 border-t border-[#c9bfa5] bg-[#eee8d8] min-h-svh flex flex-col justify-center">
+        <div className="mx-auto grid w-full max-w-5xl gap-10 px-6 py-14 sm:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          <div>
+            <div className="flex items-center gap-2">
+              <LogoMark size={22} />
+              <span className="text-lg font-semibold tracking-tight text-[#193d2d]">Save</span>
+            </div>
+            <p className="mt-3 max-w-xs text-sm text-[#526457]">
+              {t('landing.footerTagline')}
+            </p>
           </div>
-          <p className="text-xs text-[#f8fafc]/50">{t('landing.footer')}</p>
-          <a
-            href="#top"
-            className="text-xs font-semibold text-[#f8fafc] hover:underline"
-          >
-            {t('landing.backToTop')}
-          </a>
+          <div>
+            <p className="font-mono text-[10px] font-bold tracking-[0.23em] uppercase text-[#526457]">
+              {t('landing.footerProduct')}
+            </p>
+            <ul className="mt-3 space-y-2">
+              {[
+                { to: '/app', label: t('nav.dashboard') },
+                { to: '/app/yield', label: t('nav.yield') },
+                { to: '/app/activity', label: t('nav.activity') },
+                { to: '/app/link', label: t('nav.paymentLink') },
+              ].map((link) => (
+                <li key={link.to}>
+                  <Link to={link.to} className="text-sm text-[#526457] hover:text-[#193d2d] transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="font-mono text-[10px] font-bold tracking-[0.23em] uppercase text-[#526457]">
+              {t('landing.footerProtocols')}
+            </p>
+            <ul className="mt-3 space-y-2">
+              {[
+                { href: 'https://sparkdex.finance', logo: '/logos/sparkdex-icon.svg', name: 'SparkDEX' },
+                { href: 'https://firelight.finance', logo: '/logos/firelight-icon.svg', name: 'Firelight' },
+                { href: 'https://upshift.finance', logo: '/logos/upshift-icon.svg', name: 'Upshift' },
+              ].map((p) => (
+                <li key={p.href}>
+                  <a href={p.href} target="_blank" rel="noreferrer" className="group flex items-center gap-2 text-sm text-[#526457] hover:text-[#193d2d] transition-colors">
+                    <span className="flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#c9bf9f]/50">
+                      <img src={p.logo} alt="" className="h-full w-full object-contain p-0.5" />
+                    </span>
+                    {p.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="font-mono text-[10px] font-bold tracking-[0.23em] uppercase text-[#526457]">
+              {t('landing.footerResources')}
+            </p>
+            <ul className="mt-3 space-y-2">
+              <li>
+                <a href="https://dev.flare.network" target="_blank" rel="noreferrer" className="text-sm text-[#526457] hover:text-[#193d2d] transition-colors">
+                  Flare Docs
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-[#c9bfa5]">
+          <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-6 py-4 text-xs text-[#526457]">
+            <p>{t('landing.footer')}</p>
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#c9bfa5] px-3 py-1.5 outline-none transition-colors hover:text-[#193d2d] hover:border-[#193d2d]"
+            >
+              {t('landing.backToTop')}
+              ↑
+            </button>
+          </div>
         </div>
       </footer>
     </div>

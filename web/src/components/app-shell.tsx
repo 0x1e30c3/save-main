@@ -30,6 +30,7 @@ import { useFaucet } from '@/lib/use-faucet'
 import { useScrollLock } from '@/lib/use-scroll-lock'
 import { cn } from '@/lib/utils'
 import { useWallet } from '@/lib/wallet'
+import { WalletPicker } from '@/components/wallet-picker'
 
 const ITEM =
   'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50'
@@ -89,16 +90,18 @@ type SidebarContentProps = {
 
 function SidebarContent({ rail = false, onNavigate }: SidebarContentProps) {
   const t = useT()
-  const { address, connecting, connect, disconnect } = useWallet()
+  const { address, connecting, connectWithProvider, disconnect } = useWallet()
   const { faucetBusy, anyBusy, runFaucet } = useFaucet()
   const label = labelClass(rail)
+  const [pickerOpen, setPickerOpen] = useState(false)
 
-  const handleConnect = async () => {
+  const handleSelect = async (wallet: { provider: Parameters<typeof connectWithProvider>[0] }) => {
     try {
-      await connect()
+      await connectWithProvider(wallet.provider)
+      setPickerOpen(false)
     } catch (e) {
       const key = errorKey(e)
-      if (key === 'errors.walletCancelled') return // user closed the modal on purpose
+      if (key === 'errors.walletCancelled') return
       toast.error(t(key))
     }
   }
@@ -172,7 +175,7 @@ function SidebarContent({ rail = false, onNavigate }: SidebarContentProps) {
           <span className={label}>{t('nav.viewContract')}</span>
         </a>
       </nav>
-      <div className="mt-2 border-t pt-2">
+        <div className="mt-2 border-t pt-2">
         {address ? (
           <button
             type="button"
@@ -183,20 +186,23 @@ function SidebarContent({ rail = false, onNavigate }: SidebarContentProps) {
             <span className={label}>{t('nav.disconnect')}</span>
           </button>
         ) : (
-          <button
-            type="button"
-            className={cn(
-              ITEM,
-              'text-primary-ink hover:bg-primary/10 disabled:pointer-events-none disabled:opacity-50',
-            )}
-            disabled={connecting}
-            onClick={() => void handleConnect()}
-          >
-            <WalletIcon className="size-[18px] shrink-0" />
-            <span className={label}>
-              {connecting ? `${t('topbar.connecting')}...` : t('topbar.connect')}
-            </span>
-          </button>
+          <>
+            <button
+              type="button"
+              className={cn(
+                ITEM,
+                'text-primary-ink hover:bg-primary/10 disabled:pointer-events-none disabled:opacity-50',
+              )}
+              disabled={connecting}
+              onClick={() => setPickerOpen(true)}
+            >
+              <WalletIcon className="size-[18px] shrink-0" />
+              <span className={label}>
+                {connecting ? `${t('topbar.connecting')}...` : t('topbar.connect')}
+              </span>
+            </button>
+            <WalletPicker open={pickerOpen} onOpenChange={setPickerOpen} onSelect={handleSelect} />
+          </>
         )}
       </div>
     </div>

@@ -19,21 +19,21 @@ Migrasi dari YourSave (programmable savings splitter di EVM Sepolia dengan USDC)
 | File | Reason |
 |------|--------|
 | `feedback.md` | Feedback iExec hackathon, tidak relevan dengan Flare |
-| `scripts/deploy.sh` | Stellar-specific (`stellar contract build/deploy`) |
-| `scripts/e2e.sh` | Stellar-specific (`stellar keys/contract invoke`) |
+| `scripts/deploy.sh` | Legacy deploy script, replaced by forge create |
+| `scripts/e2e.sh` | Legacy E2E script, replaced by forge test |
 | `evm/src/ConfidentialSave.sol` | iExec Nox TEE contract, tidak dipakai di Flare |
 | `evm/src/IUniswapV2Router.sol` | Uniswap V2 interface, Flare pakai SparkDEX (V3 fork) |
 | `evm/test/ConfidentialSave.t.sol` | Test untuk contract yang dihapus |
 | `evm/test/UniswapAdapter.t.sol` | Test untuk adapter yang diganti |
 | `web/public/tokens/usdc.svg` | Ganti dengan FXRP |
 | `web/public/tokens/eurc.png` | Tidak dipakai di Flare |
-| `web/public/assets/stellar-black.webp` | Stellar branding |
-| `web/public/assets/stellar-logo.png` | Stellar branding |
+| `web/public/assets/stellar-black.webp` | Legacy branding |
+| `web/public/assets/stellar-logo.png` | Legacy branding |
 | `web/public/assets/sol.png` | Solana icon, tidak relevan |
 | `web/public/logos/nox-vault-icon.svg` | iExec Nox logo |
 | `web/public/logos/aave-icon.svg` | Aave bukan yield source di Flare |
 | `web/public/logos/uniswap-icon.svg` | Diganti SparkDEX |
-| `web/src/lib/usdc-status.ts` | Stellar USDC trustline checker |
+| `web/src/lib/usdc-status.ts` | Legacy USDC checker, replaced by FXRP |
 | `evm/out/*` | Build artifacts, rebuild setelah perubahan |
 
 **Total: 17 files**
@@ -60,9 +60,9 @@ Migrasi dari YourSave (programmable savings splitter di EVM Sepolia dengan USDC)
 ### 3. `web/src/lib/config.ts` → Full rewrite
 
 **Hapus:**
-- `NETWORK_PASSPHRASE`, `RPC_URL` (Stellar)
-- `STELLAR_YOURSAVE_ID`, `USDC_ID`, `USDC_ISSUER`, `VAULT_ID`, `HORIZON_URL`
-- `MAINNET_RPC_URL`, `MAINNET_NETWORK_PASSPHRASE`, `MAINNET_USDC_ID`
+- `NETWORK_PASSPHRASE`, `RPC_URL` (removed)
+- `STELLAR_YOURSAVE_ID`, `USDC_ID`, `USDC_ISSUER`, `VAULT_ID`, `HORIZON_URL` (removed)
+- `MAINNET_RPC_URL`, `MAINNET_NETWORK_PASSPHRASE`, `MAINNET_USDC_ID` (removed)
 - `EVM_CHAIN_ID = 11155111` (Sepolia)
 
 **Tambah:**

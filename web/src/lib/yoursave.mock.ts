@@ -23,7 +23,7 @@ function nowSeconds(): bigint {
   return BigInt(Math.floor(Date.now() / 1000))
 }
 
-// looks like a real 32-byte Stellar tx hash so the confirmation UI has something to show
+// looks like a real 32-byte Ethereum tx hash so the confirmation UI has something to show
 function mockHash(): string {
   return Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
 }

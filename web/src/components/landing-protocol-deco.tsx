@@ -99,7 +99,7 @@ const ITEMS: Item[] = [
     delay: 0.3,
   },
   {
-    render: () => <TokenIcon token="usdc" size={44} />,
+    render: () => <TokenIcon token="fxrp" size={44} />,
     side: 'left',
     top: '86%',
     left: '14%',

@@ -117,7 +117,7 @@ export function ActivityList({ items, loading }: ActivityListProps) {
                   ) : TOKEN_KINDS.includes(item.kind) ? (
                     // token logo alone fills its own circle edge-to-edge, so the currency
                     // is recognizable at a glance without extra padding diluting it
-                    <TokenIcon token="usdc" size={36} />
+                    <TokenIcon token="fxrp" size={36} />
                   ) : (
                     <span
                       className={cn(
@@ -131,7 +131,7 @@ export function ActivityList({ items, loading }: ActivityListProps) {
                   {TOKEN_KINDS.includes(item.kind) &&
                     (externalPayer ? (
                       <span className="absolute -right-1 -bottom-1 flex rounded-full ring-2 ring-card">
-                        <TokenIcon token="usdc" size={18} />
+                        <TokenIcon token="fxrp" size={18} />
                       </span>
                     ) : (
                       <span

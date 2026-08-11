@@ -30,6 +30,7 @@ export function errorKey(e: unknown): MessageKey {
   if (text.includes('faucet_unavailable')) return 'errors.faucetUnavailable'
   if (text.includes('faucet_maybe_funded')) return 'errors.faucetAlreadyFunded'
   if (text.includes('wallet_not_found')) return 'common.connectFirst'
+  if (text.includes('wallet_timeout')) return 'errors.walletTimeout'
   if (/reject|declin|denied|closed/i.test(text)) return 'errors.walletCancelled'
   return 'errors.generic'
 }
