@@ -1,4 +1,4 @@
-export type YieldTarget = 'sparkdex' | 'firelight' | 'upshift'
+export type YieldTarget = 'sparkdex' | 'firelight' | 'upshift' | 'defindex'
 
 export type YourSaveAccount = {
   splitBps: number

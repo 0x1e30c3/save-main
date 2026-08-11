@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="web/public/logo-yoursave.png" width="88" alt="YourSave">
+  <img src="web/public/logo-light.png" width="88" alt="YourSave">
   <h1>YourSave</h1>
   <p>Auto-savings on every payment, powered by FXRP on Flare.</p>
 

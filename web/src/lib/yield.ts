@@ -1,4 +1,5 @@
 import type { ActivityItem } from '@/lib/activity'
+import type { YieldTarget } from '@/lib/types'
 
 // Flare Coston2 yield protocol constants
 export const FXRP_SCALE = 10n ** 18n // FXRP has 18 decimals
@@ -61,9 +62,9 @@ export async function getUpshiftMainnetReferenceApy(): Promise<number | null> {
 
 export function valueOfShares(
   shares: bigint,
-  target: 'sparkdex' | 'firelight' | 'upshift',
+  target: YieldTarget,
   sharePrice: bigint | null,
-  sparkdexTvl: bigint | null,
+  _sparkdexTvl: bigint | null,
   upshiftStats?: { tvl: bigint | null },
 ): bigint | null {
   if (target === 'sparkdex') {

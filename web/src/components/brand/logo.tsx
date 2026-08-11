@@ -5,13 +5,22 @@ import { cn } from '@/lib/utils'
  */
 export function LogoMark({ size = 24, className }: { size?: number; className?: string }) {
   return (
-    <img
-      src="/logo-yoursave.png"
-      width={size}
-      height={size}
-      className={cn('shrink-0 object-contain', className)}
-      alt="YourSave Logo"
-    />
+    <>
+      <img
+        src="/logo-light.png"
+        width={size}
+        height={size}
+        className={cn('shrink-0 object-contain dark:hidden', className)}
+        alt="YourSave Logo"
+      />
+      <img
+        src="/logo-dark.png"
+        width={size}
+        height={size}
+        className={cn('shrink-0 object-contain hidden dark:block', className)}
+        alt="YourSave Logo"
+      />
+    </>
   )
 }
 

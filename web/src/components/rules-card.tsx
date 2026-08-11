@@ -26,12 +26,14 @@ const YIELD_SOURCES: { target: YieldTarget; logo: string; logoBackdrop?: string 
   { target: 'sparkdex', logo: '/logos/sparkdex-icon.svg' },
   { target: 'firelight', logo: '/logos/firelight-icon.svg' },
   { target: 'upshift', logo: '/logos/upshift-icon.svg' },
+  { target: 'defindex', logo: '/logos/defindex-icon.svg' },
 ]
 
 const YIELD_SOURCE_NAME_KEY: Record<YieldTarget, MessageKey> = {
   sparkdex: 'rules.yieldSourceSparkdexName',
   firelight: 'rules.yieldSourceFirelightName',
   upshift: 'rules.yieldSourceUpshiftName',
+  defindex: 'rules.yieldSourceDefindexName',
 }
 
 type YieldSourceOptionProps = {
