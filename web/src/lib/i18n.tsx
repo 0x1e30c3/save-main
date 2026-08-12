@@ -963,11 +963,11 @@ export function formatMoney(
     }).format(fxrp)
     return `${formatted} FXRP`
   }
-  const usd = Number(amount) / 1e7
+  const units = Number(amount) / 1e18
   if (currency === 'usdc') {
     const formatted = new Intl.NumberFormat(intlLocale(locale), {
       maximumFractionDigits: 2,
-    }).format(usd)
+    }).format(units)
     return `${formatted} USDC`
   }
   const digits = FIAT_DECIMALS[currency]
@@ -976,7 +976,7 @@ export function formatMoney(
     currency: currency.toUpperCase(),
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
-  }).format(usd * rates[currency])
+  }).format(units * rates[currency])
 }
 
 // where a fiat symbol sits relative to the digits (Rp/PHP are prefixed,

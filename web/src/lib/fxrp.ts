@@ -1,8 +1,8 @@
 // FXRP utilities for Flare network
 // FXRP is an ERC-20 token with 18 decimals on Flare
 
-import { Contract, JsonRpcProvider } from 'ethers'
-import { FLARE_RPC_URL, FXRP_ADDRESS } from '@/lib/config'
+import { BrowserProvider, Contract, JsonRpcProvider, type ContractRunner } from 'ethers'
+import { FLARE_RPC_URL, FXRP_ADDRESS, YOURSAVE_ADDRESS } from '@/lib/config'
 
 const FXRP_ABI = [
   'function balanceOf(address owner) view returns (uint256)',
@@ -17,19 +17,44 @@ const FXRP_ABI = [
 export const FXRP_DECIMALS = 18
 export const FXRP_SCALE = 10n ** 18n
 
-export function fxrpContract(readOnly = true): Contract {
-  const provider = readOnly
-    ? new JsonRpcProvider(FLARE_RPC_URL)
-    : new JsonRpcProvider(FLARE_RPC_URL) // signer provider handled separately
+export function fxrpContract(runner?: ContractRunner): Contract {
+  const provider = runner ?? new JsonRpcProvider(FLARE_RPC_URL)
   return new Contract(FXRP_ADDRESS, FXRP_ABI, provider)
 }
 
 export async function getFxrpBalance(address: string): Promise<bigint> {
-  const contract = fxrpContract()
-  return contract.balanceOf(address)
+  return fxrpContract().balanceOf(address)
 }
 
 export async function getFxrpAllowance(owner: string, spender: string): Promise<bigint> {
-  const contract = fxrpContract()
-  return contract.allowance(owner, spender)
+  return fxrpContract().allowance(owner, spender)
+}
+
+export async function approveFxrp(spender: string, amount: bigint, signer: ContractRunner): Promise<string> {
+  const c = fxrpContract(signer)
+  const tx = await c.approve(spender, amount)
+  await tx.wait()
+  return tx.hash
+}
+
+export async function ensureFxrpAllowance(
+  owner: string,
+  amount: bigint,
+  signer: ContractRunner,
+): Promise<boolean> {
+  const c = fxrpContract(signer)
+  const current = (await c.allowance(owner, YOURSAVE_ADDRESS)) as bigint
+  if (current >= amount) return false
+  const tx = await c.approve(YOURSAVE_ADDRESS, amount)
+  await tx.wait()
+  return true
+}
+
+type Eip1193ProviderWindow = Window & { ethereum?: { request: (req: { method: string; params?: unknown[] }) => Promise<unknown> } }
+
+export async function getBrowserSigner() {
+  const ethereum = (window as Eip1193ProviderWindow).ethereum
+  if (!ethereum) throw new Error('wallet_not_found')
+  const provider = new BrowserProvider(ethereum)
+  return provider.getSigner()
 }

@@ -3,6 +3,11 @@ pragma solidity 0.8.28;
 
 import "./ISparkDexRouter.sol";
 
+interface IERC20Minimal {
+    function approve(address spender, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
+}
+
 /// @title SparkDexAdapter - Routes savings through SparkDEX V3 on Flare
 /// @notice This adapter is called by YourSave.withdrawSavingsToAdapter() to swap FXRP into yield-bearing tokens
 contract SparkDexAdapter {
@@ -32,8 +37,11 @@ contract SparkDexAdapter {
         uint256 amountOutMin,
         uint256 deadline
     ) external returns (uint256[] memory amounts) {
-        // Use default 0.3% fee tier for SparkDEX V3
         uint24 fee = 3000;
+
+        // The caller (YourSave) has already transferred tokenIn to this adapter.
+        // We must approve the router to pull it.
+        require(IERC20Minimal(tokenIn).approve(address(router), amountIn), "approve-router-failed");
 
         uint256 amountOut = router.exactInputSingle(
             ISparkDexRouter.ExactInputSingleParams({

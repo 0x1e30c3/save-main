@@ -15,9 +15,9 @@ export type ActivityItem = {
 }
 
 const SAVE_EVM_ABI = [
-  'event PaymentRouted(address indexed from,address indexed to,uint8 yieldTarget)',
-  'event SpendWithdrawn(address indexed user)',
-  'event SavingsWithdrawn(address indexed user,uint8 yieldTarget)',
+  'event PaymentRouted(address indexed from,address indexed to,uint256 amount,uint256 spendAmount,uint256 savingsAmount,uint8 yieldTarget)',
+  'event SpendWithdrawn(address indexed user,uint256 amount)',
+  'event SavingsWithdrawn(address indexed user,uint256 shares,uint256 amountOut)',
   'event SplitSet(address indexed user,uint16 bps)',
   'event LockSet(address indexed user,uint64 until)',
 ] as const
@@ -48,11 +48,22 @@ function decodeLogs(logs: EventLog[], user: string): ActivityItem[] {
       const from = String(log.args.from)
       const to = String(log.args.to)
       if (to.toLowerCase() !== userLc) continue
-      out.push({ ...base, kind: 'pay', from })
+      out.push({
+        ...base,
+        kind: 'pay',
+        from,
+        amount: BigInt(log.args.amount),
+        saved: BigInt(log.args.savingsAmount),
+      })
     } else if (name === 'SpendWithdrawn') {
-      out.push({ ...base, kind: 'wd_spend' })
+      out.push({ ...base, kind: 'wd_spend', amount: BigInt(log.args.amount) })
     } else if (name === 'SavingsWithdrawn') {
-      out.push({ ...base, kind: 'wd_save' })
+      out.push({
+        ...base,
+        kind: 'wd_save',
+        shares: BigInt(log.args.shares),
+        amount: BigInt(log.args.amountOut),
+      })
     } else if (name === 'SplitSet') {
       out.push({ ...base, kind: 'split', bps: Number(log.args.bps) })
     } else if (name === 'LockSet') {

@@ -21,7 +21,7 @@ contract MockAdapterForTest {
     }
 }
 
-contract MockERC20ForSave {
+contract MockERC20ForSave is IERC20Minimal {
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
@@ -31,6 +31,13 @@ contract MockERC20ForSave {
 
     function approve(address spender, uint256 amount) external returns (bool) {
         allowance[msg.sender][spender] = amount;
+        return true;
+    }
+
+    function transfer(address to, uint256 amount) external returns (bool) {
+        if (balanceOf[msg.sender] < amount) return false;
+        balanceOf[msg.sender] -= amount;
+        balanceOf[to] += amount;
         return true;
     }
 
@@ -51,15 +58,19 @@ contract YourSaveIntegrationTest is Test {
     address alice = address(0xA11CE);
 
     function setUp() public {
-        yourSave = new YourSave();
-        adapter = new MockAdapterForTest();
         token = new MockERC20ForSave();
+        yourSave = new YourSave(address(token));
+        adapter = new MockAdapterForTest();
         token.mint(alice, 1000);
     }
 
     function testWithdrawSavingsToAdapterFlow() public {
         // alice receives savings via pay
-        yourSave.pay(address(0xFEE), alice, 1000);
+        vm.prank(alice);
+        token.approve(address(yourSave), 1000);
+        vm.prank(alice);
+        yourSave.pay(alice, alice, 1000);
+
         YourSave.Account memory acc = yourSave.accountOf(alice);
         assertEq(acc.shares, uint128(200));
 

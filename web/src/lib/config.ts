@@ -8,7 +8,7 @@ export const FLARE_EXPLORER_URL =
 
 // Contract addresses on Flare Coston2
 export const YOURSAVE_ADDRESS: string =
-  import.meta.env.VITE_YOURSAVE_ADDRESS ?? '0x6d4d017dE8d0A36dce7856Ee989624C6A18cD9Ea'
+  import.meta.env.VITE_YOURSAVE_ADDRESS ?? '0x40c3323992dD140Fc3770ceE5A6B23165aD36Fc1'
 export const FXRP_ADDRESS: string =
   import.meta.env.VITE_FXRP_ADDRESS ?? '0x3A7bDfF4C47B6363F4173cA4446513D4C61E8f07' // FAssets FXRP on Coston2
 

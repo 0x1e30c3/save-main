@@ -13,7 +13,7 @@ function delay(): Promise<void> {
 function account(user: string): YourSaveAccount {
   let acc = accounts.get(user)
   if (!acc) {
-    acc = { splitBps: DEFAULT_SPLIT_BPS, spend: 0n, shares: 0n, lockUntil: 0n, yieldTarget: 'defindex' }
+    acc = { splitBps: DEFAULT_SPLIT_BPS, spend: 0n, shares: 0n, lockUntil: 0n, yieldTarget: 'firelight' }
     accounts.set(user, acc)
   }
   return acc

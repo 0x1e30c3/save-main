@@ -6,7 +6,8 @@ import {
   type ContractRunner,
   type Eip1193Provider,
 } from 'ethers'
-import { FLARE_CHAIN_HEX, FLARE_RPC_URL, YOURSAVE_ADDRESS } from '@/lib/config'
+import { FLARE_RPC_URL, YOURSAVE_ADDRESS } from '@/lib/config'
+import { ensureFxrpAllowance, getBrowserSigner } from '@/lib/fxrp'
 import type { YourSaveAccount, YourSaveService, YieldTarget } from '@/lib/types'
 
 const YOURSAVE_ABI = [
@@ -17,6 +18,7 @@ const YOURSAVE_ABI = [
   'function setSplit(address user,uint16 bps)',
   'function setLock(address user,uint64 until)',
   'function setYieldTarget(address user,uint8 target)',
+  'error InvalidAddress()',
   'error InvalidAmount()',
   'error InvalidBps()',
   'error InsufficientSpendable()',
@@ -26,9 +28,11 @@ const YOURSAVE_ABI = [
   'error EmptyWithdrawal()',
   'error LockTooLong()',
   'error SavingsNotZero()',
+  'error Unauthorized()',
 ] as const
 
 const ERROR_CODES: Record<string, number> = {
+  InvalidAddress: 10,
   InvalidAmount: 1,
   InvalidBps: 2,
   InsufficientSpendable: 3,
@@ -38,6 +42,7 @@ const ERROR_CODES: Record<string, number> = {
   EmptyWithdrawal: 7,
   LockTooLong: 8,
   SavingsNotZero: 9,
+  Unauthorized: 11,
 }
 
 const iface = new Interface(YOURSAVE_ABI)
@@ -65,10 +70,6 @@ async function signerContract(): Promise<Contract> {
   const ethereum = (window as EthereumWindow).ethereum
   if (!ethereum) throw new Error('wallet_not_found')
   const provider = new BrowserProvider(ethereum)
-  await ethereum.request({
-    method: 'wallet_switchEthereumChain',
-    params: [{ chainId: FLARE_CHAIN_HEX }],
-  })
   const signer = await provider.getSigner()
   return new Contract(YOURSAVE_ADDRESS, YOURSAVE_ABI, signer as ContractRunner)
 }
@@ -117,7 +118,9 @@ export const yoursaveEvm: YourSaveService = {
   },
 
   async pay(from: string, to: string, amount: bigint) {
-    const c = await signerContract()
+    const signer = await getBrowserSigner()
+    await ensureFxrpAllowance(from, amount, signer)
+    const c = new Contract(YOURSAVE_ADDRESS, YOURSAVE_ABI, signer as ContractRunner)
     const hash = await sendTx(c.pay(from, to, amount))
     return { hash }
   },

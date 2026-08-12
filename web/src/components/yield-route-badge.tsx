@@ -6,14 +6,12 @@ const SOURCE_LOGO: Record<YieldTarget, string> = {
   sparkdex: '/logos/sparkdex-icon.svg',
   firelight: '/logos/firelight-icon.svg',
   upshift: '/logos/upshift-icon.svg',
-  defindex: '/logos/defindex-icon.svg',
 }
 
 const SOURCE_NAME_KEY: Record<YieldTarget, MessageKey> = {
   sparkdex: 'rules.yieldSourceSparkdexName',
   firelight: 'rules.yieldSourceFirelightName',
   upshift: 'rules.yieldSourceUpshiftName',
-  defindex: 'rules.yieldSourceDefindexName',
 }
 
 type YieldRouteBadgeProps = {

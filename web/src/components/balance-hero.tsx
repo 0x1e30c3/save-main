@@ -48,7 +48,7 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
   const [sharePrice, setSharePrice] = useState<bigint | null>(null)
   const [sparkdexTvl, setSparkdexTvl] = useState<bigint | null>(null)
   const [upshiftStats, setUpshiftStats] = useState<{ tvl: bigint | null }>({ tvl: null })
-  const yieldTarget = account?.yieldTarget ?? 'defindex'
+  const yieldTarget = account?.yieldTarget ?? 'firelight'
 
   useEffect(() => {
     let active = true
@@ -133,10 +133,11 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
               const affix = (
                 <span className="mb-1.5 text-2xl font-medium text-muted-foreground">{symbol}</span>
               )
+              const fiatDecimals = primaryCurrency === 'cny' ? 2 : 0
               const ticker = (
                 <NumberTicker
                   value={fxrpToNumber(total) * rates[primaryCurrency as 'idr' | 'cny']}
-                  decimalPlaces={0}
+                  decimalPlaces={fiatDecimals}
                   locale={intl}
                   delay={0.3}
                   className="text-4xl font-semibold tracking-tight text-foreground tabular-nums"
