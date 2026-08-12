@@ -24,7 +24,6 @@ import { LogoMark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { EXPLORER_CONTRACT_URL, IS_EVM } from '@/lib/config'
-import { errorKey } from '@/lib/errors'
 import { useT, type MessageKey } from '@/lib/i18n'
 import { useFaucet } from '@/lib/use-faucet'
 import { useScrollLock } from '@/lib/use-scroll-lock'
@@ -90,21 +89,10 @@ type SidebarContentProps = {
 
 function SidebarContent({ rail = false, onNavigate }: SidebarContentProps) {
   const t = useT()
-  const { address, connecting, connectWithProvider, disconnect } = useWallet()
+  const { address, connecting, disconnect } = useWallet()
   const { faucetBusy, anyBusy, runFaucet } = useFaucet()
   const label = labelClass(rail)
   const [pickerOpen, setPickerOpen] = useState(false)
-
-  const handleSelect = async (wallet: { provider: Parameters<typeof connectWithProvider>[0] }) => {
-    try {
-      await connectWithProvider(wallet.provider)
-      setPickerOpen(false)
-    } catch (e) {
-      const key = errorKey(e)
-      if (key === 'errors.walletCancelled') return
-      toast.error(t(key))
-    }
-  }
 
   const navClass = ({ isActive }: { isActive: boolean }) =>
     cn(ITEM, isActive ? ITEM_ACTIVE : ITEM_IDLE)
@@ -201,7 +189,7 @@ function SidebarContent({ rail = false, onNavigate }: SidebarContentProps) {
                 {connecting ? `${t('topbar.connecting')}...` : t('topbar.connect')}
               </span>
             </button>
-            <WalletPicker open={pickerOpen} onOpenChange={setPickerOpen} onSelect={handleSelect} />
+            <WalletPicker open={pickerOpen} onOpenChange={setPickerOpen} />
           </>
         )}
       </div>

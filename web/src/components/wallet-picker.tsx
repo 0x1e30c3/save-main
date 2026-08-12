@@ -1,46 +1,29 @@
 import { WalletIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useAccount, useConnect } from 'wagmi'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useT } from '@/lib/i18n'
-import { discoverWallets, hasWindowEthereum, type WalletInfo } from '@/lib/wallet-discovery'
 
 interface WalletPickerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelect: (wallet: WalletInfo) => void
 }
 
-export function WalletPicker({ open, onOpenChange, onSelect }: WalletPickerProps) {
+export function WalletPicker({ open, onOpenChange }: WalletPickerProps) {
   const t = useT()
-  const [wallets, setWallets] = useState<WalletInfo[] | null>(null)
-  const [busy, setBusy] = useState(false)
+  const { connectors, connect, isPending } = useConnect()
+  const { isConnected } = useAccount()
 
   useEffect(() => {
-    if (!open) return
-    console.log('[wallet-picker] open, ethereum exists:', hasWindowEthereum())
-    setWallets(null)
-    setBusy(false)
-    let mounted = true
-    discoverWallets(1000).then((found) => {
-      console.log('[wallet-picker] discovered:', found)
-      if (mounted) setWallets(found)
-    })
-    return () => {
-      mounted = false
+    if (isConnected) {
+      onOpenChange(false)
     }
-  }, [open])
+  }, [isConnected, onOpenChange])
 
-  const handleInjected = () => {
-    console.log('[wallet-picker] using injected wallet')
-    onSelect({
-      uuid: 'injected',
-      name: t('wallet.injected'),
-      icon: '',
-      rdns: 'injected',
-      provider: (window as any).ethereum,
-    })
+  const handleSelect = (connector: (typeof connectors)[number]) => {
+    connect({ connector })
+    onOpenChange(false)
   }
 
   return (
@@ -54,45 +37,27 @@ export function WalletPicker({ open, onOpenChange, onSelect }: WalletPickerProps
           </div>
 
           <div className="grid gap-2">
-            {wallets === null ? (
-              <>
-                <Skeleton className="h-14 w-full" />
-                <Skeleton className="h-14 w-full" />
-              </>
-            ) : wallets.length === 0 ? (
+            {connectors.length === 0 ? (
               <div className="rounded-xl border p-4 text-center">
                 <p className="text-sm text-muted-foreground">{t('wallet.none')}</p>
-                {hasWindowEthereum() && (
-                  <Button
-                    variant="outline"
-                    className="mt-3 w-full"
-                    onClick={handleInjected}
-                    disabled={busy}
-                  >
-                    <WalletIcon className="mr-2 size-4" />
-                    {t('wallet.useInjected')}
-                  </Button>
-                )}
               </div>
             ) : (
-              wallets.map((w) => (
+              connectors.map((connector) => (
                 <Button
-                  key={w.uuid}
+                  key={connector.uid}
                   variant="outline"
                   className="h-auto justify-start gap-3 px-4 py-3"
-                  onClick={() => {
-                    console.log('[wallet-picker] selected:', w.name)
-                    setBusy(true)
-                    onSelect(w)
-                  }}
-                  disabled={busy}
+                  onClick={() => handleSelect(connector)}
+                  disabled={isPending}
                 >
-                  {w.icon ? (
-                    <img src={w.icon} alt="" className="size-7 rounded-full" />
+                  {connector.icon ? (
+                    <img src={connector.icon} alt="" className="size-7 rounded-full" />
                   ) : (
                     <WalletIcon className="size-7" />
                   )}
-                  <span className="font-semibold">{w.name}</span>
+                  <span className="font-semibold">
+                    {connector.id === 'injected' ? t('wallet.injected') : connector.name}
+                  </span>
                 </Button>
               ))
             )}
