@@ -1,4 +1,4 @@
-import { Contract, JsonRpcProvider, type EventLog, type Log } from 'ethers'
+import { Contract, JsonRpcProvider, type EventLog } from 'ethers'
 import { CONTRACT_ID, EVM_RPC_URL } from '@/lib/config'
 
 export type ActivityItem = {
@@ -34,7 +34,7 @@ async function getBlockTimestamp(provider: JsonRpcProvider, blockNumber: number)
   return ts
 }
 
-function decodeLogs(logs: EventLog[], user: string, iface: Contract['interface']): ActivityItem[] {
+function decodeLogs(logs: EventLog[], user: string): ActivityItem[] {
   const userLc = user.toLowerCase()
   const out: ActivityItem[] = []
   for (const log of logs) {
@@ -66,7 +66,6 @@ async function fetchEvmActivity(user: string): Promise<ActivityItem[]> {
   if (CONTRACT_ID === '') return []
   const provider = new JsonRpcProvider(EVM_RPC_URL, undefined, { staticNetwork: true })
   const c = new Contract(CONTRACT_ID, SAVE_EVM_ABI, provider)
-  const userLc = user.toLowerCase()
 
   const latest = await provider.getBlockNumber()
   const fromBlock = Math.max(latest - BLOCK_LOOKBACK, 0)
@@ -74,7 +73,7 @@ async function fetchEvmActivity(user: string): Promise<ActivityItem[]> {
   // Build all five filter topics up-front and fire as ONE batched getLogs call
   // (the RPC supports up to N topics in a single request, which is much faster
   // than five parallel calls because we skip the per-call handshake overhead).
-  const topics: string[][][] = [
+  const topics: (string | null)[][] = [
     [c.filters.PaymentRouted(null, user).fragment.topicHash],
     [c.filters.SpendWithdrawn(user).fragment.topicHash],
     [c.filters.SavingsWithdrawn(user).fragment.topicHash],
@@ -93,9 +92,8 @@ async function fetchEvmActivity(user: string): Promise<ActivityItem[]> {
   await Promise.all(uniqueBlocks.map((b) => getBlockTimestamp(provider, b)))
 
   // Decode using cached timestamps (no extra RPC calls needed)
-  const iface = c.interface
   const allLogs = rawLogs.flat() as EventLog[]
-  const decoded = decodeLogs(allLogs, user, iface)
+  const decoded = decodeLogs(allLogs, user)
 
   return decoded
     .filter((item): item is ActivityItem => item !== null)

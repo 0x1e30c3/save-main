@@ -43,5 +43,5 @@ export function discoverWallets(timeoutMs = 700): Promise<WalletInfo[]> {
 }
 
 export function hasWindowEthereum(): boolean {
-  return typeof window !== 'undefined' && !!window.ethereum
+  return typeof window !== 'undefined' && !!(window as any).ethereum
 }

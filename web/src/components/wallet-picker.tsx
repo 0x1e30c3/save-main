@@ -39,13 +39,13 @@ export function WalletPicker({ open, onOpenChange, onSelect }: WalletPickerProps
       name: t('wallet.injected'),
       icon: '',
       rdns: 'injected',
-      provider: window.ethereum as NonNullable<typeof window.ethereum>,
+      provider: (window as any).ethereum,
     })
   }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-2xl" aria-describedby={undefined}>
+      <SheetContent side={"bottom" as any} className="rounded-t-2xl" aria-describedby={undefined}>
         <SheetTitle className="sr-only">{t('wallet.title')}</SheetTitle>
         <div className="mx-auto w-full max-w-sm pb-6 pt-2">
           <div className="mb-5 text-center">
