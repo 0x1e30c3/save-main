@@ -14,8 +14,8 @@ const FXRP_ABI = [
   'event Approval(address indexed owner, address indexed spender, uint256 value)',
 ] as const
 
-export const FXRP_DECIMALS = 18
-export const FXRP_SCALE = 10n ** 18n
+export const FXRP_DECIMALS = 6
+export const FXRP_SCALE = 10n ** 6n
 
 export function fxrpContract(runner?: ContractRunner): Contract {
   const provider = runner ?? new JsonRpcProvider(FLARE_RPC_URL)
