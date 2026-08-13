@@ -10,6 +10,7 @@ import { SettingsProvider } from '@/lib/settings'
 import { config } from '@/lib/wagmi'
 import { ActivityPage } from '@/pages/activity'
 import { Dashboard } from '@/pages/dashboard'
+import { FaucetPage } from '@/pages/faucet'
 import { Landing } from '@/pages/landing'
 import { NotFoundPage } from '@/pages/not-found'
 import { PayPage } from '@/pages/pay'
@@ -40,6 +41,7 @@ export function App() {
                   <Route path="/app" element={<AppShell />}>
                     <Route index element={<Dashboard />} />
                     <Route path="activity" element={<ActivityPage />} />
+                    <Route path="faucet" element={<FaucetPage />} />
                     <Route path="yield" element={<YieldPage />} />
                     <Route path="withdraw" element={<WithdrawPage />} />
                     <Route path="rules" element={<RulesPage />} />
