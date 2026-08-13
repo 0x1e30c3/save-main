@@ -2,17 +2,19 @@ import { RefreshCwIcon } from 'lucide-react'
 import { ConnectPrompt } from '@/components/connect-prompt'
 import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
+import { YieldDepositCard } from '@/components/yield-deposit-card'
 import { YieldPositionCard } from '@/components/yield-position-card'
 import { YieldSourcesCard } from '@/components/yield-sources-card'
 import { useAppState } from '@/lib/app-state'
 import { useT } from '@/lib/i18n'
+import { yoursave } from '@/lib/yoursave'
 import { useYieldData } from '@/lib/use-yield-data'
 import { useWallet } from '@/lib/wallet'
 
 export function YieldPage() {
   const { address } = useWallet()
-  const { account, accountStatus, activity, rates } = useAppState()
-  const { data, loading, refresh } = useYieldData()
+  const { account, accountStatus, activity, rates, busy, runAction, refresh } = useAppState()
+  const { data, loading, refresh: refreshYield } = useYieldData()
   const t = useT()
 
   if (!address) return <ConnectPrompt />
@@ -21,6 +23,32 @@ export function YieldPage() {
     data.vaultStats.idle !== null && data.vaultStats.invested !== null
       ? data.vaultStats.idle + data.vaultStats.invested
       : null
+
+  const handleDeposit = async (args: {
+    shares: bigint
+    tokenOut: string
+    adapter: string
+    amountOutMin: bigint
+    deadline: bigint
+  }) => {
+    const result = await runAction(
+      'yield-deposit',
+      'success.yieldDeposited',
+      () =>
+        yoursave.withdrawSavingsToAdapter(
+          address,
+          args.shares,
+          args.tokenOut,
+          args.adapter,
+          args.amountOutMin,
+          args.deadline,
+        ),
+    )
+    if (result) {
+      await refresh()
+      await refreshYield()
+    }
+  }
 
   return (
     <section className="space-y-5">
@@ -31,7 +59,10 @@ export function YieldPage() {
           size="icon-sm"
           aria-label={t('yield.refresh')}
           disabled={loading}
-          onClick={() => void refresh()}
+          onClick={() => {
+            void refresh()
+            void refreshYield()
+          }}
         >
           <RefreshCwIcon className={loading ? 'animate-spin' : ''} />
         </Button>
@@ -45,6 +76,15 @@ export function YieldPage() {
         loading={accountStatus === 'loading'}
         rates={rates}
       />
+      {account && (
+        <YieldDepositCard
+          shares={account.shares}
+          yieldTarget={account.yieldTarget}
+          rates={rates}
+          onDeposit={handleDeposit}
+          busy={busy === 'yield-deposit'}
+        />
+      )}
       <YieldSourcesCard
         sparkdexApy={data.sparkdexPoolInfo.apy}
         sparkdexTvl={data.sparkdexPoolInfo.tvl}
