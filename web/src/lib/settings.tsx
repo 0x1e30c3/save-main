@@ -8,7 +8,7 @@ import {
 } from 'react'
 
 export type Locale = 'en' | 'id' | 'zh'
-export type PrimaryCurrency = 'idr' | 'fxrp' | 'cny'
+export type PrimaryCurrency = 'usd' | 'idr' | 'fxrp' | 'cny'
 
 type SettingsContextValue = {
   locale: Locale
@@ -29,16 +29,17 @@ function initialLocale(): Locale {
 }
 
 // the fiat shown alongside a FXRP-primary display follows the chosen
-// language, so a Chinese speaker sees CNY rather than defaulting to IDR
+// language, so a Chinese speaker sees CNY rather than defaulting to USD
 export function secondaryCurrencyFor(primary: PrimaryCurrency, locale: Locale): PrimaryCurrency {
   if (primary !== 'fxrp') return 'fxrp'
   if (locale === 'zh') return 'cny'
-  return 'idr'
+  if (locale === 'id') return 'idr'
+  return 'usd'
 }
 
 function initialCurrency(): PrimaryCurrency {
   const stored = localStorage.getItem(CURRENCY_KEY)
-  if (stored === 'idr' || stored === 'fxrp' || stored === 'cny') return stored
+  if (stored === 'usd' || stored === 'idr' || stored === 'fxrp' || stored === 'cny') return stored
   return 'fxrp'
 }
 

@@ -41,11 +41,12 @@ export async function ensureFxrpAllowance(
   owner: string,
   amount: bigint,
   signer: ContractRunner,
+  spender: string = YOURSAVE_ADDRESS
 ): Promise<boolean> {
   const c = fxrpContract(signer)
-  const current = (await c.allowance(owner, YOURSAVE_ADDRESS)) as bigint
+  const current = (await c.allowance(owner, spender)) as bigint
   if (current >= amount) return false
-  const tx = await c.approve(YOURSAVE_ADDRESS, amount)
+  const tx = await c.approve(spender, amount)
   await tx.wait()
   return true
 }

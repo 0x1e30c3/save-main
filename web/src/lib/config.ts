@@ -26,7 +26,7 @@ export const UPSHIFT_VAULT: string =
 
 // Output token used when routing savings through SparkDexAdapter (e.g. WFLR or USDT0)
 export const YIELD_TOKEN_OUT: string =
-  import.meta.env.VITE_YIELD_TOKEN_OUT ?? ''
+  import.meta.env.VITE_YIELD_TOKEN_OUT ?? '0x8b322a30485C66C3fb3d052d921B6D218bE48fDD'
 
 export const EXPLORER_CONTRACT_URL = `${FLARE_EXPLORER_URL}/address/${YOURSAVE_ADDRESS}`
 

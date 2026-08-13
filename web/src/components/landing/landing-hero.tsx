@@ -1,58 +1,142 @@
 import { Link } from 'react-router-dom'
 import { useT } from '@/lib/i18n'
+import { motion } from 'motion/react'
+
+function GlitchText({ text, className = '' }: { text: string; className?: string }) {
+  return (
+    <div className={`group relative inline-block cursor-default ${className}`}>
+      <span className="relative z-10 block transition-transform duration-300 group-hover:scale-105">{text}</span>
+      <span 
+        className="absolute inset-0 z-0 block opacity-0 text-red-500 translate-x-[2px] animate-glitch-1 group-hover:opacity-100 mix-blend-screen transition-opacity duration-300"
+        aria-hidden="true"
+      >
+        {text}
+      </span>
+      <span 
+        className="absolute inset-0 z-0 block opacity-0 text-blue-500 -translate-x-[2px] animate-glitch-2 group-hover:opacity-100 mix-blend-screen transition-opacity duration-300"
+        aria-hidden="true"
+      >
+        {text}
+      </span>
+    </div>
+  )
+}
 
 export function LandingHero() {
   const t = useT()
+  
+  // Split the subtitle for a stagger reveal effect
+  const subtitleWords = t('landing.heroTitle').split(' ')
+
   return (
-    <section className="relative isolate z-20 grid min-h-svh place-items-center overflow-hidden px-5 pb-8 pt-24 sm:px-8 sm:pb-10 sm:pt-28" id="top">
+    <section className="relative isolate z-20 flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-6 pt-24 pb-12 sm:px-12 sm:pt-32" id="top">
+      {/* Restored Original Background */}
       <img className="absolute inset-0 z-[-3] h-full w-full object-cover opacity-40 mix-blend-luminosity" src="/assets/section1-bg.jpg" alt="" />
       <div className="pointer-events-none absolute inset-0 z-[-2] bg-[radial-gradient(48%_56%_at_50%_47%,rgba(9,13,22,0.6),rgba(9,13,22,0.1)_76%),linear-gradient(to_bottom,rgba(29,34,21,0.6),transparent_22%,transparent_60%,rgba(9,13,22,0.7))]" aria-hidden="true" />
 
-      <div className="pointer-events-none absolute inset-0 z-[-1]" aria-hidden="true">
+      {/* Floating hands decoration with entrance animation */}
+      <div className="pointer-events-none absolute inset-0 z-[-1] opacity-80 mix-blend-screen" aria-hidden="true">
         <div className="absolute left-0 top-1/2 origin-left -translate-y-[46%] max-lg:-translate-y-[58%] max-lg:scale-90 max-[620px]:opacity-40">
-          <img className="block h-auto w-[min(46vw,600px)] [filter:drop-shadow(0_26px_40px_rgba(0,0,0,0.55))] max-lg:w-[62vw] max-[620px]:w-[76vw]" src="/assets/left-hand.png" alt="" />
+          <motion.img 
+            initial={{ x: -40, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="block h-auto w-[min(46vw,600px)] [filter:drop-shadow(0_26px_40px_rgba(0,0,0,0.55))] max-lg:w-[62vw] max-[620px]:w-[76vw]" 
+            src="/assets/left-hand.png" 
+            alt="" 
+          />
         </div>
         <div className="absolute right-0 top-1/2 origin-right -translate-y-[40%] max-lg:-translate-y-[16%] max-lg:scale-90 max-[620px]:opacity-40">
-          <img className="block h-auto w-[min(46vw,600px)] [filter:drop-shadow(0_26px_40px_rgba(0,0,0,0.55))] max-lg:w-[62vw] max-[620px]:w-[76vw]" src="/assets/right-hand.png" alt="" />
+          <motion.img 
+            initial={{ x: 40, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+            className="block h-auto w-[min(46vw,600px)] [filter:drop-shadow(0_26px_40px_rgba(0,0,0,0.55))] max-lg:w-[62vw] max-[620px]:w-[76vw]" 
+            src="/assets/right-hand.png" 
+            alt="" 
+          />
         </div>
       </div>
 
-      <div className="relative flex min-h-[clamp(500px,72svh,640px)] w-full max-w-[480px] bg-[radial-gradient(115%_90%_at_50%_45%,rgba(29,34,21,0.7),rgba(9,13,22,0.2)_100%)] px-6 py-7 text-[#f8fafc] [text-shadow:0_1px_18px_rgba(0,0,0,0.6)] sm:px-9 sm:py-9 lg:px-10 lg:py-11">
-        <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 340 452" preserveAspectRatio="none" aria-hidden="true">
-          <rect x="0.5" y="0.5" width="339" height="451" pathLength={1} strokeDasharray={1} className="fill-none stroke-[#f8fafc]/40" />
-        </svg>
-        <div className="relative flex w-full flex-col">
-          <h1 className="m-0 mt-2 flex flex-col text-[clamp(2.1rem,8vw,3.6rem)] font-bold leading-[0.98] tracking-[-0.03em] text-[#f8fafc] sm:mt-4 sm:text-[clamp(2.1rem,4.4vw,3.6rem)]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            <span>Confidential</span>
-            <span>FXRP</span>
-            <span>Savings</span>
-          </h1>
-          <p className="mt-6 max-w-[28ch] text-sm font-semibold uppercase leading-[1.55] tracking-[0.08em] text-[#f8fafc]/70" style={{ fontFamily: "'Space Mono', monospace" }}>
-            {t('landing.heroTitle')}
-          </p>
-          <div className="mt-6 grid grid-cols-2 gap-2.5 sm:mt-7">
-            <Link className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#f5f3ea] px-3 text-center text-sm font-bold tracking-[0.02em] text-[#090d16] transition-opacity hover:opacity-85 sm:px-5" to="/app">
-              {t('landing.cta')}
-            </Link>
-            <a className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#f8fafc]/50 bg-transparent px-3 text-center text-sm font-bold leading-tight tracking-[0.02em] text-[#f8fafc] transition-opacity hover:opacity-85 sm:px-5" href="#about">
-              {t('landing.navCompare')}
-            </a>
+      <div className="relative z-10 flex w-full max-w-4xl flex-col items-center text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="flex flex-col items-center"
+        >
+          <div className="mb-6 overflow-hidden rounded-full border border-white/20 bg-white/5 px-4 py-1.5 backdrop-blur-md">
+            <span className="text-xs font-semibold tracking-[0.2em] text-white/80 uppercase" style={{ fontFamily: "'Space Mono', monospace" }}>
+              Welcome to the Future
+            </span>
           </div>
-          <ul className="mt-auto grid list-none gap-0.5 pt-5 sm:pt-6">
-            {[
-              { label: t('landing.navCompare'), num: 'I', href: '#about' },
-              { label: t('landing.navHow'), num: 'II', href: '#features' },
-              { label: t('landing.navProtocols'), num: 'III', href: '#protocols' },
-            ].map((item) => (
-              <li key={item.href}>
-                <a href={item.href} className="flex items-baseline justify-between border-b border-transparent py-2 text-[15px] font-bold text-[#f8fafc]/60 hover:text-white sm:py-2.5">
-                  <span>{item.label}</span>
-                  <span className="text-xs font-semibold text-[#f8fafc]/40" style={{ fontFamily: "'Space Mono', monospace" }}>{item.num}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+          
+          <h1 className="flex flex-col items-center text-balance text-5xl font-bold tracking-tight text-white sm:text-7xl lg:text-[6rem] leading-[1.05]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+            <GlitchText text="Confidential" />
+            <GlitchText text="FXRP Savings" />
+          </h1>
+        </motion.div>
+
+        <motion.p 
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: { staggerChildren: 0.05, delayChildren: 0.5 }
+            }
+          }}
+          className="mt-6 flex max-w-xl flex-wrap justify-center gap-[1ex] text-lg font-medium leading-relaxed text-slate-300 sm:text-xl md:mt-8"
+        >
+          {subtitleWords.map((word, i) => (
+            <motion.span 
+              key={i} 
+              variants={{
+                hidden: { opacity: 0, y: 10 },
+                visible: { opacity: 1, y: 0 }
+              }}
+            >
+              {word}
+            </motion.span>
+          ))}
+        </motion.p>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1 }}
+          className="mt-10 flex flex-wrap items-center justify-center gap-4 md:mt-12"
+        >
+          <Link className="group relative inline-flex h-14 items-center justify-center overflow-hidden rounded-full bg-white px-8 text-[15px] font-semibold text-black transition-transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.15)]" to="/app">
+            <span className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-black/10 to-transparent -translate-x-full group-hover:animate-liquid-shimmer" />
+            <span className="relative z-10">{t('landing.cta')}</span>
+          </Link>
+          <a className="inline-flex h-14 items-center justify-center rounded-full border border-slate-600 bg-slate-900/60 px-8 text-[15px] font-semibold text-white backdrop-blur transition-all hover:border-white/50 hover:bg-slate-800" href="#about">
+            {t('landing.navCompare')}
+          </a>
+        </motion.div>
+        
+        {/* Navigation links at the bottom */}
+        <motion.ul 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1.5 }}
+          className="mt-20 flex flex-wrap items-center justify-center gap-x-8 gap-y-4"
+        >
+          {[
+            { label: t('landing.navCompare'), href: '#about' },
+            { label: t('landing.navHow'), href: '#features' },
+            { label: t('landing.navProtocols'), href: '#protocols' },
+          ].map((item) => (
+            <li key={item.href}>
+              <a href={item.href} className="group relative text-sm font-semibold tracking-wide text-slate-400 transition-colors hover:text-white uppercase" style={{ fontFamily: "'Space Mono', monospace" }}>
+                {item.label}
+                <span className="absolute -bottom-1 left-0 h-[1px] w-0 bg-white transition-all duration-300 group-hover:w-full" />
+              </a>
+            </li>
+          ))}
+        </motion.ul>
       </div>
     </section>
   )

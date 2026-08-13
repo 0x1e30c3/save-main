@@ -429,7 +429,7 @@ export function AppShell() {
         </SheetContent>
       </Sheet>
       <div ref={scrollRef} className="no-scrollbar relative z-10 h-full overflow-y-auto">
-        <main className="mx-auto w-full max-w-2xl px-4 pt-6 pb-12 md:pt-16">
+        <main className="mx-auto w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl px-4 pt-6 pb-12 md:pt-16">
           {/* touch tablets pass md: but never fire mouse hot zones, so keep the sheet toggle */}
           <div className="mb-4 flex md:pointer-fine:hidden">
             <button

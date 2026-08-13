@@ -1,4 +1,4 @@
-import { ExternalLinkIcon } from 'lucide-react'
+import { ExternalLinkIcon, Loader2Icon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,6 +19,8 @@ type YieldSourcesCardProps = {
   loading: boolean
   rates: FxRates
   selectedTarget?: YieldTarget
+  onSelectTarget?: (target: YieldTarget) => void
+  busyTarget?: YieldTarget | null
 }
 
 type SourceRow = {
@@ -77,6 +79,8 @@ export function YieldSourcesCard({
   loading,
   rates,
   selectedTarget,
+  onSelectTarget,
+  busyTarget,
 }: YieldSourcesCardProps) {
   const t = useT()
   const { locale, primaryCurrency } = useSettings()
@@ -133,36 +137,49 @@ export function YieldSourcesCard({
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="flex gap-3 overflow-x-auto pb-1">
-            <Skeleton className="h-40 w-64 shrink-0 rounded-2xl" />
-            <Skeleton className="h-40 w-64 shrink-0 rounded-2xl" />
-            <Skeleton className="h-40 w-64 shrink-0 rounded-2xl" />
+          <div className="flex gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-3">
+            <Skeleton className="h-40 w-64 shrink-0 rounded-2xl md:w-auto" />
+            <Skeleton className="h-40 w-64 shrink-0 rounded-2xl md:w-auto" />
+            <Skeleton className="h-40 w-64 shrink-0 rounded-2xl md:w-auto" />
           </div>
         ) : (
-          <div className="no-scrollbar -mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-1">
+          <div className="no-scrollbar -mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-1 md:grid md:grid-cols-3 md:overflow-visible">
             {sources.map((source) => {
               const isBest = bestApy !== null && source.apy === bestApy
               const isSelected = source.target !== null && source.target === selectedTarget
+              const isBusy = source.target !== null && source.target === busyTarget
+
               return (
-                <a
+                <button
                   key={source.key}
-                  href={source.website}
-                  target="_blank"
-                  rel="noreferrer"
+                  type="button"
+                  onClick={() => source.target && onSelectTarget?.(source.target)}
+                  disabled={isSelected || isBusy || !source.target}
                   className={cn(
-                    'group flex w-64 shrink-0 snap-start flex-col gap-3 rounded-2xl border bg-card p-4 outline-none transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
-                    isSelected && 'border-gold/50',
+                    'group relative flex w-64 md:w-auto shrink-0 snap-start flex-col gap-3 rounded-2xl border bg-card p-4 text-left outline-none transition-[transform,box-shadow,border-color] duration-150',
+                    !isSelected && 'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer',
+                    isSelected && 'border-gold/50 cursor-default',
+                    isBusy && 'opacity-80 pointer-events-none'
                   )}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <ProtocolLogo source={source} />
-                    <div className="min-w-0">
-                      <p className="flex items-center gap-1 text-sm font-medium">
-                        <span className="truncate">{t(source.name)}</span>
-                        <ExternalLinkIcon className="size-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">{t(source.route)}</p>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2.5">
+                      <ProtocolLogo source={source} />
+                      <div className="min-w-0">
+                        <a 
+                          href={source.website} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="flex items-center gap-1 text-sm font-medium hover:underline z-10 relative"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span className="truncate">{t(source.name)}</span>
+                          <ExternalLinkIcon className="size-3 shrink-0 text-muted-foreground" />
+                        </a>
+                        <p className="truncate text-xs text-muted-foreground">{t(source.route)}</p>
+                      </div>
                     </div>
+                    {isBusy && <Loader2Icon className="size-4 animate-spin text-muted-foreground" />}
                   </div>
                   <div className="flex flex-wrap items-center gap-1">
                     {isSelected ? (
@@ -203,7 +220,7 @@ export function YieldSourcesCard({
                       {formatApy(source.mainnetApy, intl)}
                     </span>
                   </p>
-                </a>
+                </button>
               )
             })}
           </div>

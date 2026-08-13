@@ -89,4 +89,19 @@ export const yoursaveMock: YourSaveService = {
     acc.shares -= shares
     return { amountIn: shares, amountOut: shares, hash: mockHash() }
   },
+
+  async depositYieldDirect(
+    amount: bigint,
+    _tokenOut: string,
+    _adapter: string,
+    _amountOutMin: bigint,
+    _deadline: bigint,
+  ) {
+    await delay()
+    return {
+      amountIn: amount,
+      amountOut: (amount * 99n) / 100n,
+      hash: '0xmock' + Math.random().toString(16).slice(2),
+    }
+  },
 }

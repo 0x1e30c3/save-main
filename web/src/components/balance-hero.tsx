@@ -133,10 +133,10 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
               const affix = (
                 <span className="mb-1.5 text-2xl font-medium text-muted-foreground">{symbol}</span>
               )
-              const fiatDecimals = primaryCurrency === 'cny' ? 2 : 0
+              const fiatDecimals = primaryCurrency === 'idr' ? 0 : 2
               const ticker = (
                 <NumberTicker
-                  value={fxrpToNumber(total) * rates[primaryCurrency as 'idr' | 'cny']}
+                  value={fxrpToNumber(total) * rates[primaryCurrency as 'usd' | 'idr' | 'cny']}
                   decimalPlaces={fiatDecimals}
                   locale={intl}
                   delay={0.3}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRightIcon, Loader2Icon, SparklesIcon, InfoIcon, XIcon } from 'lucide-react'
+import { ArrowRightIcon, Loader2Icon, WalletIcon, InfoIcon, XIcon } from 'lucide-react'
 import { TokenIcon } from '@/components/brand/token-icon'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,11 +23,11 @@ function shortAddr(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
-type YieldDepositCardProps = {
-  shares: bigint
+type YieldDirectDepositCardProps = {
+  walletBalance: bigint
   yieldTarget: 'sparkdex' | 'firelight' | 'upshift'
   rates: FxRates
-  onDeposit: (args: {
+  onDirectDeposit: (args: {
     shares: bigint
     tokenOut: string
     adapter: string
@@ -37,13 +37,13 @@ type YieldDepositCardProps = {
   busy: boolean
 }
 
-export function YieldDepositCard({
-  shares,
+export function YieldDirectDepositCard({
+  walletBalance,
   yieldTarget,
   rates,
-  onDeposit,
+  onDirectDeposit,
   busy,
-}: YieldDepositCardProps) {
+}: YieldDirectDepositCardProps) {
   const t = useT()
   const { address } = useWallet()
   const { locale } = useSettings()
@@ -62,10 +62,10 @@ export function YieldDepositCard({
       : YIELD_TOKEN_OUT
   const hasTokenOut = isValidAddress(tokenOut)
   const canDeposit =
-    address && hasTokenOut && amount.trim() !== '' && !busy && shares > 0n
+    address && hasTokenOut && amount.trim() !== '' && !busy && walletBalance > 0n
 
   const handleMax = () => {
-    setAmount(fxrpToInput(shares))
+    setAmount(fxrpToInput(walletBalance))
   }
 
   const handleDeposit = async () => {
@@ -77,14 +77,14 @@ export function YieldDepositCard({
         setError(t('errors.invalidAmount'))
         return
       }
-      if (sharesValue > shares) {
+      if (sharesValue > walletBalance) {
         setError(t('errors.insufficientShares'))
         return
       }
       const amountOutMin = 0n
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 20)
       
-      await onDeposit({
+      await onDirectDeposit({
         shares: sharesValue,
         tokenOut,
         adapter,
@@ -111,8 +111,8 @@ export function YieldDepositCard({
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-base font-medium">
                 <div className="flex items-center gap-2">
-                  <SparklesIcon className="size-5 text-gold-ink" />
-                  {t('yield.depositTitle')}
+                  <WalletIcon className="size-5 text-primary-ink" />
+                  Direct Wallet Deposit
                 </div>
                 <Button variant="ghost" size="icon-sm" onClick={() => setShowInfo(true)}>
                   <InfoIcon className="size-4 text-muted-foreground" />
@@ -122,13 +122,15 @@ export function YieldDepositCard({
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between rounded-xl border bg-muted/40 px-4 py-3">
                 <div>
-                  <p className="text-xs text-muted-foreground">{t('yield.availableSavings')}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Wallet balance
+                  </p>
                   <p className="mt-0.5 flex items-center gap-1.5 text-lg font-semibold tabular-nums">
                     <TokenIcon token="fxrp" size={22} />
-                    {formatMoney(shares, 'fxrp', rates, locale)}
+                    {formatMoney(walletBalance, 'fxrp', rates, locale)}
                   </p>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleMax} disabled={shares === 0n || busy}>
+                <Button variant="outline" size="sm" onClick={handleMax} disabled={walletBalance === 0n || busy}>
                   {t('yield.max')}
                 </Button>
               </div>
@@ -248,9 +250,9 @@ export function YieldDepositCard({
             </CardHeader>
             <CardContent className="flex flex-1 flex-col justify-center px-6 pb-10 pt-2">
               <p className="text-[15px] leading-8 text-muted-foreground text-center px-2">
-                This option allows you to deposit the funds that were <strong className="text-foreground font-medium">automatically saved</strong> when you received payments via your Payment Link. 
+                This option allows you to deposit FXRP <strong className="text-foreground font-medium">directly from your MetaMask wallet</strong> into a yield-generating vault, completely bypassing the Payment Link flow.
                 <br /><br />
-                These funds are currently held inside the YourSave smart contract and will be routed into a yield-generating vault (like Firelight or SparkDEX) so your savings can grow over time.
+                Your funds will be routed directly to the chosen protocol (like Firelight or SparkDEX) to start earning interest immediately.
               </p>
             </CardContent>
           </motion.div>

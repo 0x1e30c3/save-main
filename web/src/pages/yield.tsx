@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react'
 import { RefreshCwIcon } from 'lucide-react'
+import { getFxrpBalance } from '@/lib/fxrp'
 import { ConnectPrompt } from '@/components/connect-prompt'
 import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
 import { YieldDepositCard } from '@/components/yield-deposit-card'
+import { YieldDirectDepositCard } from '@/components/yield-direct-deposit-card'
 import { YieldPositionCard } from '@/components/yield-position-card'
 import { YieldSourcesCard } from '@/components/yield-sources-card'
 import { useAppState } from '@/lib/app-state'
@@ -50,6 +53,53 @@ export function YieldPage() {
     }
   }
 
+  const [walletBalance, setWalletBalance] = useState(0n)
+  
+  useEffect(() => {
+    if (address) {
+      getFxrpBalance(address).then(setWalletBalance).catch(console.error)
+    }
+  }, [address, busy])
+
+  const handleDirectDeposit = async (args: {
+    shares: bigint
+    tokenOut: string
+    adapter: string
+    amountOutMin: bigint
+    deadline: bigint
+  }) => {
+    if (!address) return
+    const result = await runAction(
+      'yield-direct',
+      'success.yieldDeposited', // reuse the same message
+      () =>
+        yoursave.depositYieldDirect!(
+          args.shares,
+          args.tokenOut,
+          args.adapter,
+          args.amountOutMin,
+          args.deadline,
+        ),
+    )
+    if (result) {
+      await refresh()
+      await refreshYield()
+    }
+  }
+
+  const handleSelectTarget = async (target: YieldTarget) => {
+    if (!address) return
+    const result = await runAction(
+      `target-${target}`,
+      'success.settingsSaved', // generic message since we don't have a specific one
+      () => yoursave.setYieldTarget(address, target),
+    )
+    if (result) {
+      await refresh()
+      await refreshYield()
+    }
+  }
+
   return (
     <section className="space-y-5">
       <div className="flex items-start justify-between gap-3">
@@ -77,13 +127,22 @@ export function YieldPage() {
         rates={rates}
       />
       {account && (
-        <YieldDepositCard
-          shares={account.shares}
-          yieldTarget={account.yieldTarget}
-          rates={rates}
-          onDeposit={handleDeposit}
-          busy={busy === 'yield-deposit'}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <YieldDepositCard
+            shares={account.shares}
+            yieldTarget={account.yieldTarget}
+            rates={rates}
+            onDeposit={handleDeposit}
+            busy={busy === 'yield-deposit'}
+          />
+          <YieldDirectDepositCard
+            walletBalance={walletBalance}
+            yieldTarget={account.yieldTarget}
+            rates={rates}
+            onDirectDeposit={handleDirectDeposit}
+            busy={busy === 'yield-direct'}
+          />
+        </div>
       )}
       <YieldSourcesCard
         sparkdexApy={data.sparkdexPoolInfo.apy}
@@ -96,6 +155,8 @@ export function YieldPage() {
         loading={loading}
         rates={rates}
         selectedTarget={account?.yieldTarget}
+        onSelectTarget={handleSelectTarget}
+        busyTarget={busy?.startsWith('target-') ? (busy.replace('target-', '') as YieldTarget) : null}
       />
     </section>
   )

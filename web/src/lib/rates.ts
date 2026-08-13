@@ -1,6 +1,6 @@
-export type FxRates = { idr: number; cny: number }
+export type FxRates = { usd: number; idr: number; cny: number }
 
-export const FALLBACK_RATES: FxRates = { idr: 16300, cny: 7.25 }
+export const FALLBACK_RATES: FxRates = { usd: 1, idr: 16300, cny: 7.25 }
 
 let cached: Promise<FxRates> | null = null
 
@@ -14,6 +14,7 @@ async function fetchRates(): Promise<FxRates> {
   if (!res.ok) throw new Error(`Rate fetch failed: ${res.status}`)
   const data = (await res.json()) as { rates?: Record<string, number> }
   return {
+    usd: pick(data.rates, 'USD', FALLBACK_RATES.usd),
     idr: pick(data.rates, 'IDR', FALLBACK_RATES.idr),
     cny: pick(data.rates, 'CNY', FALLBACK_RATES.cny),
   }

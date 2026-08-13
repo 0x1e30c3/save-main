@@ -33,4 +33,11 @@ export interface YourSaveService {
   setSplit(user: string, bps: number): Promise<TxResult>
   setLock(user: string, until: bigint): Promise<TxResult>
   setYieldTarget(user: string, target: YieldTarget): Promise<TxResult>
+  depositYieldDirect?(
+    amount: bigint,
+    tokenOut: string,
+    adapter: string,
+    amountOutMin: bigint,
+    deadline: bigint,
+  ): Promise<YieldDepositResult>
 }

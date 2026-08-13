@@ -191,4 +191,28 @@ export const yoursaveEvm: YourSaveService = {
     )
     return { amountIn: shares, amountOut, hash }
   },
+
+  async depositYieldDirect(
+    amount: bigint,
+    tokenOut: string,
+    adapter: string,
+    amountOutMin: bigint,
+    deadline: bigint,
+  ) {
+    const signer = await getBrowserSigner()
+    const from = await signer.getAddress()
+    await ensureFxrpAllowance(from, amount, signer, adapter)
+
+    const ADAPTER_ABI = ['function routeSavings(address tokenIn,uint256 amountIn,address tokenOut,address to,uint256 amountOutMin,uint256 deadline) returns (uint256[])']
+    const c = new Contract(adapter, ADAPTER_ABI, signer)
+    let amountOut = 0n
+    try {
+      const res = await c.routeSavings.staticCall(FXRP_ADDRESS, amount, tokenOut, from, amountOutMin, deadline)
+      amountOut = BigInt(res[1] ?? 0n)
+    } catch (error) {
+      // ignore static call errors, let sendTx handle it
+    }
+    const hash = await sendTx(c.routeSavings(FXRP_ADDRESS, amount, tokenOut, from, amountOutMin, deadline))
+    return { amountIn: amount, amountOut, hash }
+  },
 }

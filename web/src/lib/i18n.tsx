@@ -271,6 +271,7 @@ const en = {
   'settings.themeSystem': 'System',
   'settings.aboutTitle': 'About',
   'settings.currency': 'Display currency',
+  'settings.currencyUsd': 'US Dollar (USD)',
   'settings.currencyIdr': 'Rupiah (IDR)',
   'settings.currencyFxrp': 'FXRP',
   'settings.currencyCny': 'Chinese Yuan (CNY)',
@@ -626,6 +627,7 @@ const id = {
   'settings.themeSystem': 'Ikuti sistem',
   'settings.aboutTitle': 'Tentang',
   'settings.currency': 'Mata uang tampilan',
+  'settings.currencyUsd': 'Dolar AS (USD)',
   'settings.currencyIdr': 'Rupiah (IDR)',
   'settings.currencyFxrp': 'FXRP',
   'settings.currencyCny': 'Yuan China (CNY)',
@@ -943,6 +945,7 @@ const zh = {
   'settings.themeSystem': '系统默认',
   'settings.aboutTitle': '关于',
   'settings.currency': '法币单位',
+  'settings.currencyUsd': '美元 (USD)',
   'settings.currencyIdr': '印尼盾 (IDR)',
   'settings.currencyFxrp': 'FXRP',
   'settings.currencyCny': '人民币 (CNY)',
@@ -1042,9 +1045,9 @@ export function intlLocale(locale: string): string {
   return 'en-US'
 }
 
-type FiatCurrency = 'idr' | 'cny'
+type FiatCurrency = 'usd' | 'idr' | 'cny'
 
-const FIAT_DECIMALS: Record<FiatCurrency, number> = { idr: 0, cny: 2 }
+const FIAT_DECIMALS: Record<FiatCurrency, number> = { usd: 2, idr: 0, cny: 2 }
 
 export function formatMoney(
   amount: bigint,

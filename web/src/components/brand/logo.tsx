@@ -3,7 +3,18 @@ import { cn } from '@/lib/utils'
 /**
  * Brand mark: Renders the new YourSave logo image.
  */
-export function LogoMark({ size = 24, className }: { size?: number; className?: string }) {
+export function LogoMark({ size = 24, className, forceDark }: { size?: number; className?: string; forceDark?: boolean }) {
+  if (forceDark) {
+    return (
+      <img
+        src="/logo-dark.png"
+        width={size}
+        height={size}
+        className={cn('shrink-0 object-contain', className)}
+        alt="YourSave Logo"
+      />
+    )
+  }
   return (
     <>
       <img

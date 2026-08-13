@@ -73,6 +73,17 @@ export function Dashboard() {
 
   return (
     <div key={address} className="space-y-5">
+      {account !== null && (
+        <OnboardingChecklist
+          connected
+          funded={funded}
+          received={received}
+          faucetBusy={false}
+          onFaucet={() => navigate('/app/faucet')}
+          onGoToPaymentLink={() => void navigate('/app/link')}
+        />
+      )}
+      
       {accountStatus === 'error' ? (
         <div className="flex items-center justify-between gap-4 rounded-2xl border bg-card px-5 py-4 text-sm">
           <span>{t('errors.loadFailed')}</span>
@@ -86,32 +97,7 @@ export function Dashboard() {
       {loading && <Skeleton className="h-40 w-full rounded-2xl" />}
       {account !== null && (
         <>
-          {onboarding && (
-            <OnboardingChecklist
-              connected
-              funded={funded}
-              received={received}
-              faucetBusy={false}
-              onFaucet={() => navigate('/app/faucet')}
-              onGoToPaymentLink={() => void navigate('/app/link')}
-            />
-          )}
-          <section aria-label={t('dashboard.quickActions')} className="space-y-3">
-            <Link
-              to="/app/link"
-              className="flex items-center gap-4 rounded-2xl border border-primary/30 bg-primary/10 p-4 outline-none transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md active:translate-y-0 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <Link2Icon className="size-5" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <p className="text-base font-semibold">{t('nav.paymentLink')}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  {t('page.paymentLinkCaption')}
-                </p>
-              </span>
-              <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground" />
-            </Link>
+          <section aria-label={t('dashboard.quickActions')} className="grid gap-3 md:grid-cols-2">
             <div className="grid grid-cols-3 gap-3">
               {SECONDARY_ACTIONS.map((action) => (
                 <Link
@@ -134,6 +120,22 @@ export function Dashboard() {
                 </Link>
               ))}
             </div>
+
+            <Link
+              to="/app/link"
+              className="flex items-center gap-4 rounded-2xl border border-primary/30 bg-primary/10 p-5 outline-none transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md active:translate-y-0 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                <Link2Icon className="size-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <p className="text-base font-semibold">Share your payment link</p>
+                <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                  Send your link to get paid for real. It splits into spending and savings the moment it arrives.
+                </p>
+              </span>
+              <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground" />
+            </Link>
           </section>
           <YieldSourcesCard
             sparkdexApy={yieldData.sparkdexPoolInfo.apy}
