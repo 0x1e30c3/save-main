@@ -32,14 +32,14 @@ The recipient sets their own savings rule (default 20%) and picks where they wan
 
 | Contract | Address | Explorer |
 | --- | --- | --- |
-| **YourSave** | `0x6d4d017dE8d0A36dce7856Ee989624C6A18cD9Ea` | [View](https://coston2-explorer.flare.network/address/0x6d4d017dE8d0A36dce7856Ee989624C6A18cD9Ea) |
+| **YourSave** | `0x588DeC15D915659E8BF36c01e662479916301d3A` | [View](https://coston2-explorer.flare.network/address/0x588DeC15D915659E8BF36c01e662479916301d3A) |
 | **SparkDexAdapter** | `0xD04A92C83AFe71f4f69F9FAD0A33229BFBdE33E6` | [View](https://coston2-explorer.flare.network/address/0xD04A92C83AFe71f4f69F9FAD0A33229BFBdE33E6) |
 
 ### Protocol addresses (Flare Coston2)
 
 | Protocol | Address |
 | --- | --- |
-| FXRP | `0x3A7bDfF4C47B6363F4173cA4446513D4C61E8f07` |
+| FXRP | `0x0b6A3645c240605887a5532109323A3E12273dc7` |
 | SparkDEX Router | `0x4a1E5A90e9943467FAd1acea1E7F0e5e88472a1e` |
 | Firelight Vault | `0xC90D6847747b85d1fa2E07859869fb9fB72c0361` |
 | Upshift Vault | `0x24c1a47cD5e8473b64EAB2a94515a196E10C7C81` |
