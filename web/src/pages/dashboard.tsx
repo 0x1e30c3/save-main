@@ -17,7 +17,7 @@ import { YieldSourcesCard } from '@/components/yield-sources-card'
 import { cn } from '@/lib/utils'
 import { useAppState } from '@/lib/app-state'
 import { useT, type MessageKey } from '@/lib/i18n'
-import { faucetedFlag, useFaucet } from '@/lib/use-faucet'
+import { faucetedFlag } from '@/lib/use-faucet'
 import { useYieldData } from '@/lib/use-yield-data'
 import { useWallet } from '@/lib/wallet'
 
@@ -56,7 +56,6 @@ const SECONDARY_ACTIONS: SecondaryAction[] = [
 export function Dashboard() {
   const { address } = useWallet()
   const { account, accountStatus, rates, activity, refresh } = useAppState()
-  const { faucetBusy, runFaucet } = useFaucet()
   const { data: yieldData, loading: yieldLoading } = useYieldData()
   const navigate = useNavigate()
   const t = useT()
@@ -92,8 +91,8 @@ export function Dashboard() {
               connected
               funded={funded}
               received={received}
-              faucetBusy={faucetBusy}
-              onFaucet={() => void runFaucet()}
+              faucetBusy={false}
+              onFaucet={() => navigate('/app/faucet')}
               onGoToPaymentLink={() => void navigate('/app/link')}
             />
           )}
