@@ -52,7 +52,7 @@ function SheetContent({
   closeLabel = "Close",
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
-  side?: "left" | "right"
+  side?: "left" | "right" | "bottom"
   closeLabel?: string
 }) {
   return (
@@ -66,6 +66,8 @@ function SheetContent({
             "inset-y-0 left-0 h-full w-3/4 max-w-xs border-r data-open:slide-in-from-left data-closed:slide-out-to-left",
           side === "right" &&
             "inset-y-0 right-0 h-full w-3/4 max-w-xs border-l data-open:slide-in-from-right data-closed:slide-out-to-right",
+          side === "bottom" &&
+            "inset-x-0 bottom-0 h-auto w-full rounded-t-2xl border-t data-open:slide-in-from-bottom data-closed:slide-out-to-bottom",
           className
         )}
         {...props}
