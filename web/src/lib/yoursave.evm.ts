@@ -6,7 +6,7 @@ import {
   type ContractRunner,
   type Eip1193Provider,
 } from 'ethers'
-import { FLARE_RPC_URL, YOURSAVE_ADDRESS } from '@/lib/config'
+import { FLARE_RPC_URL, FXRP_ADDRESS, YOURSAVE_ADDRESS } from '@/lib/config'
 import { ensureFxrpAllowance, getBrowserSigner } from '@/lib/fxrp'
 import type { YourSaveAccount, YourSaveService, YieldTarget } from '@/lib/types'
 
@@ -18,6 +18,7 @@ const YOURSAVE_ABI = [
   'function setSplit(address user,uint16 bps)',
   'function setLock(address user,uint64 until)',
   'function setYieldTarget(address user,uint8 target)',
+  'function withdrawSavingsToAdapter(uint256 shares,address tokenIn,address tokenOut,address adapter,uint256 amountOutMin,uint256 deadline) returns (uint256)',
   'error InvalidAddress()',
   'error InvalidAmount()',
   'error InvalidBps()',
@@ -159,5 +160,35 @@ export const yoursaveEvm: YourSaveService = {
     const c = await signerContract()
     const hash = await sendTx(c.setYieldTarget(user, fromYieldTarget(target)))
     return { hash }
+  },
+
+  async withdrawSavingsToAdapter(
+    _user: string,
+    shares: bigint,
+    tokenOut: string,
+    adapter: string,
+    amountOutMin: bigint,
+    deadline: bigint,
+  ) {
+    const c = await signerContract()
+    let amountOut = 0n
+    try {
+      amountOut = BigInt(
+        await c.withdrawSavingsToAdapter.staticCall(
+          shares,
+          FXRP_ADDRESS,
+          tokenOut,
+          adapter,
+          amountOutMin,
+          deadline,
+        ),
+      )
+    } catch (error) {
+      throw asLegacyContractError(error) ?? error
+    }
+    const hash = await sendTx(
+      c.withdrawSavingsToAdapter(shares, FXRP_ADDRESS, tokenOut, adapter, amountOutMin, deadline),
+    )
+    return { amountIn: shares, amountOut, hash }
   },
 }
