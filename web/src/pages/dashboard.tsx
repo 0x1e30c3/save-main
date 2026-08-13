@@ -65,7 +65,7 @@ export function Dashboard() {
   const loading = accountStatus === 'loading'
   const funded = faucetedFlag(address) || activity.length > 0
   const received = activity.some((item) => item.kind === 'pay')
-  const onboarding = !(funded && received)
+  // no unused onboarding variable
   const yieldTvl =
     yieldData.vaultStats.idle !== null && yieldData.vaultStats.invested !== null
       ? yieldData.vaultStats.idle + yieldData.vaultStats.invested

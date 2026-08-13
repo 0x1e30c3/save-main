@@ -4,6 +4,7 @@ import { getFxrpBalance } from '@/lib/fxrp'
 import { ConnectPrompt } from '@/components/connect-prompt'
 import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
+import type { YieldTarget } from '@/lib/types'
 import { YieldDepositCard } from '@/components/yield-deposit-card'
 import { YieldDirectDepositCard } from '@/components/yield-direct-deposit-card'
 import { YieldPositionCard } from '@/components/yield-position-card'
@@ -91,7 +92,7 @@ export function YieldPage() {
     if (!address) return
     const result = await runAction(
       `target-${target}`,
-      'success.settingsSaved', // generic message since we don't have a specific one
+      'success.yieldTargetSaved',
       () => yoursave.setYieldTarget(address, target),
     )
     if (result) {
