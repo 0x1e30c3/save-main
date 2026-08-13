@@ -1,17 +1,16 @@
-// FXRP has 18 decimals (standard ERC-20)
-const FXRP_SCALE = 10n ** 18n
+import { FXRP_SCALE } from '@/lib/fxrp'
 
 export function parseFxrp(input: string): bigint {
   const trimmed = input.trim()
-  if (!/^\d+(\.\d{1,18})?$/.test(trimmed)) throw new Error('Invalid amount')
+  if (!/^\d+(\.\d{1,6})?$/.test(trimmed)) throw new Error('Invalid amount')
   const [whole, frac = ''] = trimmed.split('.')
-  return BigInt(whole) * FXRP_SCALE + BigInt(frac.padEnd(18, '0'))
+  return BigInt(whole) * FXRP_SCALE + BigInt(frac.padEnd(6, '0'))
 }
 
 // plain decimal string that parseFxrp accepts, for prefilling inputs
 export function fxrpToInput(amount: bigint): string {
   const whole = (amount / FXRP_SCALE).toString()
-  const frac = (amount % FXRP_SCALE).toString().padStart(18, '0').replace(/0+$/, '')
+  const frac = (amount % FXRP_SCALE).toString().padStart(6, '0').replace(/0+$/, '')
   return frac === '' ? whole : `${whole}.${frac}`
 }
 
