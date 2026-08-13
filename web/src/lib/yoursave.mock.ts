@@ -80,4 +80,13 @@ export const yoursaveMock: YourSaveService = {
     acc.yieldTarget = target
     return { hash: mockHash() }
   },
+
+  async withdrawSavingsToAdapter(user, shares, _tokenOut, _adapter, _amountOutMin, _deadline) {
+    await delay()
+    const acc = account(user)
+    if (acc.lockUntil > nowSeconds()) throw new Error('Error(Contract, #5)')
+    if (shares > acc.shares) throw new Error('Error(Contract, #4)')
+    acc.shares -= shares
+    return { amountIn: shares, amountOut: shares, hash: mockHash() }
+  },
 }
