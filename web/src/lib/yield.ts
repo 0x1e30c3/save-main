@@ -1,11 +1,12 @@
+import { FXRP_SCALE } from '@/lib/fxrp'
 import type { ActivityItem } from '@/lib/activity'
 import type { YieldTarget } from '@/lib/types'
 
 // Flare Coston2 yield protocol constants
-export const FXRP_SCALE = 10n ** 18n // FXRP has 18 decimals
+export { FXRP_SCALE } // FXRP has 6 decimals on Coston2
 
 export async function getSharePrice(): Promise<bigint | null> {
-  return 10n ** 18n // mock 1.0 FXRP per share
+  return FXRP_SCALE // mock 1.0 FXRP per share
 }
 
 export type VaultStats = {
@@ -16,9 +17,9 @@ export type VaultStats = {
 
 export async function getFirelightVaultStats(): Promise<VaultStats> {
   return {
-    totalSupply: 5_000_000_000_000_000_000_000n, // 5000 FXRP
-    idle: 1_000_000_000_000_000_000_000n, // 1000 FXRP
-    invested: 4_000_000_000_000_000_000_000n, // 4000 FXRP
+    totalSupply: 5_000_000_000n, // 5000 FXRP
+    idle: 1_000_000_000n, // 1000 FXRP
+    invested: 4_000_000_000n, // 4000 FXRP
   }
 }
 
