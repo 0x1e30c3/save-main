@@ -14,6 +14,16 @@ YourSave is a programmable savings splitter that automatically routes a portion 
 
 Built for **Bounty 1: Interoperable Asset Products** — making FXRP more useful across the Flare ecosystem.
 
+## Problem statement
+
+Web3 users and merchants lack seamless tools to automate savings from everyday incoming payments. Often, crypto sits idle in wallets without compounding through DeFi yield protocols because manually splitting funds and depositing them across various yield sources is tedious and adds unnecessary friction.
+
+## Our solution
+
+**YourSave** acts as an effortless, programmable routing layer. It allows users to set automated saving rules (e.g., save 20% of all incoming payments). Whenever they receive a payment in FXRP, the smart contract automatically splits the funds into a spendable balance and a savings balance. 
+
+Users can then seamlessly route their savings directly into top Flare yield protocols (such as **SparkDEX**, **Firelight**, or **Upshift**) to earn passive income. This turns saving and yield farming from a manual chore into an invisible, automatic habit.
+
 ## How it works
 
 ```mermaid
