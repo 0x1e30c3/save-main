@@ -20,43 +20,47 @@ import { SettingsPage } from '@/pages/settings'
 import { WithdrawPage } from '@/pages/withdraw'
 import { YieldPage } from '@/pages/yield'
 
+import { ReactLenis } from 'lenis/react'
+
 const queryClient = new QueryClient()
 
 export function App() {
   return (
-    <ThemeProvider
-      attribute="class"
-      storageKey="yoursave:theme"
-      defaultTheme="light"
-      disableTransitionOnChange
-    >
-      <SettingsProvider>
-        <WagmiProvider config={config}>
-          <QueryClientProvider client={queryClient}>
-            <AppStateProvider>
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/pay/:address" element={<PayPage />} />
-                  <Route path="/app" element={<AppShell />}>
-                    <Route index element={<Dashboard />} />
-                    <Route path="activity" element={<ActivityPage />} />
-                    <Route path="faucet" element={<FaucetPage />} />
-                    <Route path="yield" element={<YieldPage />} />
-                    <Route path="withdraw" element={<WithdrawPage />} />
-                    <Route path="rules" element={<RulesPage />} />
-                    <Route path="link" element={<PaymentLinkPage />} />
-                    <Route path="settings" element={<SettingsPage />} />
-                    <Route path="*" element={<NotFoundContent />} />
-                  </Route>
-                  <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-              </BrowserRouter>
-              <Toaster />
-            </AppStateProvider>
-          </QueryClientProvider>
-        </WagmiProvider>
-      </SettingsProvider>
-    </ThemeProvider>
+    <ReactLenis root>
+      <ThemeProvider
+        attribute="class"
+        storageKey="yoursave:theme"
+        defaultTheme="light"
+        disableTransitionOnChange
+      >
+        <SettingsProvider>
+          <WagmiProvider config={config}>
+            <QueryClientProvider client={queryClient}>
+              <AppStateProvider>
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Landing />} />
+                    <Route path="/pay/:address" element={<PayPage />} />
+                    <Route path="/app" element={<AppShell />}>
+                      <Route index element={<Dashboard />} />
+                      <Route path="activity" element={<ActivityPage />} />
+                      <Route path="faucet" element={<FaucetPage />} />
+                      <Route path="yield" element={<YieldPage />} />
+                      <Route path="withdraw" element={<WithdrawPage />} />
+                      <Route path="rules" element={<RulesPage />} />
+                      <Route path="link" element={<PaymentLinkPage />} />
+                      <Route path="settings" element={<SettingsPage />} />
+                      <Route path="*" element={<NotFoundContent />} />
+                    </Route>
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </BrowserRouter>
+                <Toaster />
+              </AppStateProvider>
+            </QueryClientProvider>
+          </WagmiProvider>
+        </SettingsProvider>
+      </ThemeProvider>
+    </ReactLenis>
   )
 }

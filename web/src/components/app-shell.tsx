@@ -30,7 +30,7 @@ import { useWallet } from '@/lib/wallet'
 import { WalletPicker } from '@/components/wallet-picker'
 
 const ITEM =
-  'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50'
+  'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.98]'
 const ITEM_IDLE = 'text-muted-foreground hover:bg-muted hover:text-foreground'
 const ITEM_ACTIVE = 'bg-primary/10 text-primary-ink'
 
@@ -240,15 +240,14 @@ export function AppShell() {
 
   useScrollLock()
 
-  // the scroll container outlives route swaps, so reset it like a page load would
   useEffect(() => {
-    scrollRef.current?.scrollTo(0, 0)
+    window.scrollTo(0, 0)
   }, [pathname])
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev)
 
   return (
-    <div className="relative h-svh">
+    <div className="relative min-h-svh">
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[-1]">
         <img
           src="/assets/section1-bg.jpg"
@@ -286,7 +285,7 @@ export function AppShell() {
       <div 
         ref={scrollRef} 
         className={cn(
-          "no-scrollbar relative z-10 h-full overflow-y-auto transition-[padding] duration-300",
+          "relative z-10 w-full transition-[padding] duration-300",
           sidebarOpen ? "md:pl-[280px]" : "md:pl-[88px]"
         )}
       >
@@ -297,7 +296,7 @@ export function AppShell() {
               type="button"
               aria-label={t('shell.openMenu')}
               aria-haspopup="dialog"
-              className="flex size-10 items-center justify-center rounded-xl border bg-card shadow-sm outline-none transition-shadow hover:shadow-md focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="flex size-10 items-center justify-center rounded-xl border bg-card shadow-sm outline-none transition-all duration-200 hover:shadow-md focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-95"
               onClick={() => setSheetOpen(true)}
             >
               <LogoMark size={22} />
