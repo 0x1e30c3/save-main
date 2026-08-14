@@ -21,6 +21,7 @@ type YieldSourcesCardProps = {
   selectedTarget?: YieldTarget
   onSelectTarget?: (target: YieldTarget) => void
   busyTarget?: YieldTarget | null
+  targetHealth?: { sparkdex: boolean; firelight: boolean; upshift: boolean }
 }
 
 type SourceRow = {
@@ -37,6 +38,7 @@ type SourceRow = {
   target: YieldTarget | null
   apy: number | null
   tvl: bigint | null
+  available: boolean
   // A real rate from a live mainnet pool, purely for context on what real
   // borrowing/trading demand looks like - never the user's own position.
   mainnetApy: number | null
@@ -81,6 +83,7 @@ export function YieldSourcesCard({
   selectedTarget,
   onSelectTarget,
   busyTarget,
+  targetHealth = { sparkdex: true, firelight: true, upshift: true },
 }: YieldSourcesCardProps) {
   const t = useT()
   const { locale, primaryCurrency } = useSettings()
@@ -97,6 +100,7 @@ export function YieldSourcesCard({
       target: 'sparkdex',
       apy: sparkdexApy,
       tvl: sparkdexTvl,
+      available: targetHealth.sparkdex,
       mainnetApy: mainnetApy.sparkdex,
     },
     {
@@ -109,6 +113,7 @@ export function YieldSourcesCard({
       target: 'firelight',
       apy: firelightApy,
       tvl: firelightTvl,
+      available: targetHealth.firelight,
       mainnetApy: mainnetApy.firelight,
     },
     {
@@ -121,12 +126,16 @@ export function YieldSourcesCard({
       target: 'upshift',
       apy: upshiftApy,
       tvl: upshiftTvl,
+      available: targetHealth.upshift,
       mainnetApy: mainnetApy.upshift,
     },
   ]
 
   const bestApy = sources.reduce<number | null>(
-    (best, source) => (source.apy !== null && (best === null || source.apy > best) ? source.apy : best),
+    (best, source) =>
+      source.available && source.apy !== null && (best === null || source.apy > best)
+        ? source.apy
+        : best,
     null,
   )
 
@@ -154,12 +163,13 @@ export function YieldSourcesCard({
                   key={source.key}
                   type="button"
                   onClick={() => source.target && onSelectTarget?.(source.target)}
-                  disabled={isSelected || isBusy || !source.target}
+                  disabled={isSelected || isBusy || !source.target || !source.available}
                   className={cn(
                     'group relative flex w-64 md:w-auto shrink-0 snap-start flex-col gap-3 rounded-2xl border bg-card p-4 text-left outline-none transition-[transform,box-shadow,border-color] duration-150',
-                    !isSelected && 'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer',
+                    !isSelected && source.available && 'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer',
                     isSelected && 'border-gold/50 cursor-default',
-                    isBusy && 'opacity-80 pointer-events-none'
+                    isBusy && 'opacity-80 pointer-events-none',
+                    !source.available && 'cursor-not-allowed opacity-60'
                   )}
                 >
                   <div className="flex items-center justify-between w-full">
@@ -182,7 +192,11 @@ export function YieldSourcesCard({
                     {isBusy && <Loader2Icon className="size-4 animate-spin text-muted-foreground" />}
                   </div>
                   <div className="flex flex-wrap items-center gap-1">
-                    {isSelected ? (
+                    {!source.available ? (
+                      <Badge variant="destructive" className="text-[10px]">
+                        {t('yield.badgeUnavailable')}
+                      </Badge>
+                    ) : isSelected ? (
                       <Badge variant="secondary" className="bg-gold/15 text-[10px] text-gold-ink">
                         {t('yield.badgeSelected')}
                       </Badge>
@@ -194,7 +208,7 @@ export function YieldSourcesCard({
                         {t(source.badge === 'active' ? 'yield.badgeActive' : 'yield.badgeSoon')}
                       </Badge>
                     )}
-                    {isBest && (
+                    {isBest && source.available && (
                       <Badge variant="secondary" className="bg-gold/15 text-[10px] text-gold-ink">
                         {t('yield.bestYield')}
                       </Badge>
