@@ -38,3 +38,7 @@ export const EVM_RPC_URL = FLARE_RPC_URL
 export function explorerTxUrl(hash: string): string {
   return `${FLARE_EXPLORER_URL}/tx/${hash}`
 }
+
+export function explorerAddressUrl(address: string): string {
+  return `${FLARE_EXPLORER_URL}/address/${address}`
+}
