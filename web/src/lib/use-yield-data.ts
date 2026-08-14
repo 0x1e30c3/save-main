@@ -4,10 +4,12 @@ import {
   getFirelightVaultStats,
   getSparkDexPoolInfo,
   getUpshiftStats,
+  getTargetHealth,
   getSparkDexMainnetReferenceApy,
   getFirelightMainnetReferenceApy,
   getUpshiftMainnetReferenceApy,
   type SparkDexPoolInfo,
+  type TargetHealth,
   type VaultStats,
   type UpshiftStats,
 } from '@/lib/yield'
@@ -24,12 +26,14 @@ type YieldData = {
   sparkdexPoolInfo: SparkDexPoolInfo
   upshiftStats: UpshiftStats
   mainnetApy: MainnetReferenceApy
+  targetHealth: TargetHealth
 }
 
 const EMPTY_STATS: VaultStats = { totalSupply: null, idle: null, invested: null }
 const EMPTY_SPARKDEX: SparkDexPoolInfo = { apy: null, tvl: null, feeRate: null }
 const EMPTY_UPSHIFT: UpshiftStats = { apy: null, tvl: null }
 const EMPTY_MAINNET_APY: MainnetReferenceApy = { upshift: null, firelight: null, sparkdex: null }
+const EMPTY_HEALTH: TargetHealth = { sparkdex: true, firelight: true, upshift: true }
 
 export function useYieldData() {
   const [data, setData] = useState<YieldData>({
@@ -38,6 +42,7 @@ export function useYieldData() {
     sparkdexPoolInfo: EMPTY_SPARKDEX,
     upshiftStats: EMPTY_UPSHIFT,
     mainnetApy: EMPTY_MAINNET_APY,
+    targetHealth: EMPTY_HEALTH,
   })
   const [loading, setLoading] = useState(true)
   const runId = useRef(0)
@@ -50,6 +55,7 @@ export function useYieldData() {
       vaultStats,
       sparkdexPoolInfo,
       upshiftStats,
+      targetHealth,
       sparkdexMainnetApy,
       firelightMainnetApy,
       upshiftMainnetApy,
@@ -58,6 +64,7 @@ export function useYieldData() {
       getFirelightVaultStats(),
       getSparkDexPoolInfo(),
       getUpshiftStats(),
+      getTargetHealth(),
       getSparkDexMainnetReferenceApy(),
       getFirelightMainnetReferenceApy(),
       getUpshiftMainnetReferenceApy(),
@@ -69,6 +76,7 @@ export function useYieldData() {
       sparkdexPoolInfo,
       upshiftStats,
       mainnetApy: { sparkdex: sparkdexMainnetApy, firelight: firelightMainnetApy, upshift: upshiftMainnetApy },
+      targetHealth,
     })
     setLoading(false)
   }, [])
