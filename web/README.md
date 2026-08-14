@@ -1,32 +1,51 @@
-# React + TypeScript + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + Vite + TypeScript + Tailwind CSS v4 frontend for YourSave.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19** with TypeScript
+- **Vite** for build & dev
+- **Tailwind CSS v4** for styling
+- **ethers.js v6** for contract interactions
+- **wagmi** for wallet connection
+- **shadcn-style** UI components
 
-## React Compiler
+## Commands
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install       # Install dependencies
+npm run dev       # Start dev server (http://localhost:5173)
+npm run build     # Type-check + production build
+npm run lint      # Run oxlint
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Environment
+
+```env
+VITE_CHAIN_MODE=evm
+VITE_YOURSAVE_ADDRESS=0x588DeC15D915659E8BF36c01e662479916301d3A
+VITE_FLARE_RPC_URL=https://coston2-api.flare.network/ext/C/rpc
+```
+
+Set `VITE_YOURSAVE_ADDRESS=""` for mock mode (no wallet needed).
+
+## Key Files
+
+| File | Purpose |
+|---|---|
+| `lib/config.ts` | Contract addresses, RPC URLs |
+| `lib/yoursave.evm.ts` | EVM contract interactions |
+| `lib/yoursave.mock.ts` | In-memory mock |
+| `lib/fxrp.ts` | FXRP token utilities |
+| `lib/app-state.tsx` | Global state provider |
+| `lib/yield.ts` | Yield calculations |
+| `lib/errors.ts` | Error code mapping |
+| `lib/i18n.tsx` | Translations (EN, ID, ZH) |
+
+## Gotchas
+
+- FXRP has **6 decimals** (not 18)
+- All write calls include explicit `gasLimit` to prevent silent reverts on Coston2
+- `vercel.json` handles SPA routing — excludes static assets from rewrite
+- Console logging is enabled in deposit flow for debugging
