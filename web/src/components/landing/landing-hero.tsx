@@ -31,7 +31,7 @@ export function LandingHero() {
   return (
     <section className="relative isolate z-20 flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-6 pt-24 pb-12 sm:px-12 sm:pt-32" id="top">
       {/* Restored Original Background */}
-      <img className="absolute inset-0 z-[-3] h-full w-full object-cover opacity-40 mix-blend-luminosity" src="/assets/section1-bg.jpg" alt="" />
+      <img className="absolute inset-0 z-[-3] h-full w-full object-cover opacity-40 mix-blend-luminosity" src="/assets/section1-bg.png" alt="" />
       <div className="pointer-events-none absolute inset-0 z-[-2] bg-[radial-gradient(48%_56%_at_50%_47%,rgba(9,13,22,0.6),rgba(9,13,22,0.1)_76%),linear-gradient(to_bottom,rgba(29,34,21,0.6),transparent_22%,transparent_60%,rgba(9,13,22,0.7))]" aria-hidden="true" />
 
       {/* Floating hands decoration with entrance animation */}
