@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { ArrowRightIcon, Loader2Icon, WalletIcon, InfoIcon, XIcon } from 'lucide-react'
 import { TokenIcon } from '@/components/brand/token-icon'
 import { Button } from '@/components/ui/button'
@@ -35,6 +35,7 @@ type YieldDirectDepositCardProps = {
     deadline: bigint
   }) => Promise<void>
   busy: boolean
+  available?: boolean
 }
 
 export function YieldDirectDepositCard({
@@ -43,6 +44,7 @@ export function YieldDirectDepositCard({
   rates,
   onDirectDeposit,
   busy,
+  available = true,
 }: YieldDirectDepositCardProps) {
   const t = useT()
   const { address } = useWallet()
@@ -64,7 +66,12 @@ export function YieldDirectDepositCard({
         : YIELD_TOKEN_OUT
   const hasTokenOut = isValidAddress(tokenOut)
   const canDeposit =
-    address && hasTokenOut && amount.trim() !== '' && !busy && walletBalance > 0n
+    available &&
+    address &&
+    hasTokenOut &&
+    amount.trim() !== '' &&
+    !busy &&
+    walletBalance > 0n
 
   const handleMax = () => {
     setAmount(fxrpToInput(walletBalance))
@@ -83,7 +90,7 @@ export function YieldDirectDepositCard({
         setError(t('errors.insufficientShares'))
         return
       }
-      const amountOutMin = 0n
+      const amountOutMin = (sharesValue * BigInt(10000 - Math.round(slippage * 100))) / 10000n
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 20)
       
       await onDirectDeposit({
@@ -216,6 +223,11 @@ export function YieldDirectDepositCard({
               </div>
 
               {error && <p className="text-sm text-destructive">{error}</p>}
+              {!available && (
+                <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                  {t('yield.targetUnavailable')}
+                </p>
+              )}
 
               <Button
                 className={cn('w-full', yieldTarget === 'sparkdex' ? 'bg-gold-ink hover:bg-gold-ink/90' : '')}
