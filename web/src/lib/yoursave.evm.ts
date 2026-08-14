@@ -121,13 +121,13 @@ export const yoursaveEvm: YourSaveService = {
     const signer = await getBrowserSigner()
     await ensureFxrpAllowance(from, amount, signer)
     const c = new Contract(YOURSAVE_ADDRESS, YOURSAVE_ABI, signer as ContractRunner)
-    const hash = await sendTx(c.pay(from, to, amount))
+    const hash = await sendTx(c.pay(from, to, amount, { gasLimit: 300_000 }))
     return { hash }
   },
 
   async withdrawSpend(user: string, amount: bigint) {
     const c = await signerContract()
-    const hash = await sendTx(c.withdrawSpend(user, amount))
+    const hash = await sendTx(c.withdrawSpend(user, amount, { gasLimit: 200_000 }))
     return { hash }
   },
 
@@ -139,25 +139,25 @@ export const yoursaveEvm: YourSaveService = {
     } catch (error) {
       throw asLegacyContractError(error) ?? error
     }
-    const hash = await sendTx(c.withdrawSavings(user, shares))
+    const hash = await sendTx(c.withdrawSavings(user, shares, { gasLimit: 300_000 }))
     return { amount, hash }
   },
 
   async setSplit(user: string, bps: number) {
     const c = await signerContract()
-    const hash = await sendTx(c.setSplit(user, bps))
+    const hash = await sendTx(c.setSplit(user, bps, { gasLimit: 200_000 }))
     return { hash }
   },
 
   async setLock(user: string, until: bigint) {
     const c = await signerContract()
-    const hash = await sendTx(c.setLock(user, until))
+    const hash = await sendTx(c.setLock(user, until, { gasLimit: 200_000 }))
     return { hash }
   },
 
   async setYieldTarget(user: string, target: YieldTarget) {
     const c = await signerContract()
-    const hash = await sendTx(c.setYieldTarget(user, fromYieldTarget(target)))
+    const hash = await sendTx(c.setYieldTarget(user, fromYieldTarget(target), { gasLimit: 200_000 }))
     return { hash }
   },
 
@@ -186,7 +186,7 @@ export const yoursaveEvm: YourSaveService = {
       throw asLegacyContractError(error) ?? error
     }
     const hash = await sendTx(
-      c.withdrawSavingsToAdapter(shares, FXRP_ADDRESS, tokenOut, adapter, amountOutMin, deadline, { gasLimit: 1000000 }),
+      c.withdrawSavingsToAdapter(shares, FXRP_ADDRESS, tokenOut, adapter, amountOutMin, deadline, { gasLimit: 1_000_000 }),
     )
     return { amountIn: shares, amountOut, hash }
   },
@@ -200,14 +200,27 @@ export const yoursaveEvm: YourSaveService = {
   ) {
     const signer = await getBrowserSigner()
     const user = await (signer as any).getAddress()
-    
+
+    const network = await signer.provider.getNetwork()
+    if (network.chainId !== BigInt(FLARE_CHAIN_ID)) {
+      throw new Error(`Wrong network: please connect to Flare Coston2`)
+    }
+
     if (adapter === import.meta.env.VITE_VAULT_ADAPTER || adapter === '0x3c13BDd505DE69bB0DF0a2e68A0Cd93a44beB0b4') {
       await ensureFxrpAllowance(user, amount, signer, tokenOut)
       const vaultInterface = new Interface(['function deposit(uint256 assets, address receiver) external returns (uint256)'])
       const vaultContract = new Contract(tokenOut, vaultInterface, signer as ContractRunner)
       let amountOut = 0n
-      try { amountOut = await vaultContract.deposit.staticCall(amount, user) } catch {}
-      const hash = await sendTx(vaultContract.deposit(amount, user, { gasLimit: 500000 }))
+      try {
+        amountOut = await vaultContract.deposit.staticCall(amount, user)
+      } catch (staticErr: any) {
+        const msg = staticErr?.shortMessage ?? staticErr?.message ?? String(staticErr)
+        if (/maxDeposit|max deposit/i.test(msg)) {
+          throw new Error('This vault is not accepting deposits right now.')
+        }
+        throw new Error('Vault deposit simulation failed: ' + msg.slice(0, 120))
+      }
+      const hash = await sendTx(vaultContract.deposit(amount, user, { gasLimit: 500_000 }))
       return { amountIn: amount, amountOut, hash }
     } else {
       const routerAddress = import.meta.env.VITE_SPARKDEX_ROUTER ?? '0x4a1E5A90e9943467FAd1acea1E7F0e5e88472a1e'
@@ -227,8 +240,12 @@ export const yoursaveEvm: YourSaveService = {
         sqrtPriceLimitX96: 0n
       }
       let amountOut = 0n
-      try { amountOut = await router.exactInputSingle.staticCall(params) } catch {}
-      const hash = await sendTx(router.exactInputSingle(params, { gasLimit: 500000 }))
+      try {
+        amountOut = await router.exactInputSingle.staticCall(params)
+      } catch {
+        // static call failed — proceed anyway, the on-chain tx may still succeed
+      }
+      const hash = await sendTx(router.exactInputSingle(params, { gasLimit: 500_000 }))
       return { amountIn: amount, amountOut, hash }
     }
   },
