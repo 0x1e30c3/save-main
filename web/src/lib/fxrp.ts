@@ -1,7 +1,7 @@
 // FXRP utilities for Flare network
 // FXRP is an ERC-20 token with 18 decimals on Flare
 
-import { BrowserProvider, Contract, JsonRpcProvider, type ContractRunner } from 'ethers'
+import { Contract, JsonRpcProvider, type ContractRunner } from 'ethers'
 import { FLARE_RPC_URL, FXRP_ADDRESS, YOURSAVE_ADDRESS } from '@/lib/config'
 
 const FXRP_ABI = [
@@ -51,11 +51,8 @@ export async function ensureFxrpAllowance(
   return true
 }
 
-type Eip1193ProviderWindow = Window & { ethereum?: { request: (req: { method: string; params?: unknown[] }) => Promise<unknown> } }
+import { getEthersSigner } from '@/lib/ethers-wagmi'
 
 export async function getBrowserSigner() {
-  const ethereum = (window as Eip1193ProviderWindow).ethereum
-  if (!ethereum) throw new Error('wallet_not_found')
-  const provider = new BrowserProvider(ethereum)
-  return provider.getSigner()
+  return getEthersSigner()
 }

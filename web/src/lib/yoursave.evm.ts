@@ -1,10 +1,8 @@
 import {
-  BrowserProvider,
   Contract,
   Interface,
   JsonRpcProvider,
   type ContractRunner,
-  type Eip1193Provider,
 } from 'ethers'
 import { FLARE_RPC_URL, FXRP_ADDRESS, YOURSAVE_ADDRESS, FLARE_CHAIN_ID } from '@/lib/config'
 import { ensureFxrpAllowance, getBrowserSigner } from '@/lib/fxrp'
@@ -48,8 +46,6 @@ const ERROR_CODES: Record<string, number> = {
 
 const iface = new Interface(YOURSAVE_ABI)
 
-type EthereumWindow = Window & { ethereum?: Eip1193Provider }
-
 // Flare yield target mapping: SparkDEX=0, Firelight=1, Upshift=2
 function toYieldTarget(index: bigint): YieldTarget {
   if (index === 0n) return 'sparkdex'
@@ -67,15 +63,14 @@ function reader(): Contract {
   return new Contract(YOURSAVE_ADDRESS, YOURSAVE_ABI, new JsonRpcProvider(FLARE_RPC_URL))
 }
 
+import { getEthersSigner } from '@/lib/ethers-wagmi'
+
 async function signerContract(): Promise<Contract> {
-  const ethereum = (window as EthereumWindow).ethereum
-  if (!ethereum) throw new Error('wallet_not_found')
-  const provider = new BrowserProvider(ethereum)
-  const network = await provider.getNetwork()
+  const signer = await getEthersSigner()
+  const network = await signer.provider.getNetwork()
   if (network.chainId !== BigInt(FLARE_CHAIN_ID)) {
     throw new Error(`Wrong network: please connect to Coston2`)
   }
-  const signer = await provider.getSigner()
   return new Contract(YOURSAVE_ADDRESS, YOURSAVE_ABI, signer as ContractRunner)
 }
 
