@@ -51,6 +51,38 @@ The recipient sets their own savings rule (default 20%) and picks where they wan
 - `plan.md` — Full migration plan (EVM Sepolia → Flare Coston2)
 - `deployments.json` — Deployed contract addresses
 
+## Trying the app
+
+1. Install an EVM browser wallet (e.g. MetaMask, Rabby) and connect to **Flare Coston2 Testnet** (chain ID 114).
+2. Connect your wallet on the dashboard. The app will prompt to add and switch networks automatically.
+3. Fund your wallet with testnet C2FLR (from [Flare Faucet](https://faucet.flare.network/coston2)) and testnet FXRP.
+4. Simulate an incoming payment and watch it split into spendable and savings balances.
+5. On the Rules page, switch the yield target between **SparkDEX**, **Firelight**, and **Upshift**.
+
+## Flare Integration
+
+- **FAssets/FXRP**: Primary asset — savings are denominated in FXRP (wrapped XRP on Flare), 18 decimals
+- **Flare Coston2**: Testnet for deployment and testing (chain ID 114, RPC: `https://coston2-api.flare.network/ext/C/rpc`)
+- **SparkDEX**: Uniswap V3 fork for token swaps and liquidity pools
+- **Firelight**: ERC-4626 compliant yield vaults for FXRP
+- **Upshift**: Strategy-driven auto-compound vaults
+- **Flare Data Connector (FDC)**: Powers cross-chain payment verification
+
+## What was built / migrated
+
+### Newly built
+- `YourSave.sol` — Core savings contract with SparkDEX/Firelight/Upshift yield targets
+- `SparkDexAdapter.sol` — Adapter for routing savings into SparkDEX V3 pools
+- `ISparkDexRouter.sol` — SparkDEX V3 router interface
+- Full React frontend with Flare Coston2 integration
+- FXRP 18-decimal formatting and wallet auto-switch to Flare Coston2
+
+### Migrated from EVM Sepolia
+- Network: Ethereum Sepolia → Flare Coston2
+- Asset: USDC (7 decimals) → FXRP (18 decimals)
+- Yield: iExec Nox / Blend / Soroswap / Defindex → SparkDEX / Firelight / Upshift
+- All old Stellar/iExec code removed
+
 ## Running locally
 
 ### 1. Smart Contracts (Foundry)
@@ -85,43 +117,4 @@ cd evm
   --broadcast
 ```
 
-## Trying the app
 
-1. Install an EVM browser wallet (e.g. MetaMask, Rabby) and connect to **Flare Coston2 Testnet** (chain ID 114).
-2. Connect your wallet on the dashboard. The app will prompt to add and switch networks automatically.
-3. Fund your wallet with testnet C2FLR (from [Flare Faucet](https://faucet.flare.network/coston2)) and testnet FXRP.
-4. Simulate an incoming payment and watch it split into spendable and savings balances.
-5. On the Rules page, switch the yield target between **SparkDEX**, **Firelight**, and **Upshift**.
-
-## Flare Integration
-
-- **FAssets/FXRP**: Primary asset — savings are denominated in FXRP (wrapped XRP on Flare), 18 decimals
-- **Flare Coston2**: Testnet for deployment and testing (chain ID 114, RPC: `https://coston2-api.flare.network/ext/C/rpc`)
-- **SparkDEX**: Uniswap V3 fork for token swaps and liquidity pools
-- **Firelight**: ERC-4626 compliant yield vaults for FXRP
-- **Upshift**: Strategy-driven auto-compound vaults
-- **Flare Data Connector (FDC)**: Powers cross-chain payment verification
-
-## What was built / migrated
-
-### Newly built
-- `YourSave.sol` — Core savings contract with SparkDEX/Firelight/Upshift yield targets
-- `SparkDexAdapter.sol` — Adapter for routing savings into SparkDEX V3 pools
-- `ISparkDexRouter.sol` — SparkDEX V3 router interface
-- Full React frontend with Flare Coston2 integration
-- FXRP 18-decimal formatting and wallet auto-switch to Flare Coston2
-
-### Migrated from EVM Sepolia
-- Network: Ethereum Sepolia → Flare Coston2
-- Asset: USDC (7 decimals) → FXRP (18 decimals)
-- Yield: iExec Nox / Blend / Soroswap / Defindex → SparkDEX / Firelight / Upshift
-- All old Stellar/iExec code removed
-
-## Next Steps
-
-- [ ] Integrate FAssets SDK for direct FXRP minting flow
-- [ ] Add cross-chain XRP balance display
-- [ ] Implement FXRP onboarding flow (XRP → FXRP via FDC proof)
-- [ ] Mainnet deployment (Flare Mainnet)
-- [ ] Real SparkDEX V3 SwapRouter integration
-- [ ] User testing and feedback
