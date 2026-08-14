@@ -32,5 +32,8 @@ export function errorKey(e: unknown): MessageKey {
   if (text.includes('wallet_not_found')) return 'common.connectFirst'
   if (text.includes('wallet_timeout')) return 'errors.walletTimeout'
   if (/reject|declin|denied|closed/i.test(text)) return 'errors.walletCancelled'
+  if (/wrong network|coston2/i.test(text)) return 'errors.wrongNetwork'
+  if (/vault.*not accepting|maxDeposit|not accepting deposits/i.test(text)) return 'errors.vaultNotAccepting'
+  if (/insufficient allowance|allowance/i.test(text)) return 'errors.insufficientAllowance'
   return 'errors.generic'
 }
