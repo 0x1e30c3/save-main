@@ -1,35 +1,31 @@
-# YourSave EVM (Foundry)
+# Smart Contracts
 
-Smart contracts for YourSave on Flare Coston2 Testnet, built with **Foundry/Forge**.
+Solidity contracts for YourSave, deployed on Flare Coston2.
 
-## Setup
+## Contracts
 
-```bash
-cd evm
-cp .env.example .env
-# Set FLARE_RPC_URL and DEPLOYER_PRIVATE_KEY
-/Users/em/.foundry/bin/forge build
-```
+| Contract | Description |
+|---|---|
+| `Save.sol` | Core savings contract — payment splitting, yield targets, withdrawals |
+| `VaultAdapter.sol` | Deposits FXRP into ERC-4626 vaults |
+| `SparkDexAdapter.sol` | Swaps FXRP via SparkDEX V3 |
+| `FxrpVault.sol` | Custom ERC-4626 vault for FXRP |
+| `ISparkDexRouter.sol` | SparkDEX V3 router interface |
 
-## Testing
-
-```bash
-/Users/em/.foundry/bin/forge test
-```
-
-## Deploy ke Coston2
+## Build & Test
 
 ```bash
-cd evm
-source .env
-# Get testnet C2FLR from https://faucet.flare.network/coston2
-/Users/em/.foundry/bin/forge create src/Save.sol:YourSave \
-  --rpc-url "$FLARE_RPC_URL" \
-  --private-key "$DEPLOYER_PRIVATE_KEY" \
-  --broadcast
+git submodule update --init  # forge-std
+~/.foundry/bin/forge build
+~/.foundry/bin/forge test
 ```
 
-## Deployed (Coston2)
+## Deploy
 
-- YourSave: `0x6d4d017dE8d0A36dce7856Ee989624C6A18cD9Ea`
-- SparkDexAdapter: `0xD04A92C83AFe71f4f69F9FAD0A33229BFBdE33E6`
+See [docs/deployment.md](../docs/deployment.md) for deploy scripts and addresses.
+
+## Gotchas
+
+- FXRP has **6 decimals** on Coston2 (not 18)
+- `forge-std` is a git submodule — run `git submodule update --init` after clone
+- Use `~/.foundry/bin/forge` (not bare `forge` — the npm `forge` package is ForgeCode, not Foundry)
