@@ -4,8 +4,6 @@ import { cn } from '@/lib/utils'
 
 type DecoProps = { uid: string }
 
-const SHADOW = { x: '-40%', y: '-40%', width: '180%', height: '180%' }
-
 // the APAC hackathon countries this app targets: Indonesia, China
 const APAC_CURRENCY_SYMBOLS = ['Rp', '¥']
 const CURRENCY_CYCLE_MS = 3200
@@ -14,7 +12,6 @@ const CURRENCY_FLIP_MS = 420
 function RpCoin({ uid }: DecoProps) {
   const rim = `${uid}-rim`
   const face = `${uid}-face`
-  const sh = `${uid}-sh`
   const [symbolIndex, setSymbolIndex] = useState(0)
   const [edgeOn, setEdgeOn] = useState(false)
 
@@ -32,7 +29,7 @@ function RpCoin({ uid }: DecoProps) {
   }, [])
 
   return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true">
+    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(122, 84, 16, 0.3))' }}>
       <defs>
         <radialGradient id={rim} cx="35%" cy="28%" r="80%">
           <stop offset="0%" stopColor="#ffe9b8" />
@@ -43,11 +40,8 @@ function RpCoin({ uid }: DecoProps) {
           <stop offset="0%" stopColor="#f3d27e" />
           <stop offset="100%" stopColor="#cf9832" />
         </linearGradient>
-        <filter id={sh} {...SHADOW}>
-          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#7a5410" floodOpacity="0.3" />
-        </filter>
       </defs>
-      <g filter={`url(#${sh})`}>
+      <g>
         <circle cx="32" cy="32" r="27" fill={`url(#${rim})`} />
         <circle cx="32" cy="32" r="21" fill={`url(#${face})`} />
         <circle cx="32" cy="32" r="21" fill="none" stroke="#b07f22" strokeWidth="1.2" opacity="0.5" />
@@ -79,9 +73,8 @@ function RpCoin({ uid }: DecoProps) {
 function DollarCoin({ uid }: DecoProps) {
   const rim = `${uid}-rim`
   const face = `${uid}-face`
-  const sh = `${uid}-sh`
   return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true">
+    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(66, 95, 43, 0.3))' }}>
       <defs>
         <radialGradient id={rim} cx="35%" cy="28%" r="80%">
           <stop offset="0%" stopColor="#ecf6d8" />
@@ -92,11 +85,8 @@ function DollarCoin({ uid }: DecoProps) {
           <stop offset="0%" stopColor="#d9e9b4" />
           <stop offset="100%" stopColor="#8fb05c" />
         </linearGradient>
-        <filter id={sh} {...SHADOW}>
-          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#425f2b" floodOpacity="0.3" />
-        </filter>
       </defs>
-      <g filter={`url(#${sh})`}>
+      <g>
         <circle cx="32" cy="32" r="27" fill={`url(#${rim})`} />
         <circle cx="32" cy="32" r="21" fill={`url(#${face})`} />
         <circle cx="32" cy="32" r="21" fill="none" stroke="#6d8c44" strokeWidth="1.2" opacity="0.5" />
@@ -120,9 +110,8 @@ function DollarCoin({ uid }: DecoProps) {
 function EthCoin({ uid }: DecoProps) {
   const rim = `${uid}-rim`
   const face = `${uid}-face`
-  const sh = `${uid}-sh`
   return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true">
+    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(45, 55, 72, 0.35))' }}>
       <defs>
         <radialGradient id={rim} cx="35%" cy="28%" r="80%">
           <stop offset="0%" stopColor="#c2c9d6" />
@@ -133,11 +122,8 @@ function EthCoin({ uid }: DecoProps) {
           <stop offset="0%" stopColor="#a0aec0" />
           <stop offset="100%" stopColor="#718096" />
         </linearGradient>
-        <filter id={sh} {...SHADOW}>
-          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#2d3748" floodOpacity="0.35" />
-        </filter>
       </defs>
-      <g filter={`url(#${sh})`}>
+      <g>
         <circle cx="32" cy="32" r="27" fill={`url(#${rim})`} />
         <circle cx="32" cy="32" r="21" fill={`url(#${face})`} />
         <circle cx="32" cy="32" r="21" fill="none" stroke="#2d3748" strokeWidth="1.2" opacity="0.5" />
@@ -158,9 +144,8 @@ function EthCoin({ uid }: DecoProps) {
 function UsdcCoin({ uid }: DecoProps) {
   const rim = `${uid}-rim`
   const face = `${uid}-face`
-  const sh = `${uid}-sh`
   return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true">
+    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(18, 63, 116, 0.3))' }}>
       <defs>
         <radialGradient id={rim} cx="35%" cy="28%" r="80%">
           <stop offset="0%" stopColor="#5aa9e6" />
@@ -171,11 +156,8 @@ function UsdcCoin({ uid }: DecoProps) {
           <stop offset="0%" stopColor="#4d9ede" />
           <stop offset="100%" stopColor="#1f65b3" />
         </linearGradient>
-        <filter id={sh} {...SHADOW}>
-          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#123f74" floodOpacity="0.3" />
-        </filter>
       </defs>
-      <g filter={`url(#${sh})`}>
+      <g>
         <circle cx="32" cy="32" r="27" fill={`url(#${rim})`} />
         <circle cx="32" cy="32" r="21" fill={`url(#${face})`} />
         <circle cx="32" cy="32" r="21" fill="none" stroke="#144a87" strokeWidth="1.2" opacity="0.5" />
@@ -203,7 +185,6 @@ function UsdcCoin({ uid }: DecoProps) {
 function CoinStack({ uid }: DecoProps) {
   const side = `${uid}-side`
   const top = `${uid}-top`
-  const sh = `${uid}-sh`
   const coin = (cx: number, topY: number) => (
     <g key={topY}>
       <ellipse cx={cx} cy={topY + 5} rx="20" ry="7.5" fill={`url(#${side})`} />
@@ -213,7 +194,7 @@ function CoinStack({ uid }: DecoProps) {
     </g>
   )
   return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true">
+    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(122, 84, 16, 0.3))' }}>
       <defs>
         <linearGradient id={side} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#b9861f" />
@@ -223,11 +204,8 @@ function CoinStack({ uid }: DecoProps) {
           <stop offset="0%" stopColor="#f7dc94" />
           <stop offset="100%" stopColor="#d9a441" />
         </linearGradient>
-        <filter id={sh} {...SHADOW}>
-          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#7a5410" floodOpacity="0.3" />
-        </filter>
       </defs>
-      <g filter={`url(#${sh})`}>
+      <g>
         {coin(32, 42)}
         {coin(30, 33)}
         {coin(33, 24)}
@@ -239,22 +217,17 @@ function CoinStack({ uid }: DecoProps) {
 
 function LoopBlob({ uid }: DecoProps) {
   const body = `${uid}-body`
-  const sh = `${uid}-sh`
   return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true">
+    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(138, 108, 0, 0.32))' }}>
       <defs>
         <linearGradient id={body} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#ffe98a" />
           <stop offset="55%" stopColor="#f4c81c" />
           <stop offset="100%" stopColor="#c79400" />
         </linearGradient>
-        <filter id={sh} {...SHADOW}>
-          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#8a6c00" floodOpacity="0.32" />
-        </filter>
       </defs>
       {/* the brand mark's twin arcs, rescaled from the 48-box logo to this 64-box deco */}
       <g
-        filter={`url(#${sh})`}
         fill="none"
         stroke={`url(#${body})`}
         strokeWidth="8.7"
@@ -270,20 +243,16 @@ function LoopBlob({ uid }: DecoProps) {
 
 function Sparkle({ uid }: DecoProps) {
   const body = `${uid}-body`
-  const sh = `${uid}-sh`
   return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true">
+    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 4px 4px rgba(28, 104, 138, 0.3))' }}>
       <defs>
         <radialGradient id={body} cx="40%" cy="32%" r="80%">
           <stop offset="0%" stopColor="#e6f6fb" />
           <stop offset="55%" stopColor="#7fcbe3" />
           <stop offset="100%" stopColor="#38a3c8" />
         </radialGradient>
-        <filter id={sh} {...SHADOW}>
-          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#1c688a" floodOpacity="0.3" />
-        </filter>
       </defs>
-      <g filter={`url(#${sh})`}>
+      <g>
         <path
           d="M32 5C34.5 23 41 29.5 59 32 41 34.5 34.5 41 32 59 29.5 41 23 34.5 5 32 23 29.5 29.5 23 32 5Z"
           fill={`url(#${body})`}
@@ -296,9 +265,8 @@ function Sparkle({ uid }: DecoProps) {
 
 function SoftArrow({ uid }: DecoProps) {
   const body = `${uid}-body`
-  const sh = `${uid}-sh`
   return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true">
+    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(23, 95, 125, 0.32))' }}>
       <defs>
         {/* sky-teal balances a page that now leans heavily gold */}
         <linearGradient id={body} x1="0" y1="1" x2="1" y2="0">
@@ -306,12 +274,8 @@ function SoftArrow({ uid }: DecoProps) {
           <stop offset="55%" stopColor="#4fb0d3" />
           <stop offset="100%" stopColor="#1f7fa3" />
         </linearGradient>
-        <filter id={sh} {...SHADOW}>
-          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#175f7d" floodOpacity="0.32" />
-        </filter>
       </defs>
       <g
-        filter={`url(#${sh})`}
         fill="none"
         stroke={`url(#${body})`}
         strokeWidth="11"
@@ -328,20 +292,16 @@ function SoftArrow({ uid }: DecoProps) {
 
 function HeartBlob({ uid }: DecoProps) {
   const body = `${uid}-body`
-  const sh = `${uid}-sh`
   return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true">
+    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(140, 51, 85, 0.3))' }}>
       <defs>
         <radialGradient id={body} cx="35%" cy="28%" r="85%">
           <stop offset="0%" stopColor="#ffdbe3" />
           <stop offset="55%" stopColor="#ee8aa3" />
           <stop offset="100%" stopColor="#c2557a" />
         </radialGradient>
-        <filter id={sh} {...SHADOW}>
-          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#8c3355" floodOpacity="0.3" />
-        </filter>
       </defs>
-      <g filter={`url(#${sh})`}>
+      <g>
         <path
           d="M32 55C13 42 7 28 15 19 21 12.5 30 14.5 32 21 34 14.5 43 12.5 49 19 57 28 51 42 32 55Z"
           fill={`url(#${body})`}
