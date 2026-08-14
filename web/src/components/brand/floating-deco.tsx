@@ -1,186 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import type { ComponentType } from 'react'
 import { cn } from '@/lib/utils'
 
 type DecoProps = { uid: string }
-
-// the APAC hackathon countries this app targets: Indonesia, China
-const APAC_CURRENCY_SYMBOLS = ['Rp', '¥']
-const CURRENCY_CYCLE_MS = 3200
-const CURRENCY_FLIP_MS = 420
-
-function RpCoin({ uid }: DecoProps) {
-  const rim = `${uid}-rim`
-  const face = `${uid}-face`
-  const [symbolIndex, setSymbolIndex] = useState(0)
-  const [edgeOn, setEdgeOn] = useState(false)
-
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const cycle = setInterval(() => {
-      setEdgeOn(true)
-      const swap = setTimeout(() => {
-        setSymbolIndex((i) => (i + 1) % APAC_CURRENCY_SYMBOLS.length)
-        setEdgeOn(false)
-      }, CURRENCY_FLIP_MS / 2)
-      return () => clearTimeout(swap)
-    }, CURRENCY_CYCLE_MS)
-    return () => clearInterval(cycle)
-  }, [])
-
-  return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(122, 84, 16, 0.3))' }}>
-      <defs>
-        <radialGradient id={rim} cx="35%" cy="28%" r="80%">
-          <stop offset="0%" stopColor="#ffe9b8" />
-          <stop offset="55%" stopColor="#d9a441" />
-          <stop offset="100%" stopColor="#a9761f" />
-        </radialGradient>
-        <linearGradient id={face} x1="0" y1="0" x2="0.6" y2="1">
-          <stop offset="0%" stopColor="#f3d27e" />
-          <stop offset="100%" stopColor="#cf9832" />
-        </linearGradient>
-      </defs>
-      <g>
-        <circle cx="32" cy="32" r="27" fill={`url(#${rim})`} />
-        <circle cx="32" cy="32" r="21" fill={`url(#${face})`} />
-        <circle cx="32" cy="32" r="21" fill="none" stroke="#b07f22" strokeWidth="1.2" opacity="0.5" />
-        {/* squashed to edge-on then un-squashed on the other side of the symbol swap,
-            like a coin flipping over to reveal its next face - swap itself is invisible
-            since it happens at the point the text is scaled to a hairline */}
-        <text
-          x="32"
-          y="40"
-          textAnchor="middle"
-          fontFamily="'Geist Variable', system-ui, sans-serif"
-          fontSize="20"
-          fontWeight="700"
-          fill="#8f6414"
-          style={{
-            transformOrigin: '32px 34px',
-            transform: edgeOn ? 'scaleX(0.04)' : 'scaleX(1)',
-            transition: `transform ${CURRENCY_FLIP_MS / 2}ms ease-in-out`,
-          }}
-        >
-          {APAC_CURRENCY_SYMBOLS[symbolIndex]}
-        </text>
-        <ellipse cx="22" cy="16" rx="9" ry="4.2" fill="#fff" opacity="0.55" transform="rotate(-28 22 16)" />
-      </g>
-    </svg>
-  )
-}
-
-function DollarCoin({ uid }: DecoProps) {
-  const rim = `${uid}-rim`
-  const face = `${uid}-face`
-  return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(66, 95, 43, 0.3))' }}>
-      <defs>
-        <radialGradient id={rim} cx="35%" cy="28%" r="80%">
-          <stop offset="0%" stopColor="#ecf6d8" />
-          <stop offset="55%" stopColor="#a8c377" />
-          <stop offset="100%" stopColor="#5e7f3d" />
-        </radialGradient>
-        <linearGradient id={face} x1="0" y1="0" x2="0.6" y2="1">
-          <stop offset="0%" stopColor="#d9e9b4" />
-          <stop offset="100%" stopColor="#8fb05c" />
-        </linearGradient>
-      </defs>
-      <g>
-        <circle cx="32" cy="32" r="27" fill={`url(#${rim})`} />
-        <circle cx="32" cy="32" r="21" fill={`url(#${face})`} />
-        <circle cx="32" cy="32" r="21" fill="none" stroke="#6d8c44" strokeWidth="1.2" opacity="0.5" />
-        <text
-          x="32"
-          y="40"
-          textAnchor="middle"
-          fontFamily="'Geist Variable', system-ui, sans-serif"
-          fontSize="22"
-          fontWeight="700"
-          fill="#4c672c"
-        >
-          $
-        </text>
-        <ellipse cx="22" cy="16" rx="9" ry="4.2" fill="#fff" opacity="0.55" transform="rotate(-28 22 16)" />
-      </g>
-    </svg>
-  )
-}
-
-function EthCoin({ uid }: DecoProps) {
-  const rim = `${uid}-rim`
-  const face = `${uid}-face`
-  return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(45, 55, 72, 0.35))' }}>
-      <defs>
-        <radialGradient id={rim} cx="35%" cy="28%" r="80%">
-          <stop offset="0%" stopColor="#c2c9d6" />
-          <stop offset="55%" stopColor="#8a99ad" />
-          <stop offset="100%" stopColor="#4a5568" />
-        </radialGradient>
-        <linearGradient id={face} x1="0" y1="0" x2="0.6" y2="1">
-          <stop offset="0%" stopColor="#a0aec0" />
-          <stop offset="100%" stopColor="#718096" />
-        </linearGradient>
-      </defs>
-      <g>
-        <circle cx="32" cy="32" r="27" fill={`url(#${rim})`} />
-        <circle cx="32" cy="32" r="21" fill={`url(#${face})`} />
-        <circle cx="32" cy="32" r="21" fill="none" stroke="#2d3748" strokeWidth="1.2" opacity="0.5" />
-        <g fill="white" transform="translate(22, 14)">
-          <polygon points="10 0 9.8 0.7 9.8 21.7 10 21.9 19.6 16.2" fill="#e2e8f0" />
-          <polygon points="10 0 0.4 16.2 10 21.9 10 11.7" fill="#cbd5e0" />
-          <polygon points="10 23.8 9.9 23.9 9.9 31.6 10 31.8 19.6 18" fill="#e2e8f0" />
-          <polygon points="10 31.8 10 23.8 0.4 18" fill="#cbd5e0" />
-          <polygon points="10 21.9 19.6 16.2 10 12.9" fill="#a0aec0" />
-          <polygon points="10 21.9 10 12.9 0.4 16.2" fill="#cbd5e0" />
-        </g>
-        <ellipse cx="22" cy="16" rx="9" ry="4.2" fill="#fff" opacity="0.45" transform="rotate(-28 22 16)" />
-      </g>
-    </svg>
-  )
-}
-
-function UsdcCoin({ uid }: DecoProps) {
-  const rim = `${uid}-rim`
-  const face = `${uid}-face`
-  return (
-    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(18, 63, 116, 0.3))' }}>
-      <defs>
-        <radialGradient id={rim} cx="35%" cy="28%" r="80%">
-          <stop offset="0%" stopColor="#5aa9e6" />
-          <stop offset="55%" stopColor="#2775ca" />
-          <stop offset="100%" stopColor="#17559c" />
-        </radialGradient>
-        <linearGradient id={face} x1="0" y1="0" x2="0.6" y2="1">
-          <stop offset="0%" stopColor="#4d9ede" />
-          <stop offset="100%" stopColor="#1f65b3" />
-        </linearGradient>
-      </defs>
-      <g>
-        <circle cx="32" cy="32" r="27" fill={`url(#${rim})`} />
-        <circle cx="32" cy="32" r="21" fill={`url(#${face})`} />
-        <circle cx="32" cy="32" r="21" fill="none" stroke="#144a87" strokeWidth="1.2" opacity="0.5" />
-        {/* official USDC mark: its 192-wide box (center 97,97) scaled to 30px on the r-21 face */}
-        <g transform="translate(16.8438 16.8438) scale(0.15625)">
-          <path
-            fill="white"
-            d="M114.28 27.0996V39.4596C138.94 46.8996 157 69.8196 157 96.9996C157 124.18 138.94 147.1 114.28 154.54V166.9C145.72 159.22 169 130.84 169 96.9996C169 63.1596 145.72 34.7796 114.28 27.0996Z"
-          />
-          <path
-            fill="white"
-            d="M37 96.9996C37 69.8196 55.06 46.8996 79.72 39.4596V27.0996C48.28 34.7796 25 63.1596 25 96.9996C25 130.84 48.28 159.22 79.72 166.9V154.54C55.06 147.16 37 124.18 37 96.9996Z"
-          />
-          <path
-            fill="white"
-            d="M122.8 110.38C122.8 85.84 84.3402 95.92 84.3402 82.36C84.3402 77.5 88.2402 74.38 95.6802 74.38C104.56 74.38 107.62 78.7 108.58 84.52H120.82C119.728 73.5976 113.459 66.7012 103 64.6468V55H91.0002V64.3024C79.542 65.7616 72.3402 72.4342 72.3402 82.36C72.3402 107.02 110.86 97.78 110.86 111.1C110.86 116.14 106 119.5 97.7802 119.5C87.0402 119.5 83.5002 114.76 82.1802 108.22H70.2402C71.0136 120.183 78.3906 127.671 91.0002 129.539V139H103V129.665C115.307 128.075 122.8 120.916 122.8 110.38Z"
-          />
-        </g>
-        <ellipse cx="22" cy="16" rx="9" ry="4.2" fill="#fff" opacity="0.55" transform="rotate(-28 22 16)" />
-      </g>
-    </svg>
-  )
-}
 
 function CoinStack({ uid }: DecoProps) {
   const side = `${uid}-side`
@@ -312,6 +134,43 @@ function HeartBlob({ uid }: DecoProps) {
   )
 }
 
+function FxrpCoin({ uid }: DecoProps) {
+  const rim = `${uid}-rim`
+  const face = `${uid}-face`
+  return (
+    <svg viewBox="0 0 64 64" width="100%" height="100%" overflow="visible" aria-hidden="true" style={{ filter: 'drop-shadow(0 5px 5px rgba(122, 84, 16, 0.3))' }}>
+      <defs>
+        <radialGradient id={rim} cx="35%" cy="28%" r="80%">
+          <stop offset="0%" stopColor="#ffe9b8" />
+          <stop offset="55%" stopColor="#d9a441" />
+          <stop offset="100%" stopColor="#a9761f" />
+        </radialGradient>
+        <linearGradient id={face} x1="0" y1="0" x2="0.6" y2="1">
+          <stop offset="0%" stopColor="#f3d27e" />
+          <stop offset="100%" stopColor="#cf9832" />
+        </linearGradient>
+      </defs>
+      <g>
+        <circle cx="32" cy="32" r="27" fill={`url(#${rim})`} />
+        <circle cx="32" cy="32" r="21" fill={`url(#${face})`} />
+        <circle cx="32" cy="32" r="21" fill="none" stroke="#b07f22" strokeWidth="1.2" opacity="0.5" />
+        <text
+          x="32"
+          y="38"
+          textAnchor="middle"
+          fontFamily="'Geist Variable', system-ui, sans-serif"
+          fontSize="14"
+          fontWeight="700"
+          fill="#8f6414"
+        >
+          FXRP
+        </text>
+        <ellipse cx="22" cy="16" rx="9" ry="4.2" fill="#fff" opacity="0.55" transform="rotate(-28 22 16)" />
+      </g>
+    </svg>
+  )
+}
+
 type Placement = {
   obj: ComponentType<DecoProps>
   side: 'left' | 'right'
@@ -326,15 +185,15 @@ type Placement = {
 }
 
 const PLACEMENTS: Placement[] = [
-  { obj: RpCoin, side: 'left', top: '12%', left: '6%', size: 96, rotate: -12, depth: 22, duration: 7, delay: 0 },
+  { obj: FxrpCoin, side: 'left', top: '12%', left: '6%', size: 96, rotate: -12, depth: 22, duration: 7, delay: 0 },
   { obj: Sparkle, side: 'left', top: '34%', left: '14%', size: 44, rotate: 8, depth: 28, duration: 5.5, delay: 0.8 },
   { obj: LoopBlob, side: 'left', top: '52%', left: '4%', size: 110, rotate: 6, depth: 12, duration: 8, delay: 0.4 },
   { obj: CoinStack, side: 'left', top: '76%', left: '12%', size: 76, rotate: -8, depth: 18, duration: 6.5, delay: 1.2 },
-  { obj: UsdcCoin, side: 'left', top: '90%', left: '5%', size: 46, rotate: 10, depth: 24, duration: 6.2, delay: 0.7 },
+  { obj: FxrpCoin, side: 'left', top: '90%', left: '5%', size: 46, rotate: 10, depth: 24, duration: 6.2, delay: 0.7 },
   { obj: HeartBlob, side: 'right', top: '10%', right: '10%', size: 72, rotate: 10, depth: 20, duration: 7.5, delay: 0.6 },
-  { obj: EthCoin, side: 'right', top: '24%', right: '18%', size: 50, rotate: -8, depth: 16, duration: 7.2, delay: 0.9 },
+  { obj: FxrpCoin, side: 'right', top: '24%', right: '18%', size: 50, rotate: -8, depth: 16, duration: 7.2, delay: 0.9 },
   { obj: SoftArrow, side: 'right', top: '36%', right: '4%', size: 88, rotate: 4, depth: 10, duration: 8.5, delay: 0.2 },
-  { obj: DollarCoin, side: 'right', top: '60%', right: '14%', size: 52, rotate: 14, depth: 26, duration: 5, delay: 1 },
+  { obj: FxrpCoin, side: 'right', top: '60%', right: '14%', size: 52, rotate: 14, depth: 26, duration: 5, delay: 1 },
   { obj: Sparkle, side: 'right', top: '80%', right: '7%', size: 40, rotate: -10, depth: 24, duration: 6, delay: 0.3 },
 ]
 
@@ -344,13 +203,13 @@ const PLACEMENTS: Placement[] = [
 const PLACEMENTS_ALT: Placement[] = [
   { obj: CoinStack, side: 'left', top: '6%', left: '17%', size: 60, rotate: 7, depth: 14, duration: 7.6, delay: 0.3 },
   { obj: LoopBlob, side: 'left', top: '18%', left: '8%', size: 84, rotate: 15, depth: 18, duration: 6.8, delay: 0.1 },
-  { obj: DollarCoin, side: 'left', top: '42%', left: '4%', size: 58, rotate: -10, depth: 26, duration: 5.8, delay: 0.9 },
+  { obj: FxrpCoin, side: 'left', top: '42%', left: '4%', size: 58, rotate: -10, depth: 26, duration: 5.8, delay: 0.9 },
   { obj: Sparkle, side: 'left', top: '66%', left: '15%', size: 40, rotate: -6, depth: 22, duration: 5, delay: 0.5 },
-  { obj: UsdcCoin, side: 'left', top: '88%', left: '9%', size: 52, rotate: 12, depth: 16, duration: 7.4, delay: 1.1 },
-  { obj: RpCoin, side: 'right', top: '14%', right: '8%', size: 88, rotate: -14, depth: 20, duration: 7, delay: 0.4 },
+  { obj: FxrpCoin, side: 'left', top: '88%', left: '9%', size: 52, rotate: 12, depth: 16, duration: 7.4, delay: 1.1 },
+  { obj: FxrpCoin, side: 'right', top: '14%', right: '8%', size: 88, rotate: -14, depth: 20, duration: 7, delay: 0.4 },
   { obj: SoftArrow, side: 'right', top: '38%', right: '17%', size: 72, rotate: -6, depth: 12, duration: 8, delay: 0 },
   { obj: HeartBlob, side: 'right', top: '58%', right: '5%', size: 64, rotate: 8, depth: 24, duration: 6.3, delay: 1 },
-  { obj: EthCoin, side: 'right', top: '80%', right: '15%', size: 46, rotate: 10, depth: 28, duration: 6.6, delay: 0.6 },
+  { obj: FxrpCoin, side: 'right', top: '80%', right: '15%', size: 46, rotate: 10, depth: 28, duration: 6.6, delay: 0.6 },
   { obj: Sparkle, side: 'right', top: '93%', right: '22%', size: 36, rotate: -12, depth: 30, duration: 5.4, delay: 0.7 },
 ]
 
