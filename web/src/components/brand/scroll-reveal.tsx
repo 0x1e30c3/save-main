@@ -152,41 +152,24 @@ export function ScrollReveal({
         },
       );
 
-      gsap.fromTo(
-        wordElements,
-        { opacity: baseOpacity, willChange: "opacity" },
-        {
-          ease: "none",
-          opacity: 1,
-          stagger: 0.05,
-          scrollTrigger: {
-            trigger: el,
-            scroller,
-            start: "top bottom-=20%",
-            end: wordAnimationEnd,
-            scrub: true,
-          },
-        },
-      );
+      const wordFrom = enableBlur
+        ? { opacity: baseOpacity, filter: `blur(${blurStrength}px)` }
+        : { opacity: baseOpacity };
+      const wordTo = enableBlur
+        ? { ease: "none", opacity: 1, filter: "blur(0px)" }
+        : { ease: "none", opacity: 1 };
 
-      if (enableBlur) {
-        gsap.fromTo(
-          wordElements,
-          { filter: `blur(${blurStrength}px)` },
-          {
-            ease: "none",
-            filter: "blur(0px)",
-            stagger: 0.05,
-            scrollTrigger: {
-              trigger: el,
-              scroller,
-              start: "top bottom-=20%",
-              end: wordAnimationEnd,
-              scrub: true,
-            },
-          },
-        );
-      }
+      gsap.fromTo(wordElements, wordFrom, {
+        ...wordTo,
+        stagger: 0.05,
+        scrollTrigger: {
+          trigger: el,
+          scroller,
+          start: "top bottom-=20%",
+          end: wordAnimationEnd,
+          scrub: true,
+        },
+      });
 
       requestAnimationFrame(() => ScrollTrigger.refresh());
     }, el);
