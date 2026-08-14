@@ -20,7 +20,7 @@ export const SPARKDEX_ADAPTER: string =
 export const VAULT_ADAPTER: string =
   import.meta.env.VITE_VAULT_ADAPTER ?? '0x3c13BDd505DE69bB0DF0a2e68A0Cd93a44beB0b4'
 export const FIRELIGHT_VAULT: string =
-  import.meta.env.VITE_FIRELIGHT_VAULT ?? '0xC90D6847747b85d1fa2E07859869fb9fB72c0361'
+  import.meta.env.VITE_FIRELIGHT_VAULT ?? '0x780780D122f075ada1Fa86A18dE2e0763B2526Ec'
 export const UPSHIFT_VAULT: string =
   import.meta.env.VITE_UPSHIFT_VAULT ?? '0x24c1a47cD5e8473b64EAB2a94515a196E10C7C81'
 
