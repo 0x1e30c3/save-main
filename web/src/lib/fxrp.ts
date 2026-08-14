@@ -32,7 +32,7 @@ export async function getFxrpAllowance(owner: string, spender: string): Promise<
 
 export async function approveFxrp(spender: string, amount: bigint, signer: ContractRunner): Promise<string> {
   const c = fxrpContract(signer)
-  const tx = await c.approve(spender, amount)
+  const tx = await c.approve(spender, amount, { gasLimit: 100_000 })
   await tx.wait()
   return tx.hash
 }
@@ -46,7 +46,7 @@ export async function ensureFxrpAllowance(
   const c = fxrpContract(signer)
   const current = (await c.allowance(owner, spender)) as bigint
   if (current >= amount) return false
-  const tx = await c.approve(spender, amount)
+  const tx = await c.approve(spender, amount, { gasLimit: 100_000 })
   await tx.wait()
   return true
 }
