@@ -44,6 +44,8 @@ export function LandingHero() {
             className="block h-auto w-[min(46vw,600px)] [filter:drop-shadow(0_26px_40px_rgba(0,0,0,0.55))] max-lg:w-[62vw] max-[620px]:w-[76vw]" 
             src="/assets/left-hand.png" 
             alt="" 
+            fetchPriority="low"
+            decoding="async"
           />
         </div>
         <div className="absolute right-0 top-1/2 origin-right -translate-y-[40%] max-lg:-translate-y-[16%] max-lg:scale-90 max-[620px]:opacity-40">
@@ -54,6 +56,8 @@ export function LandingHero() {
             className="block h-auto w-[min(46vw,600px)] [filter:drop-shadow(0_26px_40px_rgba(0,0,0,0.55))] max-lg:w-[62vw] max-[620px]:w-[76vw]" 
             src="/assets/right-hand.png" 
             alt="" 
+            fetchPriority="low"
+            decoding="async"
           />
         </div>
       </div>
