@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
@@ -24,9 +25,23 @@ import { ReactLenis } from 'lenis/react'
 
 const queryClient = new QueryClient()
 
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => setReduced(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return reduced
+}
+
 export function App() {
+  const reducedMotion = usePrefersReducedMotion()
   return (
-    <ReactLenis root>
+    <ReactLenis root options={{ duration: reducedMotion ? 0 : 1.1 }}>
       <ThemeProvider
         attribute="class"
         storageKey="yoursave:theme"
