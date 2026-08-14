@@ -1,9 +1,58 @@
+import { Contract, JsonRpcProvider } from 'ethers'
 import { FXRP_SCALE } from '@/lib/fxrp'
 import type { ActivityItem } from '@/lib/activity'
 import type { YieldTarget } from '@/lib/types'
+import {
+  CONTRACT_ID,
+  FIRELIGHT_VAULT,
+  FLARE_RPC_URL,
+  SPARKDEX_ROUTER,
+  UPSHIFT_VAULT,
+  YIELD_TOKEN_OUT,
+} from '@/lib/config'
 
 // Flare Coston2 yield protocol constants
 export { FXRP_SCALE } // FXRP has 6 decimals on Coston2
+
+export type TargetHealth = Record<YieldTarget, boolean>
+
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+const MAX_DEPOSIT_ABI = ['function maxDeposit(address) view returns (uint256)'] as const
+
+async function vaultAcceptsDeposits(address: string): Promise<boolean> {
+  try {
+    const provider = new JsonRpcProvider(FLARE_RPC_URL)
+    if ((await provider.getCode(address)) === '0x') return false
+    const vault = new Contract(address, MAX_DEPOSIT_ABI, provider)
+    await vault.maxDeposit(ZERO_ADDRESS)
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function hasCode(address: string): Promise<boolean> {
+  try {
+    const provider = new JsonRpcProvider(FLARE_RPC_URL)
+    return (await provider.getCode(address)) !== '0x'
+  } catch {
+    return false
+  }
+}
+
+// Probes the Coston2 chain to see which yield targets can actually take a
+// deposit today. Broken deployments (wrong addresses, non-ERC-4626 proxies,
+// missing output tokens) come back as false so the UI can block them early
+// instead of failing mid-deposit with a generic error.
+export async function getTargetHealth(): Promise<TargetHealth> {
+  if (CONTRACT_ID === '') return { sparkdex: true, firelight: true, upshift: true }
+  const [sparkdex, firelight, upshift] = await Promise.all([
+    (async () => (await hasCode(YIELD_TOKEN_OUT)) && (await hasCode(SPARKDEX_ROUTER)))(),
+    vaultAcceptsDeposits(FIRELIGHT_VAULT),
+    vaultAcceptsDeposits(UPSHIFT_VAULT),
+  ])
+  return { sparkdex, firelight, upshift }
+}
 
 export async function getSharePrice(): Promise<bigint | null> {
   return FXRP_SCALE // mock 1.0 FXRP per share
