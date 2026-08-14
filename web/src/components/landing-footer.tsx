@@ -29,7 +29,7 @@ export function LandingFooter() {
         <div>
           <div className="flex items-center gap-2">
             <LogoMark size={22} />
-            <span className="text-lg font-semibold tracking-tight">Save</span>
+            <span className="text-lg font-semibold tracking-tight">YourSave</span>
           </div>
           <p className="mt-3 max-w-xs text-sm text-muted-foreground">
             {t('landing.footerTagline')}

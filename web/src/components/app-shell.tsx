@@ -88,7 +88,7 @@ function SidebarContent({ rail = false, onNavigate, onToggle }: SidebarContentPr
       <div className={cn("flex items-center pt-1 pb-2", rail ? "justify-center" : "justify-between px-[9px]")}>
         <div className={cn("flex items-center gap-2", rail && "hidden")}>
           <LogoMark size={22} />
-          <span className={cn('text-lg font-semibold tracking-tight', label)}>Save</span>
+          <span className={cn('text-lg font-semibold tracking-tight', label)}>YourSave</span>
         </div>
         {onToggle && (
           <Button variant="ghost" size="icon-sm" onClick={onToggle} aria-label="Toggle Sidebar" className={cn(rail && "size-10")}>
