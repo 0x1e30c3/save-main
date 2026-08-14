@@ -106,6 +106,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setBusy(key)
       try {
         const result = await fn()
+        // Wait 2s before reloading state to allow RPC nodes to sync
+        await new Promise((resolve) => setTimeout(resolve, 2000))
         await load(address, false)
         const hash = result.hash
         toast.success(t(successKey), {

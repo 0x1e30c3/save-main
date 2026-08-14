@@ -5,7 +5,7 @@ import { TokenIcon } from '@/components/brand/token-icon'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { SPARKDEX_ADAPTER, VAULT_ADAPTER, FIRELIGHT_VAULT, YIELD_TOKEN_OUT } from '@/lib/config'
+import { SPARKDEX_ADAPTER, VAULT_ADAPTER, FIRELIGHT_VAULT, UPSHIFT_VAULT, YIELD_TOKEN_OUT } from '@/lib/config'
 import { parseFxrp, fxrpToInput } from '@/lib/format'
 import { formatMoney, useT } from '@/lib/i18n'
 import type { FxRates } from '@/lib/rates'
@@ -55,11 +55,13 @@ export function YieldDirectDepositCard({
 
   const isVault = yieldTarget === 'firelight' || yieldTarget === 'upshift'
   const adapter = isVault ? VAULT_ADAPTER : SPARKDEX_ADAPTER
-  const tokenOut = isVault
+  const tokenOut = yieldTarget === 'firelight'
     ? FIRELIGHT_VAULT
-    : isValidAddress(customTokenOut)
-      ? customTokenOut
-      : YIELD_TOKEN_OUT
+    : yieldTarget === 'upshift'
+      ? UPSHIFT_VAULT
+      : isValidAddress(customTokenOut)
+        ? customTokenOut
+        : YIELD_TOKEN_OUT
   const hasTokenOut = isValidAddress(tokenOut)
   const canDeposit =
     address && hasTokenOut && amount.trim() !== '' && !busy && walletBalance > 0n

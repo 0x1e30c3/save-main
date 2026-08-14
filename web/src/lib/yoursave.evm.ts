@@ -187,7 +187,7 @@ export const yoursaveEvm: YourSaveService = {
       throw asLegacyContractError(error) ?? error
     }
     const hash = await sendTx(
-      c.withdrawSavingsToAdapter(shares, FXRP_ADDRESS, tokenOut, adapter, amountOutMin, deadline),
+      c.withdrawSavingsToAdapter(shares, FXRP_ADDRESS, tokenOut, adapter, amountOutMin, deadline, { gasLimit: 1000000 }),
     )
     return { amountIn: shares, amountOut, hash }
   },
@@ -200,19 +200,37 @@ export const yoursaveEvm: YourSaveService = {
     deadline: bigint,
   ) {
     const signer = await getBrowserSigner()
-    const from = await signer.getAddress()
-    await ensureFxrpAllowance(from, amount, signer, adapter)
-
-    const ADAPTER_ABI = ['function routeSavings(address tokenIn,uint256 amountIn,address tokenOut,address to,uint256 amountOutMin,uint256 deadline) returns (uint256[])']
-    const c = new Contract(adapter, ADAPTER_ABI, signer)
-    let amountOut = 0n
-    try {
-      const res = await c.routeSavings.staticCall(FXRP_ADDRESS, amount, tokenOut, from, amountOutMin, deadline)
-      amountOut = BigInt(res[1] ?? 0n)
-    } catch (error) {
-      // ignore static call errors, let sendTx handle it
+    const user = await (signer as any).getAddress()
+    
+    if (adapter === import.meta.env.VITE_VAULT_ADAPTER || adapter === '0x3c13BDd505DE69bB0DF0a2e68A0Cd93a44beB0b4') {
+      await ensureFxrpAllowance(user, amount, signer, tokenOut)
+      const vaultInterface = new Interface(['function deposit(uint256 assets, address receiver) external returns (uint256)'])
+      const vaultContract = new Contract(tokenOut, vaultInterface, signer as ContractRunner)
+      let amountOut = 0n
+      try { amountOut = await vaultContract.deposit.staticCall(amount, user) } catch {}
+      const hash = await sendTx(vaultContract.deposit(amount, user, { gasLimit: 500000 }))
+      return { amountIn: amount, amountOut, hash }
+    } else {
+      const routerAddress = import.meta.env.VITE_SPARKDEX_ROUTER ?? '0x4a1E5A90e9943467FAd1acea1E7F0e5e88472a1e'
+      await ensureFxrpAllowance(user, amount, signer, routerAddress)
+      const routerInterface = new Interface([
+        'function exactInputSingle(tuple(address tokenIn,address tokenOut,uint24 fee,address recipient,uint256 deadline,uint256 amountIn,uint256 amountOutMinimum,uint160 sqrtPriceLimitX96)) external returns (uint256)'
+      ])
+      const router = new Contract(routerAddress, routerInterface, signer as ContractRunner)
+      const params = {
+        tokenIn: FXRP_ADDRESS,
+        tokenOut: tokenOut,
+        fee: 3000n,
+        recipient: user,
+        deadline,
+        amountIn: amount,
+        amountOutMinimum: amountOutMin,
+        sqrtPriceLimitX96: 0n
+      }
+      let amountOut = 0n
+      try { amountOut = await router.exactInputSingle.staticCall(params) } catch {}
+      const hash = await sendTx(router.exactInputSingle(params, { gasLimit: 500000 }))
+      return { amountIn: amount, amountOut, hash }
     }
-    const hash = await sendTx(c.routeSavings(FXRP_ADDRESS, amount, tokenOut, from, amountOutMin, deadline))
-    return { amountIn: amount, amountOut, hash }
   },
 }
