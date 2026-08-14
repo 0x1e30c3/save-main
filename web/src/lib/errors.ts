@@ -34,6 +34,8 @@ export function errorKey(e: unknown): MessageKey {
   if (/reject|declin|denied|closed/i.test(text)) return 'errors.walletCancelled'
   if (/wrong network|coston2/i.test(text)) return 'errors.wrongNetwork'
   if (/vault.*not accepting|maxDeposit|not accepting deposits/i.test(text)) return 'errors.vaultNotAccepting'
+  if (/TooLittleReceived|TooMuchRequested|TransactionTooOld|SlippageTooLow|DepositFailed|slippage/i.test(text))
+    return 'errors.slippageTooLow'
   if (/insufficient allowance|allowance/i.test(text)) return 'errors.insufficientAllowance'
   return 'errors.generic'
 }
