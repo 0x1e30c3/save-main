@@ -148,6 +148,7 @@ export function Dashboard() {
             loading={yieldLoading}
             rates={rates}
             selectedTarget={account?.yieldTarget}
+            targetHealth={yieldData.targetHealth}
           />
           <ActivityCard />
         </>
