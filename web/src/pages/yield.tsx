@@ -70,6 +70,8 @@ export function YieldPage() {
     deadline: bigint
   }) => {
     if (!address) return
+    console.log('[handleDirectDeposit] args:', args)
+    console.log('[handleDirectDeposit] depositYieldDirect exists:', typeof yoursave.depositYieldDirect)
     const result = await runAction(
       'yield-direct',
       'success.yieldDeposited', // reuse the same message
@@ -82,6 +84,7 @@ export function YieldPage() {
           args.deadline,
         ),
     )
+    console.log('[handleDirectDeposit] result:', result)
     if (result) {
       await refresh()
       await refreshYield()
