@@ -7,12 +7,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { NumberTicker } from '@/components/ui/number-ticker'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { ActivityItem } from '@/lib/activity'
+import { FIRELIGHT_VAULT } from '@/lib/config'
 import { fxrpToNumber } from '@/lib/format'
 import { currencyAffix, formatDate, formatMoney, intlLocale, useT } from '@/lib/i18n'
 import type { FxRates } from '@/lib/rates'
 import { secondaryCurrencyFor, useSettings } from '@/lib/settings'
 import type { YourSaveAccount } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { useWallet } from '@/lib/wallet'
 import {
   computeSavingsPosition,
   getSharePrice,
@@ -42,12 +44,14 @@ function segmentWidths(spend: number, save: number): [number, number] {
 
 export function BalanceHero({ account, activity, loading, rates }: BalanceHeroProps) {
   const t = useT()
+  const { address } = useWallet()
   const { locale, primaryCurrency } = useSettings()
   const secondaryCurrency = secondaryCurrencyFor(primaryCurrency, locale)
   const intl = intlLocale(locale)
   const [sharePrice, setSharePrice] = useState<bigint | null>(null)
   const [sparkdexTvl, setSparkdexTvl] = useState<bigint | null>(null)
   const [upshiftStats, setUpshiftStats] = useState<{ tvl: bigint | null }>({ tvl: null })
+  const [vaultBalance, setVaultBalance] = useState<bigint>(0n)
   const yieldTarget = account?.yieldTarget ?? 'firelight'
 
   useEffect(() => {
@@ -70,6 +74,24 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
     }
   }, [yieldTarget])
 
+  // Fetch vault share balance (direct deposits bypass YourSave contract)
+  useEffect(() => {
+    if (!address) return
+    let active = true
+    const ERC4626_ABI = ['function balanceOf(address) view returns (uint256)']
+    const { Contract, JsonRpcProvider } = require('ethers') as typeof import('ethers')
+    const provider = new JsonRpcProvider(
+      import.meta.env.VITE_FLARE_RPC_URL ?? 'https://coston2-api.flare.network/ext/C/rpc',
+    )
+    const vault = new Contract(FIRELIGHT_VAULT, ERC4626_ABI, provider)
+    vault.balanceOf(address)
+      .then((bal: bigint) => {
+        if (active) setVaultBalance(bal)
+      })
+      .catch(() => {})
+    return () => { active = false }
+  }, [address])
+
   const primary = (amount: bigint): string => formatMoney(amount, primaryCurrency, rates, locale)
   const secondary = (amount: bigint): string =>
     formatMoney(amount, secondaryCurrency, rates, locale)
@@ -91,15 +113,15 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
     )
   }
 
-  const total = account.spend + account.shares // shares valued 1:1 for the MVP
+  const total = account.spend + account.shares + vaultBalance // vaultBalance from direct deposits
   const empty = total <= 0n
   const locked = Number(account.lockUntil) * 1000 > Date.now()
   const [spendPct, savePct] = segmentWidths(
     fxrpToNumber(account.spend),
-    fxrpToNumber(account.shares),
+    fxrpToNumber(account.shares + vaultBalance),
   )
   const currentValue = valueOfShares(
-    account.shares,
+    account.shares + vaultBalance,
     account.yieldTarget,
     sharePrice,
     sparkdexTvl,
@@ -188,10 +210,10 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
               </p>
               <p className="mt-1 flex items-center justify-end gap-1.5 text-lg font-semibold tracking-tight tabular-nums">
                 <TokenIcon token="fxrp" size={24} />
-                {primary(account.shares)}
+                {primary(account.shares + vaultBalance)}
               </p>
               <p className="text-xs text-muted-foreground tabular-nums">
-                ~ {secondary(account.shares)}
+                ~ {secondary(account.shares + vaultBalance)}
               </p>
             </div>
           </div>
@@ -220,7 +242,7 @@ export function BalanceHero({ account, activity, loading, rates }: BalanceHeroPr
                   {t('balances.lockedUntil', { date: formatDate(account.lockUntil, locale) })}
                 </Badge>
               )}
-              {account.shares > 0n && (
+              {account.shares + vaultBalance > 0n && (
                 <Link
                   to="/app/yield"
                   className={cn(
