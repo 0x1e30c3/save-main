@@ -209,25 +209,11 @@ export const yoursaveEvm: YourSaveService = {
     if (adapter === VAULT_ADAPTER) {
       const vaultInterface = new Interface([
         'function deposit(uint256 assets, address receiver) external returns (uint256)',
-        'function maxDeposit(address) view returns (uint256)',
       ])
       const vaultContract = new Contract(tokenOut, vaultInterface, signer as ContractRunner)
-      
-      let maxDep = 0n
-      try {
-        maxDep = BigInt(await vaultContract.maxDeposit.staticCall(user))
-      } catch {}
-      
-      if (maxDep === 0n) {
-        throw new Error('This vault is not accepting deposits right now.')
-      }
-      
-      if (amount > maxDep) {
-        throw new Error(`Max deposit is ${maxDep}`)
-      }
 
       await ensureFxrpAllowance(user, amount, signer, tokenOut)
-      
+
       let amountOut = 0n
       try {
         amountOut = await vaultContract.deposit.staticCall(amount, user)
@@ -236,7 +222,10 @@ export const yoursaveEvm: YourSaveService = {
         if (/maxDeposit|max deposit/i.test(msg)) {
           throw new Error('This vault is not accepting deposits right now.')
         }
-        throw new Error('Vault deposit simulation failed: ' + msg.slice(0, 120))
+        if (/allowance/i.test(msg)) {
+          throw new Error('Token approval failed. Please try again.')
+        }
+        throw new Error('Vault deposit failed: ' + msg.slice(0, 120))
       }
       const hash = await sendTx(vaultContract.deposit(amount, user, { gasLimit: 500_000 }))
       return { amountIn: amount, amountOut, hash }
