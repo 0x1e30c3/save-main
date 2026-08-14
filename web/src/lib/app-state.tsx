@@ -121,6 +121,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         })
         return result
       } catch (e) {
+        console.error('[runAction] ERROR:', e)
+        console.error('[runAction] error type:', typeof e)
+        console.error('[runAction] error string:', String(e))
+        console.error('[runAction] errorKey:', errorKey(e))
         toast.error(t(errorKey(e)))
         return null
       } finally {
