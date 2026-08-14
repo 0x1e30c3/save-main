@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowRightIcon, CheckIcon, CopyIcon, ExternalLinkIcon, Loader2Icon, LogOutIcon, SparklesIcon } from 'lucide-react'
+import { CheckIcon, CopyIcon, ExternalLinkIcon, LogOutIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { AddressAvatar } from '@/components/brand/address-avatar'
-import { FloatingDeco } from '@/components/brand/floating-deco'
 import { LogoWordmark } from '@/components/brand/logo'
 import { TokenIcon } from '@/components/brand/token-icon'
 import { Badge } from '@/components/ui/badge'
@@ -13,185 +12,19 @@ import { Input } from '@/components/ui/input'
 import { useAppState } from '@/lib/app-state'
 import { isValidRecipientAddress } from '@/lib/address'
 import { yoursave } from '@/lib/yoursave'
-import { explorerTxUrl, FIRELIGHT_VAULT, VAULT_ADAPTER } from '@/lib/config'
+import { explorerTxUrl } from '@/lib/config'
 import { errorKey } from '@/lib/errors'
-import { parseFxrp, shortHex, fxrpToInput } from '@/lib/format'
+import { parseFxrp, shortHex } from '@/lib/format'
 import { formatMoney, useT } from '@/lib/i18n'
 import { useSettings } from '@/lib/settings'
 import { useScrollLock } from '@/lib/use-scroll-lock'
 import { useWallet } from '@/lib/wallet'
-import { getFxrpBalance } from '@/lib/fxrp'
 
 const QUICK_AMOUNTS = ['25', '50', '100']
 const MAX_NAME_LENGTH = 40
 
 function shortAddress(address: string): string {
   return `${address.slice(0, 4)}...${address.slice(-4)}`
-}
-
-function YieldDepositCard() {
-  const t = useT()
-  const { address, connecting, connect, disconnect } = useWallet()
-  const { rates, busy, runAction } = useAppState()
-  const { locale } = useSettings()
-  const [amount, setAmount] = useState('')
-  const [walletBalance, setWalletBalance] = useState(0n)
-  const [depositDone, setDepositDone] = useState<{ amount: bigint; hash: string } | null>(null)
-  const anyBusy = busy !== null
-
-  useEffect(() => {
-    if (address) {
-      getFxrpBalance(address).then(setWalletBalance).catch(console.error)
-    }
-  }, [address, busy])
-
-  const handleConnect = async () => {
-    try { await connect() } catch (e) {
-      const key = errorKey(e)
-      if (key !== 'errors.walletCancelled') toast.error(t(key))
-    }
-  }
-
-  const handleDeposit = async () => {
-    if (!address) return
-    let parsed: bigint
-    try {
-      parsed = parseFxrp(amount)
-      if (parsed <= 0n) throw new Error('invalid')
-    } catch {
-      toast.error(t('errors.invalidAmount'))
-      return
-    }
-    if (parsed > walletBalance) {
-      toast.error(t('errors.insufficientShares'))
-      return
-    }
-    const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 20)
-    const result = await runAction('yield-direct', 'success.yieldDeposited', () =>
-      yoursave.depositYieldDirect!(parsed, FIRELIGHT_VAULT, VAULT_ADAPTER, 0n, deadline),
-    )
-    if (result) {
-      setDepositDone({ amount: parsed, hash: result.hash })
-      setAmount('')
-    }
-  }
-
-  if (depositDone) {
-    return (
-      <Card className="w-full max-w-md rounded-2xl shadow-none">
-        <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-          <span className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary-ink">
-            <CheckIcon className="size-7" />
-          </span>
-          <p className="text-xl font-semibold tracking-tight">Deposit Successful</p>
-          <p className="flex items-center gap-2 text-2xl font-semibold tracking-tight tabular-nums">
-            <TokenIcon token="fxrp" size={36} />
-            {formatMoney(depositDone.amount, 'fxrp', rates, locale)}
-          </p>
-          <p className="text-sm text-muted-foreground">Deposited to Firelight vault</p>
-          <a
-            href={explorerTxUrl(depositDone.hash)}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border bg-muted/50 px-3 py-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {shortHex(depositDone.hash)}
-            <ExternalLinkIcon className="size-3" />
-          </a>
-          <Button variant="outline" className="mt-3" onClick={() => setDepositDone(null)}>
-            Deposit Again
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  return (
-    <Card className="w-full max-w-md rounded-2xl shadow-none">
-      <CardHeader className="items-center text-center">
-        <CardTitle className="flex items-center gap-2 text-xl tracking-tight">
-          <SparklesIcon className="size-5 text-gold-ink" />
-          Deposit to Yield
-        </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Deposit FXRP directly to Firelight vault and start earning
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {address && (
-          <div className="flex items-center justify-between rounded-xl border bg-muted/40 px-3 py-2 text-sm">
-            <span className="text-muted-foreground">Wallet balance</span>
-            <span className="font-semibold tabular-nums">{formatMoney(walletBalance, 'fxrp', rates, locale)}</span>
-          </div>
-        )}
-        <div className="relative">
-          <TokenIcon
-            token="fxrp"
-            size={36}
-            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
-          />
-          <Input
-            value={amount}
-            placeholder={t('common.amountPlaceholder')}
-            inputMode="decimal"
-            className="h-14 pl-16 text-lg tabular-nums"
-            disabled={anyBusy}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-        </div>
-        {address && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-xs"
-            disabled={walletBalance === 0n || anyBusy}
-            onClick={() => setAmount(fxrpToInput(walletBalance))}
-          >
-            Use Max
-          </Button>
-        )}
-      </CardContent>
-      <CardFooter className="flex-col items-stretch gap-3">
-        {address ? (
-          <>
-            <div className="flex min-w-0 items-center justify-between gap-2">
-              <div className="flex min-w-0 items-center gap-2">
-                <AddressAvatar address={address} size={24} className="rounded-md" />
-                <span className="min-w-0 truncate font-mono text-xs">{shortAddress(address)}</span>
-              </div>
-              <button
-                type="button"
-                className="shrink-0 rounded-full p-1.5 text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground"
-                onClick={() => void disconnect()}
-              >
-                <LogOutIcon className="size-3.5" />
-              </button>
-            </div>
-            <Button
-              size="lg"
-              className="w-full bg-gold-ink hover:bg-gold-ink/90"
-              onClick={() => void handleDeposit()}
-              disabled={anyBusy || amount.trim() === ''}
-            >
-              {busy === 'yield-direct' ? (
-                <Loader2Icon className="mr-2 size-4 animate-spin" />
-              ) : (
-                <ArrowRightIcon className="mr-2 size-4" />
-              )}
-              {busy === 'yield-direct' ? t('common.loading') : 'Deposit to Vault'}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button size="lg" className="w-full" disabled={connecting} onClick={() => void handleConnect()}>
-              {connecting ? `${t('topbar.connecting')}...` : t('pay.connectCta')}
-            </Button>
-            <p className="text-center text-xs text-muted-foreground">{t('pay.connectCaption')}</p>
-          </>
-        )}
-      </CardFooter>
-    </Card>
-  )
 }
 
 function AddressChip({ address }: { address: string }) {
@@ -241,7 +74,7 @@ function PayCard({ recipient }: { recipient: string }) {
       (acc) => {
         if (!cancelled) setSplitPct(Math.round(acc.splitBps / 100))
       },
-      () => {}, // no split preview when the recipient cannot be loaded
+      () => {},
     )
     return () => {
       cancelled = true
@@ -253,7 +86,7 @@ function PayCard({ recipient }: { recipient: string }) {
       await connect()
     } catch (e) {
       const key = errorKey(e)
-      if (key === 'errors.walletCancelled') return // user closed the modal on purpose
+      if (key === 'errors.walletCancelled') return
       toast.error(t(key))
     }
   }
@@ -276,7 +109,7 @@ function PayCard({ recipient }: { recipient: string }) {
 
   if (paid !== null) {
     return (
-      <Card className="w-full max-w-md rounded-2xl shadow-none">
+      <Card className="w-full max-w-md rounded-2xl shadow-none backdrop-blur-sm bg-card/80">
         <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
           <span className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary-ink">
             <CheckIcon className="size-7" />
@@ -312,7 +145,7 @@ function PayCard({ recipient }: { recipient: string }) {
   }
 
   return (
-    <Card className="w-full max-w-md rounded-2xl shadow-none">
+    <Card className="w-full max-w-md rounded-2xl shadow-none backdrop-blur-sm bg-card/80">
       <CardHeader className="items-center text-center">
         <div className="flex items-center justify-center gap-3">
           <AddressAvatar address={recipient} size={40} />
@@ -416,7 +249,7 @@ function InvalidLink() {
   const t = useT()
 
   return (
-    <Card className="w-full max-w-md rounded-2xl shadow-none">
+    <Card className="w-full max-w-md rounded-2xl shadow-none backdrop-blur-sm bg-card/80">
       <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
         <p className="text-xl font-semibold tracking-tight">{t('pay.invalidTitle')}</p>
         <p className="text-sm text-muted-foreground">{t('errors.invalidPayAddress')}</p>
@@ -432,15 +265,17 @@ export function PayPage() {
   const t = useT()
   const { address: recipient = '' } = useParams()
   const valid = isValidRecipientAddress(recipient)
-  const [tab, setTab] = useState<'pay' | 'yield'>('pay')
 
   useScrollLock()
 
   return (
     <div className="relative h-svh">
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
-        <FloatingDeco side="both" />
-      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center"
+        style={{ backgroundImage: 'url(/assets/section1-bg.jpg)' }}
+      />
+      <div className="pointer-events-none fixed inset-0 z-0 bg-black/30" />
       <div className="no-scrollbar relative z-10 flex h-full flex-col overflow-y-auto">
         <header className="flex items-center justify-between px-6 py-4">
           <Link to="/">
@@ -451,29 +286,7 @@ export function PayPage() {
           </Badge>
         </header>
         <main className="flex flex-1 items-start justify-center px-4 py-10 sm:items-center sm:py-4">
-          {valid ? (
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex gap-1 rounded-full border p-1">
-                <button
-                  type="button"
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${tab === 'pay' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                  onClick={() => setTab('pay')}
-                >
-                  Pay
-                </button>
-                <button
-                  type="button"
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${tab === 'yield' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                  onClick={() => setTab('yield')}
-                >
-                  Deposit to Yield
-                </button>
-              </div>
-              {tab === 'pay' ? <PayCard recipient={recipient} /> : <YieldDepositCard />}
-            </div>
-          ) : (
-            <InvalidLink />
-          )}
+          {valid ? <PayCard recipient={recipient} /> : <InvalidLink />}
         </main>
         <footer className="px-6 py-5 text-center text-sm text-muted-foreground">
           {t('landing.footer')}
