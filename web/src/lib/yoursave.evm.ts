@@ -6,7 +6,7 @@ import {
   type ContractRunner,
   type Eip1193Provider,
 } from 'ethers'
-import { FLARE_RPC_URL, FXRP_ADDRESS, YOURSAVE_ADDRESS } from '@/lib/config'
+import { FLARE_RPC_URL, FXRP_ADDRESS, YOURSAVE_ADDRESS, FLARE_CHAIN_ID } from '@/lib/config'
 import { ensureFxrpAllowance, getBrowserSigner } from '@/lib/fxrp'
 import type { YourSaveAccount, YourSaveService, YieldTarget } from '@/lib/types'
 
@@ -71,6 +71,10 @@ async function signerContract(): Promise<Contract> {
   const ethereum = (window as EthereumWindow).ethereum
   if (!ethereum) throw new Error('wallet_not_found')
   const provider = new BrowserProvider(ethereum)
+  const network = await provider.getNetwork()
+  if (network.chainId !== BigInt(FLARE_CHAIN_ID)) {
+    throw new Error(`Wrong network: please connect to Coston2`)
+  }
   const signer = await provider.getSigner()
   return new Contract(YOURSAVE_ADDRESS, YOURSAVE_ABI, signer as ContractRunner)
 }
