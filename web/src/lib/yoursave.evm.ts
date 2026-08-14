@@ -207,9 +207,27 @@ export const yoursaveEvm: YourSaveService = {
     }
 
     if (adapter === VAULT_ADAPTER) {
-      await ensureFxrpAllowance(user, amount, signer, tokenOut)
-      const vaultInterface = new Interface(['function deposit(uint256 assets, address receiver) external returns (uint256)'])
+      const vaultInterface = new Interface([
+        'function deposit(uint256 assets, address receiver) external returns (uint256)',
+        'function maxDeposit(address) view returns (uint256)',
+      ])
       const vaultContract = new Contract(tokenOut, vaultInterface, signer as ContractRunner)
+      
+      let maxDep = 0n
+      try {
+        maxDep = BigInt(await vaultContract.maxDeposit.staticCall(user))
+      } catch {}
+      
+      if (maxDep === 0n) {
+        throw new Error('This vault is not accepting deposits right now.')
+      }
+      
+      if (amount > maxDep) {
+        throw new Error(`Max deposit is ${maxDep}`)
+      }
+
+      await ensureFxrpAllowance(user, amount, signer, tokenOut)
+      
       let amountOut = 0n
       try {
         amountOut = await vaultContract.deposit.staticCall(amount, user)
@@ -224,6 +242,13 @@ export const yoursaveEvm: YourSaveService = {
       return { amountIn: amount, amountOut, hash }
     } else {
       const routerAddress = SPARKDEX_ROUTER
+      
+      const provider = new JsonRpcProvider(FLARE_RPC_URL)
+      const code = await provider.getCode(tokenOut)
+      if (code === '0x') {
+        throw new Error('This yield source is not available on the testnet right now.')
+      }
+
       await ensureFxrpAllowance(user, amount, signer, routerAddress)
       const routerInterface = new Interface([
         'function exactInputSingle(tuple(address tokenIn,address tokenOut,uint24 fee,address recipient,uint256 deadline,uint256 amountIn,uint256 amountOutMinimum,uint160 sqrtPriceLimitX96)) external returns (uint256)'
@@ -243,7 +268,7 @@ export const yoursaveEvm: YourSaveService = {
       try {
         amountOut = await router.exactInputSingle.staticCall(params)
       } catch {
-        // static call failed — proceed anyway, the on-chain tx may still succeed
+        throw new Error('This yield source is not available on the testnet right now.')
       }
       const hash = await sendTx(router.exactInputSingle(params, { gasLimit: 500_000 }))
       return { amountIn: amount, amountOut, hash }
