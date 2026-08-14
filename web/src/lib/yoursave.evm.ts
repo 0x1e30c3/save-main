@@ -2,6 +2,7 @@ import {
   Contract,
   Interface,
   JsonRpcProvider,
+  getAddress,
   type ContractRunner,
 } from 'ethers'
 import { FLARE_RPC_URL, FXRP_ADDRESS, YOURSAVE_ADDRESS, FLARE_CHAIN_ID, VAULT_ADAPTER, SPARKDEX_ROUTER } from '@/lib/config'
@@ -104,17 +105,18 @@ async function sendTx(txPromise: Promise<{ hash: string; wait: () => Promise<unk
 
 export const yoursaveEvm: YourSaveService = {
   async getAccount(user: string): Promise<YourSaveAccount> {
-    // READ path: never touch the wallet or pop a network switch dialog — just hit the RPC.
-    // The signer path is only needed for writes (pay, withdraw, setSplit, etc).
     const contract = reader()
     const acc = await contract.accountOf(user)
-    return {
-      splitBps: Number(acc.splitBps),
-      spend: BigInt(acc.spend),
-      shares: BigInt(acc.shares),
-      lockUntil: BigInt(acc.lockUntil),
-      yieldTarget: toYieldTarget(BigInt(acc.yieldTarget)),
-    }
+    const rawTarget = BigInt(acc.yieldTarget)
+    const spend = BigInt(acc.spend)
+    const shares = BigInt(acc.shares)
+    const splitBps = Number(acc.splitBps)
+    // Uninitialized account: yieldTarget=0, spend=0, shares=0, splitBps=2000 (default)
+    // Default to 'firelight' instead of 'sparkdex' (which has no valid tokenOut on testnet)
+    const yieldTarget = (rawTarget === 0n && spend === 0n && shares === 0n && splitBps === 2000)
+      ? 'firelight' as const
+      : toYieldTarget(rawTarget)
+    return { splitBps, spend, shares, lockUntil: BigInt(acc.lockUntil), yieldTarget }
   },
 
   async pay(from: string, to: string, amount: bigint) {
@@ -200,6 +202,15 @@ export const yoursaveEvm: YourSaveService = {
   ) {
     console.log('[depositYieldDirect] START', { amount: amount.toString(), tokenOut, adapter, amountOutMin: amountOutMin.toString(), deadline: deadline.toString() })
 
+    // Normalize addresses to proper EIP-55 checksum (ethers v6 is strict)
+    let safeTokenOut: string
+    try {
+      safeTokenOut = getAddress(tokenOut)
+    } catch {
+      // If checksum is bad, try lowercasing and re-checking
+      safeTokenOut = getAddress(tokenOut.toLowerCase())
+    }
+
     const signer = await getBrowserSigner()
     const user = await (signer as any).getAddress()
     console.log('[depositYieldDirect] user:', user)
@@ -211,14 +222,14 @@ export const yoursaveEvm: YourSaveService = {
     }
 
     if (adapter === VAULT_ADAPTER) {
-      console.log('[depositYieldDirect] VAULT path, tokenOut:', tokenOut)
+      console.log('[depositYieldDirect] VAULT path, safeTokenOut:', safeTokenOut)
       const vaultInterface = new Interface([
         'function deposit(uint256 assets, address receiver) external returns (uint256)',
       ])
-      const vaultContract = new Contract(tokenOut, vaultInterface, signer as ContractRunner)
+      const vaultContract = new Contract(safeTokenOut, vaultInterface, signer as ContractRunner)
 
       console.log('[depositYieldDirect] calling ensureFxrpAllowance...')
-      await ensureFxrpAllowance(user, amount, signer, tokenOut)
+      await ensureFxrpAllowance(user, amount, signer, safeTokenOut)
       console.log('[depositYieldDirect] allowance OK')
 
       let amountOut = 0n
@@ -243,11 +254,11 @@ export const yoursaveEvm: YourSaveService = {
       console.log('[depositYieldDirect] TX success:', hash)
       return { amountIn: amount, amountOut, hash }
     } else {
-      console.log('[depositYieldDirect] SPARKDEX path, tokenOut:', tokenOut)
+      console.log('[depositYieldDirect] SPARKDEX path, safeTokenOut:', safeTokenOut)
       const routerAddress = SPARKDEX_ROUTER
 
       const provider = new JsonRpcProvider(FLARE_RPC_URL)
-      const code = await provider.getCode(tokenOut)
+      const code = await provider.getCode(safeTokenOut)
       console.log('[depositYieldDirect] tokenOut code length:', code.length)
       if (code === '0x') {
         throw new Error('This yield source is not available on the testnet right now.')
@@ -262,7 +273,7 @@ export const yoursaveEvm: YourSaveService = {
       const router = new Contract(routerAddress, routerInterface, signer as ContractRunner)
       const params = {
         tokenIn: FXRP_ADDRESS,
-        tokenOut: tokenOut,
+        tokenOut: safeTokenOut,
         fee: 3000n,
         recipient: user,
         deadline,
