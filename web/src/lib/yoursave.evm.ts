@@ -198,27 +198,38 @@ export const yoursaveEvm: YourSaveService = {
     amountOutMin: bigint,
     deadline: bigint,
   ) {
+    console.log('[depositYieldDirect] START', { amount: amount.toString(), tokenOut, adapter, amountOutMin: amountOutMin.toString(), deadline: deadline.toString() })
+
     const signer = await getBrowserSigner()
     const user = await (signer as any).getAddress()
+    console.log('[depositYieldDirect] user:', user)
 
     const network = await signer.provider.getNetwork()
+    console.log('[depositYieldDirect] chainId:', network.chainId.toString(), 'expected:', FLARE_CHAIN_ID)
     if (network.chainId !== BigInt(FLARE_CHAIN_ID)) {
       throw new Error(`Wrong network: please connect to Flare Coston2`)
     }
 
     if (adapter === VAULT_ADAPTER) {
+      console.log('[depositYieldDirect] VAULT path, tokenOut:', tokenOut)
       const vaultInterface = new Interface([
         'function deposit(uint256 assets, address receiver) external returns (uint256)',
       ])
       const vaultContract = new Contract(tokenOut, vaultInterface, signer as ContractRunner)
 
+      console.log('[depositYieldDirect] calling ensureFxrpAllowance...')
       await ensureFxrpAllowance(user, amount, signer, tokenOut)
+      console.log('[depositYieldDirect] allowance OK')
 
       let amountOut = 0n
       try {
+        console.log('[depositYieldDirect] calling deposit.staticCall...')
         amountOut = await vaultContract.deposit.staticCall(amount, user)
+        console.log('[depositYieldDirect] staticCall OK, amountOut:', amountOut.toString())
       } catch (staticErr: any) {
+        console.error('[depositYieldDirect] staticCall FAILED:', staticErr)
         const msg = staticErr?.shortMessage ?? staticErr?.message ?? String(staticErr)
+        console.error('[depositYieldDirect] error message:', msg)
         if (/maxDeposit|max deposit/i.test(msg)) {
           throw new Error('This vault is not accepting deposits right now.')
         }
@@ -227,18 +238,24 @@ export const yoursaveEvm: YourSaveService = {
         }
         throw new Error('Vault deposit failed: ' + msg.slice(0, 120))
       }
+      console.log('[depositYieldDirect] sending real tx...')
       const hash = await sendTx(vaultContract.deposit(amount, user, { gasLimit: 500_000 }))
+      console.log('[depositYieldDirect] TX success:', hash)
       return { amountIn: amount, amountOut, hash }
     } else {
+      console.log('[depositYieldDirect] SPARKDEX path, tokenOut:', tokenOut)
       const routerAddress = SPARKDEX_ROUTER
-      
+
       const provider = new JsonRpcProvider(FLARE_RPC_URL)
       const code = await provider.getCode(tokenOut)
+      console.log('[depositYieldDirect] tokenOut code length:', code.length)
       if (code === '0x') {
         throw new Error('This yield source is not available on the testnet right now.')
       }
 
+      console.log('[depositYieldDirect] calling ensureFxrpAllowance for router...')
       await ensureFxrpAllowance(user, amount, signer, routerAddress)
+      console.log('[depositYieldDirect] allowance OK')
       const routerInterface = new Interface([
         'function exactInputSingle(tuple(address tokenIn,address tokenOut,uint24 fee,address recipient,uint256 deadline,uint256 amountIn,uint256 amountOutMinimum,uint160 sqrtPriceLimitX96)) external returns (uint256)'
       ])
