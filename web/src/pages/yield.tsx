@@ -135,6 +135,7 @@ export function YieldPage() {
             rates={rates}
             onDeposit={handleDeposit}
             busy={busy === 'yield-deposit'}
+            available={data.targetHealth[account.yieldTarget]}
           />
           <YieldDirectDepositCard
             walletBalance={walletBalance}
@@ -142,6 +143,7 @@ export function YieldPage() {
             rates={rates}
             onDirectDeposit={handleDirectDeposit}
             busy={busy === 'yield-direct'}
+            available={data.targetHealth[account.yieldTarget]}
           />
         </div>
       )}
@@ -158,6 +160,7 @@ export function YieldPage() {
         selectedTarget={account?.yieldTarget}
         onSelectTarget={handleSelectTarget}
         busyTarget={busy?.startsWith('target-') ? (busy.replace('target-', '') as YieldTarget) : null}
+        targetHealth={data.targetHealth}
       />
     </section>
   )
