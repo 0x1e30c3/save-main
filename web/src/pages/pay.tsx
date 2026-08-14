@@ -273,7 +273,7 @@ export function PayPage() {
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center"
-        style={{ backgroundImage: 'url(/assets/section1-bg.jpg)' }}
+        style={{ backgroundImage: 'url(/assets/section1-bg.png)' }}
       />
       <div className="pointer-events-none fixed inset-0 z-0 bg-black/30" />
       <div className="no-scrollbar relative z-10 flex h-full flex-col overflow-y-auto">
