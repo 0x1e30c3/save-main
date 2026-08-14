@@ -1,7 +1,7 @@
 <div align="center">
   <img src="web/public/logo-light.png" width="88" alt="YourSave">
   <h1>YourSave</h1>
-  <p>Auto-savings on every payment, powered by FXRP on Flare.</p>
+  <p>Auto-savings on every FXRP payment, routed to yield protocols on Flare.</p>
 
   <img src="https://img.shields.io/badge/network-Flare%20Coston2-blue.svg" alt="Flare Coston2">
   <img src="https://img.shields.io/badge/asset-FXRP%20(FAssets)-f59e0b.svg" alt="FXRP">
@@ -10,121 +10,145 @@
 
 ---
 
-YourSave is a programmable savings splitter that automatically routes a portion of every incoming payment into yield-earning positions on Flare.
+## What is YourSave?
 
-Built for **Bounty 1: Interoperable Asset Products** — making FXRP more useful across the Flare ecosystem.
+YourSave is a programmable savings splitter on Flare. It automatically routes a percentage of every incoming FXRP payment into yield-earning positions — turning saving from a manual chore into an invisible habit.
 
-## Problem statement
+**Built for Bounty 1: Interoperable Asset Products** — making FXRP more useful across the Flare ecosystem.
 
-Web3 users and merchants lack seamless tools to automate savings from everyday incoming payments. Often, crypto sits idle in wallets without compounding through DeFi yield protocols because manually splitting funds and depositing them across various yield sources is tedious and adds unnecessary friction.
+## The Problem
 
-## Our solution
+Web3 users and merchants lack tools to automate savings from incoming payments. Crypto sits idle in wallets, and manually splitting funds across yield protocols adds friction.
 
-**YourSave** acts as an effortless, programmable routing layer. It allows users to set automated saving rules (e.g., save 20% of all incoming payments). Whenever they receive a payment in FXRP, the smart contract automatically splits the funds into a spendable balance and a savings balance. 
+## The Solution
 
-Users can then seamlessly route their savings directly into top Flare yield protocols (such as **SparkDEX**, **Firelight**, or **Upshift**) to earn passive income. This turns saving and yield farming from a manual chore into an invisible, automatic habit.
+YourSave acts as a programmable routing layer:
 
-## How it works
+1. **Set a savings rule** — e.g., save 20% of all incoming payments
+2. **Receive FXRP** — via payment link
+3. **Auto-split** — contract splits into spendable + savings
+4. **Earn yield** — route savings to Firelight vault, SparkDEX, or Upshift
 
 ```mermaid
-flowchart TD
-    P["Payer"] -->|"pay(from, to, amount)"| C["YourSave Contract"]
-    C -->|"amount x (1 - split)"| SP["Spendable Balance"]
-    C -->|"amount x split"| SV["Savings Balance"]
-    SV -->|"withdrawSavingsToAdapter"| UA["SparkDexAdapter"]
-    UA -->|"swaps & deposits"| YIELD["Yield Protocol (SparkDEX / Firelight / Upshift)"]
-    SP -->|"withdrawSpend"| W["User"]
+flowchart LR
+    P[Payer] -->|pay| C[YourSave Contract]
+    C -->|80%| S[Spendable]
+    C -->|20%| V[Firelight Vault]
+    V --> Y[Yield]
 ```
 
-The recipient sets their own savings rule (default 20%) and picks where they want to earn yield: **SparkDEX** (DEX liquidity), **Firelight** (ERC-4626 vaults), or **Upshift** (auto-compound strategies).
+## Key Features
 
-## Deployed contracts (Flare Coston2 Testnet)
+| Feature | Description |
+|---|---|
+| **Auto-Savings Split** | Configurable % split on every payment (default 20%) |
+| **Payment Links** | Shareable links at `/pay/:address` |
+| **Yield Routing** | Route savings to Firelight vault via VaultAdapter |
+| **Direct Deposit** | Deposit FXRP directly to vault from wallet |
+| **Withdraw Controls** | Separate spend + savings withdrawals |
+| **Lock Protection** | Optional time-lock on savings |
+| **Multi-language** | English, Indonesian, Chinese |
+| **FXRP Faucet** | Built-in testnet faucet at `/app/faucet` |
 
-| Contract | Address | Explorer |
-| --- | --- | --- |
-| **YourSave** | `0x588DeC15D915659E8BF36c01e662479916301d3A` | [View](https://coston2-explorer.flare.network/address/0x588DeC15D915659E8BF36c01e662479916301d3A) |
-| **SparkDexAdapter** | `0xD04A92C83AFe71f4f69F9FAD0A33229BFBdE33E6` | [View](https://coston2-explorer.flare.network/address/0xD04A92C83AFe71f4f69F9FAD0A33229BFBdE33E6) |
+## Live Demo
 
-### Protocol addresses (Flare Coston2)
+**App:** [yoursaving.vercel.app](https://yoursaving.vercel.app)
 
-| Protocol | Address |
-| --- | --- |
-| FXRP | `0x0b6A3645c240605887a5532109323A3E12273dc7` |
-| SparkDEX Router | `0x4a1E5A90e9943467FAd1acea1E7F0e5e88472a1e` |
-| Firelight Vault | `0xC90D6847747b85d1fa2E07859869fb9fB72c0361` |
-| Upshift Vault | `0x24c1a47cD5e8473b64EAB2a94515a196E10C7C81` |
+**Network:** Flare Coston2 Testnet (Chain ID 114)
 
-## Repository layout
+### Quick Start
+1. Connect wallet (MetaMask/Rabby) on Coston2
+2. Get FXRP from the [faucet](https://yoursaving.vercel.app/app/faucet)
+3. Create a payment link at `/app/link`
+4. Pay to the link → savings auto-split
+5. Deposit savings to yield at `/app/yield`
 
-- `evm/` - Smart contracts workspace (Solidity, Foundry/Forge)
-- `web/` - Frontend application (React, Vite, TypeScript, Tailwind CSS v4, Ethers.js)
-- `plan.md` — Full migration plan (EVM Sepolia → Flare Coston2)
-- `deployments.json` — Deployed contract addresses
+## Deployed Contracts
 
-## Trying the app
-
-1. Install an EVM browser wallet (e.g. MetaMask, Rabby) and connect to **Flare Coston2 Testnet** (chain ID 114).
-2. Connect your wallet on the dashboard. The app will prompt to add and switch networks automatically.
-3. Fund your wallet with testnet C2FLR (from [Flare Faucet](https://faucet.flare.network/coston2)) and testnet FXRP.
-4. Simulate an incoming payment and watch it split into spendable and savings balances.
-5. On the Rules page, switch the yield target between **SparkDEX**, **Firelight**, and **Upshift**.
+| Contract | Address |
+|---|---|
+| **YourSave** | [`0x588DeC...1d3A`](https://coston2-explorer.flare.network/address/0x588DeC15D915659E8BF36c01e662479916301d3A) |
+| **VaultAdapter** | [`0x3c13B...0b4`](https://coston2-explorer.flare.network/address/0x3c13BDd505DE69bB0DF0a2e68A0Cd93a44beB0b4) |
+| **FxrpVault** | [`0x78078...26Ec`](https://coston2-explorer.flare.network/address/0x780780D122f075ada1Fa86A18dE2e0763B2526Ec) |
+| **SparkDexAdapter** | [`0xD04A3...3E6`](https://coston2-explorer.flare.network/address/0xD04A92C83AFe71f4f69F9FAD0A33229BFBdE33E6) |
+| **FXRP** | [`0x0b6A...dc7`](https://coston2-explorer.flare.network/address/0x0b6A3645c240605887a5532109323A3E12273dc7) |
 
 ## Flare Integration
 
-- **FAssets/FXRP**: Primary asset — savings are denominated in FXRP (wrapped XRP on Flare), 18 decimals
-- **Flare Coston2**: Testnet for deployment and testing (chain ID 114, RPC: `https://coston2-api.flare.network/ext/C/rpc`)
-- **SparkDEX**: Uniswap V3 fork for token swaps and liquidity pools
-- **Firelight**: ERC-4626 compliant yield vaults for FXRP
-- **Upshift**: Strategy-driven auto-compound vaults
-- **Flare Data Connector (FDC)**: Powers cross-chain payment verification
+- **FAssets / FXRP** — Primary asset (6 decimals on Coston2)
+- **Flare Coston2** — Testnet deployment (Chain ID 114)
+- **Firelight** — ERC-4626 vault for FXRP yield
+- **SparkDEX** — Uniswap V3 fork for token swaps
+- **Upshift** — Auto-compound yield vaults
 
-## What was built / migrated
+See [docs/flare-integration.md](docs/flare-integration.md) for details.
 
-### Newly built
-- `YourSave.sol` — Core savings contract with SparkDEX/Firelight/Upshift yield targets
-- `SparkDexAdapter.sol` — Adapter for routing savings into SparkDEX V3 pools
-- `ISparkDexRouter.sol` — SparkDEX V3 router interface
-- Full React frontend with Flare Coston2 integration
-- FXRP 18-decimal formatting and wallet auto-switch to Flare Coston2
+## Repository Layout
 
-### Migrated from EVM Sepolia
-- Network: Ethereum Sepolia → Flare Coston2
-- Asset: USDC (7 decimals) → FXRP (18 decimals)
-- Yield: iExec Nox / Blend / Soroswap / Defindex → SparkDEX / Firelight / Upshift
-- All old Stellar/iExec code removed
+```
+├── evm/              # Smart contracts (Solidity, Foundry)
+├── web/              # Frontend (React, Vite, TypeScript)
+├── docs/             # Documentation
+│   ├── architecture.md
+│   ├── deployment.md
+│   ├── development.md
+│   └── flare-integration.md
+├── deployments.json  # Deployed addresses
+└── push.sh           # Git push helper
+```
 
-## Running locally
+## Running Locally
 
-### 1. Smart Contracts (Foundry)
+### Smart Contracts
 
 ```bash
 cd evm
-cp .env.example .env  # Set FLARE_RPC_URL and DEPLOYER_PRIVATE_KEY
-/Users/em/.foundry/bin/forge build
-/Users/em/.foundry/bin/forge test
+git submodule update --init
+cp .env.example .env  # Set FLARE_RPC_URL + DEPLOYER_PRIVATE_KEY
+~/.foundry/bin/forge build
+~/.foundry/bin/forge test
 ```
 
-### 2. Frontend Development
+### Frontend
 
 ```bash
 cd web
-cp .env.example .env
-# VITE_YOURSAVE_ADDRESS is pre-filled with deployed contract
 npm install
-npm run dev
+npm run dev    # http://localhost:5173
 ```
 
-The frontend will start at [http://localhost:5173/](http://localhost:5173/).
+See [docs/development.md](docs/development.md) for full setup guide.
 
-### 3. Deploy to Coston2
+## Documentation
 
-```bash
-cd evm
-# Get testnet C2FLR from https://faucet.flare.network/coston2
-/Users/em/.foundry/bin/forge create src/Save.sol:YourSave \
-  --rpc-url $FLARE_RPC_URL \
-  --private-key $DEPLOYER_PRIVATE_KEY \
-  --broadcast
-```
+| Doc | Description |
+|---|---|
+| [Architecture](docs/architecture.md) | System design, contract flow, frontend structure |
+| [Deployment](docs/deployment.md) | Addresses, deploy scripts, env variables |
+| [Development](docs/development.md) | Local setup, commands, gotchas, debugging |
+| [Flare Integration](docs/flare-integration.md) | How FXRP, FAssets, SparkDEX, Firelight are used |
 
+## What Was Built
 
+### Smart Contracts
+- `YourSave.sol` — Core savings contract with auto-split, yield targets, lock protection
+- `VaultAdapter.sol` — ERC-4626 vault deposit adapter
+- `SparkDexAdapter.sol` — SparkDEX V3 swap adapter
+- `FxrpVault.sol` — Custom ERC-4626 vault for FXRP
+- `ISparkDexRouter.sol` — SparkDEX interface
+
+### Frontend
+- Full React app with dashboard, payment links, yield management, faucet
+- Direct wallet deposit to vault
+- Multi-language support (EN, ID, ZH)
+- FXRP balance + vault balance display
+- Payment link pages with background branding
+
+### Infrastructure
+- Foundry deployment scripts
+- Vercel deployment with SPA routing
+- Auto-commit git workflow (`push.sh`)
+
+## License
+
+MIT
