@@ -4,7 +4,7 @@ import {
   JsonRpcProvider,
   type ContractRunner,
 } from 'ethers'
-import { FLARE_RPC_URL, FXRP_ADDRESS, YOURSAVE_ADDRESS, FLARE_CHAIN_ID } from '@/lib/config'
+import { FLARE_RPC_URL, FXRP_ADDRESS, YOURSAVE_ADDRESS, FLARE_CHAIN_ID, VAULT_ADAPTER, SPARKDEX_ROUTER } from '@/lib/config'
 import { ensureFxrpAllowance, getBrowserSigner } from '@/lib/fxrp'
 import type { YourSaveAccount, YourSaveService, YieldTarget } from '@/lib/types'
 
@@ -206,7 +206,7 @@ export const yoursaveEvm: YourSaveService = {
       throw new Error(`Wrong network: please connect to Flare Coston2`)
     }
 
-    if (adapter === import.meta.env.VITE_VAULT_ADAPTER || adapter === '0x3c13BDd505DE69bB0DF0a2e68A0Cd93a44beB0b4') {
+    if (adapter === VAULT_ADAPTER) {
       await ensureFxrpAllowance(user, amount, signer, tokenOut)
       const vaultInterface = new Interface(['function deposit(uint256 assets, address receiver) external returns (uint256)'])
       const vaultContract = new Contract(tokenOut, vaultInterface, signer as ContractRunner)
@@ -223,7 +223,7 @@ export const yoursaveEvm: YourSaveService = {
       const hash = await sendTx(vaultContract.deposit(amount, user, { gasLimit: 500_000 }))
       return { amountIn: amount, amountOut, hash }
     } else {
-      const routerAddress = import.meta.env.VITE_SPARKDEX_ROUTER ?? '0x4a1E5A90e9943467FAd1acea1E7F0e5e88472a1e'
+      const routerAddress = SPARKDEX_ROUTER
       await ensureFxrpAllowance(user, amount, signer, routerAddress)
       const routerInterface = new Interface([
         'function exactInputSingle(tuple(address tokenIn,address tokenOut,uint24 fee,address recipient,uint256 deadline,uint256 amountIn,uint256 amountOutMinimum,uint160 sqrtPriceLimitX96)) external returns (uint256)'
